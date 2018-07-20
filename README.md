@@ -69,7 +69,7 @@ using namespace mathematica;
 symbol i("i"); // declare mathematica symbol i
 value result_sum; // declare the variable to hold the result
 
-shell << Total(Table(i, List(i, 1, 10)));
+shell << Total(Table(i, List(i, 1, 10))); // In Mathematica Total[Table[i, {i, 1, 10}]]
 shell >> result_sum;
 ````
 `result_sum` is the result object that can be converted to `int`, `double`, `std::string` and streamed to `std::ostream`. 
@@ -89,7 +89,7 @@ std::cout << sum1 << " " << sum2 << " " << sum3 << " " << sum4 << std::endl; // 
 symbol i("i"); // declare mathematica symbol i
 value result_list; // declare the variable to hold the result
 
-shell << Table(i, List(i, 1, 10));
+shell << Table(i, List(i, 1, 10)); // In Mathematica Table[i, {i, 1, 10}]
 shell >> result_list;
 std::cout << result_list << std::endl; // Prints List[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 std::cout << result_list->stringify() << std::endl; // Prints List[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
