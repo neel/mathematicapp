@@ -1,7 +1,7 @@
 # Mathematica++
-A C++ Library that talks to Mathematica
+## A C++ Library that talks Mathematica
 
-Dot product and Determinant calculation in Mathematica Code
+Dot product and Determinant calculation in Mathematica Language
 
 ```Mathematica
 mata = Table[Mod[i + j, 2], {i, 1, 2}, {j, 1, 2}];
