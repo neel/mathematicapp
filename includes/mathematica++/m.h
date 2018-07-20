@@ -128,6 +128,7 @@ struct argument<std::complex<T>>{
     }
 };
 
+
 // template <typename T>
 // struct argument<std::vector<T>>{
 //     typedef argument<std::vector<T>> self_type;
@@ -172,6 +173,8 @@ detail::abstract_delayed_call_ptr make_argument(const T& value){
     return M_Helper::argument<T>()(value);
 }
 
+mathematica::m convert(mathematica::token::ptr val);
+
 template <typename T, typename M_Type>
 struct argument_helper{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
@@ -183,8 +186,6 @@ struct argument_helper{
     }
 };
     
-
-
 template <typename T, typename U, typename M_Type>
 struct argument_helper<mathematica::rules_helper<T, U>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
@@ -331,7 +332,7 @@ struct argument_helper<std::list<T>, M_Type>{
  */
 struct m{
     m(const std::string& name);
-		m(const m& other);
+    m(const m& other);
 		
     m& operator()();
     template <typename Head, typename... Tail>
@@ -346,6 +347,10 @@ struct m{
         helper(arg);
         ++_length;
         return *this;
+    }
+    m& arg(mathematica::value arg){
+        mathematica::m argm = detail::M_Helper::convert(arg);
+        return this->arg(argm);
     }
     template <typename T>
     m& part(const T& index){

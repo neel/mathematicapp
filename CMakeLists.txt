@@ -49,6 +49,7 @@ SET(MATHEMATICAPP_HEADERS
     includes/mathematica++/connection.h
     includes/mathematica++/packet.h
     includes/mathematica++/history.h
+    includes/mathematica++/mhelper.h
 )
 
 SET(MATHEMATICAPP_SOURCES
@@ -69,6 +70,7 @@ SET(MATHEMATICAPP_SOURCES
     sources/connection.cpp
     sources/packet.cpp
     sources/history.cpp
+    sources/mhelper.cpp
 )
 
 IF (DEFINED XCODE_VERSION)
@@ -85,6 +87,8 @@ TARGET_LINK_LIBRARIES(mathematica++ ${Mathematica_LIBRARIES})
 
 set(M_STORAGE_LIB_PATH ${CMAKE_SOURCE_DIR}/storage.m)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/includes/mathematica++/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/mathematica++/config.h)
+
+MESSAGE(STATUS "Expecting storage.m in " ${M_STORAGE_LIB_PATH})
 
 ENABLE_TESTING()
 

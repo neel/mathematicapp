@@ -35,7 +35,7 @@
 #include "mathematica++/accessor.h"
 #include <boost/lexical_cast.hpp>
 
-#define M_DEBUG 1
+// #define M_DEBUG 1
 
 #ifdef M_DEBUG
 #include <iostream>

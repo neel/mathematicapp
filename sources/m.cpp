@@ -23,7 +23,6 @@
 mathematica::m::m(const std::string& name): _name(name), _length(0){}
 mathematica::m::m(const mathematica::m& other): _name(other._name), _queue(other._queue), _length(other._length){}
 
-
 mathematica::m& mathematica::m::operator()(){
     _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, _name, _length)));
     return *this;
@@ -38,3 +37,23 @@ mathematica::m& mathematica::m::invoke(mathematica::driver::ws::connection& conn
     return *this;
 }
 
+mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value val){
+    if(val->type() == mathematica::token::token_integer){
+        return mathematica::m("Evaluate")((int)*val);
+    }else if(val->type() == mathematica::token::token_real){
+        return mathematica::m("Evaluate")((double)*val);
+    }else if(val->type() == mathematica::token::token_str){
+        return mathematica::m("Evaluate")(val->stringify());
+    }else if(val->type() == mathematica::token::token_symbol){
+        return mathematica::m("Evaluate")(mathematica::symbol(val->stringify()));
+    }else if(val->type() == mathematica::token::token_function){
+        boost::shared_ptr<mathematica::tokens::function> token_fnc = boost::dynamic_pointer_cast<mathematica::tokens::function>(val);
+        mathematica::m fnc(token_fnc->name());
+        for(const mathematica::value& arg: token_fnc->_args){
+            mathematica::m argm = convert(arg);
+            fnc.arg(argm);
+        }
+        fnc();
+        return fnc;
+    }
+}

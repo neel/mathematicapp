@@ -17,7 +17,7 @@
  * 
  */
 
-#define M_DEBUG 1
+// #define M_DEBUG 1
 
 #include "mathematica++/drivers.h"
 #include "mathematica++/exceptions.h"
