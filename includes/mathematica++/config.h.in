@@ -1,0 +1,1 @@
+#cmakedefine M_STORAGE_LIB_PATH "${M_STORAGE_LIB_PATH}"
