@@ -37,10 +37,8 @@ MATHEMATICA_DECLARE(Mod)
 MATHEMATICA_DECLARE(Dot)
 MATHEMATICA_DECLARE(Det)
 
-// connect to mathematica
-int argc = 4;
-char* argv[] = {(char*)"-linkname", (char*)"math -mathlink", (char*)0x0};
-connector shell(argc, argv);
+// connect to mathematica (optionally pass argc, argv) See http://reference.wolfram.com/language/ref/c/WSOpenArgcArgv.html
+connector shell;
 
 // Declare symbols
 mathematica::symbol i("i");
