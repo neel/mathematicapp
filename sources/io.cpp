@@ -50,7 +50,11 @@ mathematica::wrapper& mathematica::operator,(mathematica::wrapper& stream, const
 
 mathematica::wrapper& mathematica::operator<<(mathematica::connector::storage storage, const mathematica::m& expr){
     mathematica::m expression("StoreSymbol");
-    expression(expr);
+    if(storage._name.empty()){
+        expression(expr);
+    }else{
+        expression(expr, storage._name);
+    }
     storage.conn() << expression;
     mathematica::value key;
     storage.conn() >> key;

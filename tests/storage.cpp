@@ -19,7 +19,9 @@
 #include "mathematica++/variant.h"
 #include "mathematica++/operators.h"
 
+MATHEMATICA_DECLARE(Simplify)
 MATHEMATICA_DECLARE(Integrate)
+// MATHEMATICA_DECLARE(Power)
 
 using namespace mathematica;
 
@@ -30,7 +32,6 @@ BOOST_AUTO_TEST_CASE(simple){
     BOOST_CHECK(shell.connected());
     {
         symbol x("x");
-        
         value result;
         
         shell.save() << Integrate(Sin(x), x);
@@ -42,9 +43,29 @@ BOOST_AUTO_TEST_CASE(simple){
     
     {
         symbol x("x");
+        value result;
                 
         shell.save("pluto") << Integrate(Sin(x), x);
-        std::cout << shell.last_key();
+        BOOST_CHECK(shell.last_key() == "pluto");
+        shell << shell.ref("pluto")+Cos(x);
+        shell >> result;
+        BOOST_CHECK(*result == 0);
+    }
+    
+    {
+        symbol x("x");
+        value result;
+        
+        std::string left_key, right_key;
+        
+        shell.save() << Integrate(2*x, x);
+        left_key = shell.last_key();
+        shell.save() << Integrate(-2/Power(x,3), x);
+        right_key = shell.last_key();
+        shell << shell.ref(left_key)*shell.ref(right_key);
+        shell >> result;
+        std::cout << result << std::endl;
+        
     }
 }
 

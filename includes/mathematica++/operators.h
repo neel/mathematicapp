@@ -30,95 +30,171 @@
 
 #include "symbol.h"
 #include "m.h"
+#include <type_traits>
 
 namespace mathematica{
 	
 namespace detail{
-template <typename U, typename V>
-struct arithmatic_operator_overload_helper;
+    template <typename T> struct is_operand{};
+    template <> struct is_operand<mathematica::m>{typedef mathematica::m result_type;};
+    template <> struct is_operand<mathematica::symbol>{typedef mathematica::m result_type;};
 
-template<>
-struct arithmatic_operator_overload_helper<mathematica::m, mathematica::symbol>{
-	typedef mathematica::m type;
-};
-template<typename V>
-struct arithmatic_operator_overload_helper<mathematica::m, V>{
-	typedef mathematica::m type;
-};
-template<typename U>
-struct arithmatic_operator_overload_helper<U, mathematica::symbol>{
-	typedef mathematica::m type;
-};
-
+    template <typename U, typename V> struct operation_result: is_operand<U>, is_operand<V>{};
+    template <typename U> struct operation_result<U, U>: is_operand<U>{};
+    template <> struct operation_result<mathematica::m, mathematica::symbol>{typedef mathematica::m result_type;};
+    template <> struct operation_result<mathematica::symbol, mathematica::m>{typedef mathematica::m result_type;};
 }
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator+(const U& left, const V& right){
+	return mathematica::m("Plus")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator-(const U& left, const V& right){
+	return mathematica::m("Subtract")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator*(const U& left, const V& right){
+	return mathematica::m("Times")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator/(const U& left, const V& right){
+	return mathematica::m("Divide")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator==(const U& left, const V& right){
+	return mathematica::m("Equal")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator!=(const U& left, const V& right){
+	return mathematica::m("Unequal")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator<(const U& left, const V& right){
+	return mathematica::m("Less")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator>(const U& left, const V& right){
+	return mathematica::m("Greater")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator<=(const U& left, const V& right){
+	return mathematica::m("LessEqual")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator>=(const U& left, const V& right){
+	return mathematica::m("GreaterEqual")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator&&(const U& left, const V& right){
+	return mathematica::m("And")(left, right);
+}
+
+template <typename U, typename V>
+typename detail::operation_result<U, V>::result_type operator||(const U& left, const V& right){
+	return mathematica::m("Or")(left, right);
+}
+
+template <typename U, typename V>
+mathematica::m pow(const U& left, const V& right){
+	return mathematica::m("Power")(left, right);
+}
+    
+// namespace detail{
+// template <typename U, typename V>
+// struct arithmatic_operator_overload_helper;
+// 
+// template<>
+// struct arithmatic_operator_overload_helper<mathematica::m, mathematica::symbol>{
+// 	typedef mathematica::m type;
+// };
+// template<typename V>
+// struct arithmatic_operator_overload_helper<mathematica::m, V>{
+// 	typedef mathematica::m type;
+// };
+// template<typename U>
+// struct arithmatic_operator_overload_helper<U, mathematica::symbol>{
+// 	typedef mathematica::m type;
+// };
+// }
 
 // typename boost::disable_if<boost::mpl::contains<boost::mpl::vector<mathematica::connector, mathematica::accessor>, L>, typename detail::arithmatic_operator_overload_helper<L, R>::type>
 // typename boost::disable_if<boost::mpl::contains<boost::mpl::vector<mathematica::connector, mathematica::accessor>, L>, mathematica::m>
 
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator+(const L& left, const R& right){
-	return mathematica::m("Plus")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator-(const L& left, const R& right){
-	return mathematica::m("Subtract")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator*(const L& left, const R& right){
-	return mathematica::m("Times")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator/(const L& left, const R& right){
-	return mathematica::m("Divide")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator==(const L& left, const R& right){
-	return mathematica::m("Equal")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator!=(const L& left, const R& right){
-	return mathematica::m("Unequal")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator<(const L& left, const R& right){
-	return mathematica::m("Less")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator>(const L& left, const R& right){
-	return mathematica::m("Greater")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator<=(const L& left, const R& right){
-	return mathematica::m("LessEqual")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator>=(const L& left, const R& right){
-	return mathematica::m("GreaterEqual")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator&&(const L& left, const R& right){
-	return mathematica::m("And")(left, right);
-}
-
-template <typename L, typename R>
-typename detail::arithmatic_operator_overload_helper<L, R>::type operator||(const L& left, const R& right){
-	return mathematica::m("Or")(left, right);
-}
-
-template <typename L, typename R>
-mathematica::m pow(const L& left, const R& right){
-	return mathematica::m("Power")(left, right);
-}
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator+(const L& left, const R& right){
+// 	return mathematica::m("Plus")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator-(const L& left, const R& right){
+// 	return mathematica::m("Subtract")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator*(const L& left, const R& right){
+// 	return mathematica::m("Times")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator/(const L& left, const R& right){
+// 	return mathematica::m("Divide")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator==(const L& left, const R& right){
+// 	return mathematica::m("Equal")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator!=(const L& left, const R& right){
+// 	return mathematica::m("Unequal")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator<(const L& left, const R& right){
+// 	return mathematica::m("Less")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator>(const L& left, const R& right){
+// 	return mathematica::m("Greater")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator<=(const L& left, const R& right){
+// 	return mathematica::m("LessEqual")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator>=(const L& left, const R& right){
+// 	return mathematica::m("GreaterEqual")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator&&(const L& left, const R& right){
+// 	return mathematica::m("And")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// typename detail::arithmatic_operator_overload_helper<L, R>::type operator||(const L& left, const R& right){
+// 	return mathematica::m("Or")(left, right);
+// }
+// 
+// template <typename L, typename R>
+// mathematica::m pow(const L& left, const R& right){
+// 	return mathematica::m("Power")(left, right);
+// }
 
 }
 
