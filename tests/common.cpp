@@ -34,7 +34,8 @@ BOOST_AUTO_TEST_SUITE(common)
 BOOST_AUTO_TEST_CASE(matrix){
     int argc = 4;
     char* argv[] = {(char*)"-linkname", (char*)"math -mathlink", (char*)0x0};
-    connector shell(argc, argv);
+//     connector shell(argc, argv);
+    connector shell;
     BOOST_CHECK(shell.connected());
     {
         value result_list;
@@ -95,6 +96,8 @@ BOOST_AUTO_TEST_CASE(matrix){
         // std::cout << res_det << std::endl; // Prints -2
         
         BOOST_CHECK((int)*res_det == -2);
+        
+        
     }
 }
 

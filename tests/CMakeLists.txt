@@ -21,9 +21,14 @@ ADD_EXECUTABLE(common common.cpp)
 TARGET_LINK_LIBRARIES(common ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(common mathematica++)
 
+ADD_EXECUTABLE(storage storage.cpp)
+TARGET_LINK_LIBRARIES(storage ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(storage mathematica++)
+
 ENABLE_TESTING()
 
 ADD_TEST(connection connection --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(chain chain --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(shell shell --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(common common --report_level=short --log_level=message --show_progress=true)
+ADD_TEST(storage storage --report_level=short --log_level=message --show_progress=true)
