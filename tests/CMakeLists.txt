@@ -25,6 +25,10 @@ ADD_EXECUTABLE(storage storage.cpp)
 TARGET_LINK_LIBRARIES(storage ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(storage mathematica++)
 
+ADD_EXECUTABLE(stl stl.cpp)
+TARGET_LINK_LIBRARIES(stl ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(stl mathematica++)
+
 ENABLE_TESTING()
 
 ADD_TEST(connection connection --report_level=short --log_level=message --show_progress=true)
@@ -32,3 +36,4 @@ ADD_TEST(chain chain --report_level=short --log_level=message --show_progress=tr
 ADD_TEST(shell shell --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(common common --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(storage storage --report_level=short --log_level=message --show_progress=true)
+ADD_TEST(stl stl --report_level=short --log_level=message --show_progress=true)

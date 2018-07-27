@@ -64,8 +64,25 @@ BOOST_AUTO_TEST_CASE(simple){
         right_key = shell.last_key();
         shell << shell.ref(left_key)*shell.ref(right_key);
         shell >> result;
-        std::cout << result << std::endl;
-        
+        BOOST_CHECK(*result == 1);
+    }
+    
+    {
+//         value result;
+//         std::string key;
+//         
+//         shell.begin();
+//         shell.save() << Sin(0);
+//         key = shell.last_key();
+//         shell << shell.ref(key);
+//         shell >> result;
+//         BOOST_CHECK(*result == 0);
+//         shell.end(true);
+//         shell << shell.ref(key);
+//         shell >> result;
+//         std::cout << result << std::endl;
+//         symbol x("x"), y("y");
+//         mathematica::m expr = 2*Sin(x)+3*Cos(y);
     }
 }
 
