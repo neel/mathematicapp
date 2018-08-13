@@ -25,7 +25,7 @@ MATHEMATICA_DECLARE(Mod)
 MATHEMATICA_DECLARE(Dot)
 MATHEMATICA_DECLARE(Det)
 MATHEMATICA_DECLARE(Plus)
-// MATHEMATICA_DECLARE(Total)
+MATHEMATICA_DECLARE(Plot)
 
 using namespace mathematica;
 
@@ -97,7 +97,13 @@ BOOST_AUTO_TEST_CASE(matrix){
         
         BOOST_CHECK((int)*res_det == -2);
         
-        
+        {
+            symbol x("x");
+            value plot;
+            shell << Plot(Sin(x), List(x, 0, 6.2));
+            std::cout << "HERE" << std::endl;
+            shell >> plot;
+        }
     }
 }
 

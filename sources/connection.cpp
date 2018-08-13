@@ -199,8 +199,13 @@ std::pair<std::string, int> mathematica::driver::ws::connection::get_function(){
 	const char* symbol = "";
 	int success = WSGetFunction(_link, &symbol, &args);
 	if(!success){
-		throw exceptions::dispatch(_link, "mathematica::tokens::function::fetch");
+		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_function");
 	}
+#ifdef M_DEBUG
+    else{
+		std::cout << "mathematica::driver::ws::connection::get_function " << std::string(symbol) << " " << args << std::endl;
+    }
+#endif
 	std::string name(symbol);
 	WSReleaseSymbol(_link, symbol);
 	return std::make_pair(name, args);
@@ -210,8 +215,13 @@ int mathematica::driver::ws::connection::get_integer(){
 	int data;
 	int success = WSGetInteger(_link, &data);
 	if(!success){
-		throw exceptions::dispatch(_link, "mathematica::tokens::integer::fetch");
+		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
 	}
+#ifdef M_DEBUG
+    else{
+		std::cout << "mathematica::driver::ws::connection::get_integer " << data << std::endl;
+    }
+#endif
 	return data;
 }
 
@@ -219,17 +229,27 @@ double mathematica::driver::ws::connection::get_real(){
 	double data;
 	int success = WSGetReal(_link, &data);
 	if(!success){
-		throw exceptions::dispatch(_link, "mathematica::tokens::real::fetch");
+		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_real");
 	}
+#ifdef M_DEBUG
+    else{
+		std::cout << "mathematica::driver::ws::connection::get_real " << data << std::endl;
+    }
+#endif
 	return data;
 }
 
 std::string mathematica::driver::ws::connection::get_str(){
-  const char* message;
-  int success = WSGetString(_link, &message);
-  if(!success){
-    throw exceptions::dispatch(_link, "mathematica::tokens::str::fetch");
-  }
+    const char* message;
+    int success = WSGetString(_link, &message);
+    if(!success){
+        throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_str");
+    }
+#ifdef M_DEBUG
+    else{
+		std::cout << "mathematica::driver::ws::connection::get_str " << std::string(message) << std::endl;
+    }
+#endif
   std::string symbol(message);
   WSReleaseString(_link, message);
   return symbol;
@@ -239,8 +259,13 @@ std::string mathematica::driver::ws::connection::get_symbol(){
 	const char* name;
 	int success = WSGetSymbol(_link, &name);
 	if(!success){
-		throw exceptions::dispatch(_link, "mathematica::tokens::symbol::fetch");
+		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_symbol");
 	}
+#ifdef M_DEBUG
+    else{
+		std::cout << "mathematica::driver::ws::connection::get_symbol " << std::string(name) << std::endl;
+    }
+#endif
 	std::string symbol(name);
 	WSReleaseSymbol(_link, name);
 	return symbol;
