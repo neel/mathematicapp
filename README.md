@@ -1,6 +1,26 @@
 # Mathematica++
-## A C++ Library that talks Mathematica
+[GitLab Repository](https://gitlab.com/neel.basu/mathematicapp) | [GitLab Wiki](https://gitlab.com/neel.basu/mathematicapp/wikis/home) | [Website](http://neelex.com/mathematica++)
 
+* [Build Instructions](build)
+* [Connection](connection)
+* [Types](types)
+* [Mathematica Constructs](mathematica-constructs)
+* [STL Containers](stl)
+* [Local Storage](local-storage)
+
+```C++
+symbol x("x");
+value  res;
+std::string method = "Newton";
+
+shell << Values(FindRoot(ArcTan(1000 * Cos(x)), List(x, 1, 2),  Rule("Method") = method));
+shell >> res;
+std::vector<double> results = cast<std::vector<double>>(res);
+std::cout << results[0] << std::endl; // Prints 10.9956
+```
+
+
+## A C++ Library that talks Mathematica
 Dot product and Determinant calculation in Mathematica Language
 
 ```Mathematica
@@ -70,7 +90,9 @@ value result_sum; // declare the variable to hold the result
 shell << Total(Table(i, List(i, 1, 10))); // In Mathematica Total[Table[i, {i, 1, 10}]]
 shell >> result_sum;
 ````
+
 `result_sum` is the result object that can be converted to `int`, `double`, `std::string` and streamed to `std::ostream`. 
+
 ```cpp
 std::cout << result_sum << std::endl; // Prints 55
 std::cout << result_sum->stringify() << std::endl; // Prints 55
@@ -117,5 +139,3 @@ shell >> res_matc;
 shell << Det(res_matc);
 shell >> res_det;
 ```
-
-## Graphics Objects saved on the fly
