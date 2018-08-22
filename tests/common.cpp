@@ -25,7 +25,12 @@ MATHEMATICA_DECLARE(Mod)
 MATHEMATICA_DECLARE(Dot)
 MATHEMATICA_DECLARE(Det)
 MATHEMATICA_DECLARE(Plus)
-// MATHEMATICA_DECLARE(Total)
+MATHEMATICA_DECLARE(Plot)
+MATHEMATICA_DECLARE(Pow)
+MATHEMATICA_DECLARE(Values)
+MATHEMATICA_DECLARE(Flatten)
+MATHEMATICA_DECLARE(N)
+MATHEMATICA_DECLARE(FindRoot)
 
 using namespace mathematica;
 
@@ -97,7 +102,26 @@ BOOST_AUTO_TEST_CASE(matrix){
         
         BOOST_CHECK((int)*res_det == -2);
         
+//         symbol x("x");
+//         value plot;
+//         
+//         shell << Plot(Pow(x, 2), List(x, 0.0, 6.3));
+//         std::cout << "START" << std::endl;
+//         shell >> plot;
+//         std::cout << "Plot: " << plot << std::endl;
         
+        {
+//             symbol x("x");
+//             value  res;
+//             std::string method = "Newton";
+//             
+ //             shell << N(Flatten(Values(Solve(Power(x, 2) + 2*x -7 == 0, x))));
+//             shell << Values(FindRoot(Sin(x-10)-x+10, List(x, 0), (Rule("AccuracyGoal") = 4, Rule("PrecisionGoal") = 4)));
+//             shell << Values(FindRoot(ArcTan(1000 * Cos(x)), List(x, 1, 2),  Rule("Method") = method));
+//             shell >> res;
+//             std::vector<double> results = cast<std::vector<double>>(res);
+//             std::cout << results[0] << std::endl;
+        }
     }
 }
 
