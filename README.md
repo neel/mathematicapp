@@ -1,5 +1,5 @@
 # Mathematica++
-[GitLab Repository](https://gitlab.com/neel.basu/mathematicapp) | [GitLab Wiki](https://gitlab.com/neel.basu/mathematicapp/wikis/home) | [Website](http://neelex.com/mathematica++)
+[GitLab Repository](https://gitlab.com/neel.basu/mathematicapp) | [GitLab Wiki](https://gitlab.com/neel.basu/mathematicapp/wikis/home) | [Website](http://neelex.com/mathematica++) | FreeBSD License
 
 * [Build Instructions](build)
 * [Connection](connection)
