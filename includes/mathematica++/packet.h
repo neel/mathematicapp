@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_PACKET_H
-#define WSTP_PACKET_H
+#ifndef MATHEMATICAPP_PACKET_H
+#define MATHEMATICAPP_PACKET_H
 
 #include <map>
 #include <string>
@@ -200,4 +200,4 @@ std::ostream& operator<<(std::ostream& stream, const packet& pkt);
 
 }
 
-#endif // WSTP_PACKET_H
+#endif // MATHEMATICAPP_PACKET_H

@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_SYMBOL_H
-#define WSTP_SYMBOL_H
+#ifndef MATHEMATICAPP_SYMBOL_H
+#define MATHEMATICAPP_SYMBOL_H
 
 #include <string>
 
@@ -53,4 +53,4 @@ struct symbol{
 };
 }
 
-#endif // WSTP_SYMBOL_H
+#endif // MATHEMATICAPP_SYMBOL_H

@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_IO_H
-#define WSTP_IO_H
+#ifndef MATHEMATICAPP_IO_H
+#define MATHEMATICAPP_IO_H
 
 #include "accessor.h"
 #include "tokens.h"
@@ -66,4 +66,4 @@ wrapper& operator<<(mathematica::connector::storage storage, const mathematica::
 //wrapper& operator<<(mathematica::connector::storage storage, const mathematica::value& val);
 }
 
-#endif // WSTP_IO_H
+#endif // MATHEMATICAPP_IO_H

@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_HISTORY_H
-#define WSTP_HISTORY_H
+#ifndef MATHEMATICAPP_HISTORY_H
+#define MATHEMATICAPP_HISTORY_H
 
 #include <vector>
 #include "mathematica++/packet.h"
@@ -53,4 +53,4 @@ struct history{
 
 }
 
-#endif // WSTP_HISTORY_H
+#endif // MATHEMATICAPP_HISTORY_H

@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_OPERATORS_H
-#define WSTP_OPERATORS_H
+#ifndef MATHEMATICAPP_OPERATORS_H
+#define MATHEMATICAPP_OPERATORS_H
 
 #include "symbol.h"
 #include "m.h"
@@ -112,4 +112,4 @@ mathematica::m pow(const U& left, const V& right){
 
 }
 
-#endif // WSTP_OPERATORS_H
+#endif // MATHEMATICAPP_OPERATORS_H

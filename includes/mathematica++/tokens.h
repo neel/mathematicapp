@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_TOKENS_H
-#define WSTP_TOKENS_H
+#ifndef MATHEMATICAPP_TOKENS_H
+#define MATHEMATICAPP_TOKENS_H
 
 #include <vector>
 #include <string>
@@ -192,4 +192,4 @@ boost::shared_ptr<token> factory(accessor* accessor, int type);
 }
 
 }
-#endif // WSTP_TOKENS_H
+#endif // MATHEMATICAPP_TOKENS_H

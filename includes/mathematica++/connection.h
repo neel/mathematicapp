@@ -24,9 +24,10 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_CONNECTION_H
-#define WSTP_CONNECTION_H
+#ifndef MATHEMATICAPP_CONNECTION_H
+#define MATHEMATICAPP_CONNECTION_H
 
+#include "defs.h"
 #include "wstp.h"
 #include <string>
 #include <stack>
@@ -94,8 +95,8 @@ struct connection{
     void pop();
   private:
     bool _connected;
-		link_type _link;
-		env_type  _env;
+    link_type _link;
+    env_type  _env;
     std::stack<mark_type> _checkpoints;
 		
 		connection(connection& other);
@@ -105,4 +106,4 @@ struct connection{
 }
 }
 
-#endif // WSTP_CONNECTION_H
+#endif // MATHEMATICAPP_CONNECTION_H

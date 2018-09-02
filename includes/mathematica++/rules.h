@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_UTILS_H
-#define WSTP_UTILS_H
+#ifndef MATHEMATICAPP_UTILS_H
+#define MATHEMATICAPP_UTILS_H
 
 #include "symbol.h"
 #include <string>
@@ -187,4 +187,4 @@ namespace detail{
     }
 }
 
-#endif // WSTP_UTILS_H
+#endif // MATHEMATICAPP_UTILS_H

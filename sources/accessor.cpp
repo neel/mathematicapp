@@ -32,7 +32,6 @@
 #include "mathematica++/drivers.h"
 #include "mathematica++/m.h"
 #include <map>
-#include "wstp.h"
 #include <ctime>
 #include <boost/format.hpp>
 #include <iostream>

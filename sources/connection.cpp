@@ -24,7 +24,6 @@
  * DAMAGE. 
  */
 
-#include "wstp.h"
 #include "mathematica++/symbol.h"
 #include "mathematica++/rules.h"
 #include "mathematica++/connection.h"

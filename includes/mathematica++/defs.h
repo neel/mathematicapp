@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_DEFS_H
-#define WSTP_DEFS_H
+#ifndef MATHEMATICAPP_DEFS_H
+#define MATHEMATICAPP_DEFS_H
 
 namespace mathematica{
 

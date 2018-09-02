@@ -24,9 +24,10 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_EXCEPTIONS_H
-#define WSTP_EXCEPTIONS_H
+#ifndef MATHEMATICAPP_EXCEPTIONS_H
+#define MATHEMATICAPP_EXCEPTIONS_H
 
+#include "defs.h"
 #include "wstp.h"
 #include <string>
 #include <stdexcept>
@@ -61,4 +62,4 @@ error dispatch(mathematica::driver::ws::connection& conn, const std::string& con
 
 }
 
-#endif // WSTP_EXCEPTIONS_H
+#endif // MATHEMATICAPP_EXCEPTIONS_H

@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef WSTP_VARIANT_H
-#define WSTP_VARIANT_H
+#ifndef MATHEMATICAPP_VARIANT_H
+#define MATHEMATICAPP_VARIANT_H
 
 #include <iostream>
 #include <complex>
@@ -460,4 +460,4 @@ T cast(const mathematica::variant& var){
 
 }
 
-#endif // WSTP_VARIANT_H
+#endif // MATHEMATICAPP_VARIANT_H

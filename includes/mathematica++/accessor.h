@@ -25,8 +25,8 @@
  */
 
 
-#ifndef WSTP_ACCESSOR_H
-#define WSTP_ACCESSOR_H
+#ifndef MATHEMATICAPP_ACCESSOR_H
+#define MATHEMATICAPP_ACCESSOR_H
 
 #include "mathematica++/tokens.h"
 #include "mathematica++/defs.h"
@@ -132,4 +132,4 @@ class wrapper: public accessor{
 
 }
 
-#endif // WSTP_ACCESSOR_H
+#endif // MATHEMATICAPP_ACCESSOR_H
