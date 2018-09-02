@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef CONNECTOR_H
-#define CONNECTOR_H
+#ifndef MATHEMATICAPP_CONNECTOR_H
+#define MATHEMATICAPP_CONNECTOR_H
 
 #include <vector>
 #include <string>
@@ -127,4 +127,4 @@ class connector: public mathematica::wrapper{
 
 }
 
-#endif // CONNECTOR_H
+#endif // MATHEMATICAPP_CONNECTOR_H

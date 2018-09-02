@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef SCOPE_H
-#define SCOPE_H
+#ifndef MATHEMATICAPP_SCOPE_H
+#define MATHEMATICAPP_SCOPE_H
 
 #include <list>
 #include <vector>
@@ -97,4 +97,4 @@ struct scope: public boost::enable_shared_from_this<scope>{
 }
 }
 
-#endif // SCOPE_H
+#endif // MATHEMATICAPP_SCOPE_H

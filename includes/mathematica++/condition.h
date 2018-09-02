@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef CONDITION_H
-#define CONDITION_H
+#ifndef MATHEMATICAPP_CONDITION_H
+#define MATHEMATICAPP_CONDITION_H
 
 #include "m.h"
 
@@ -46,4 +46,4 @@ class condition{
 };
 }
 
-#endif // CONDITION_H
+#endif // MATHEMATICAPP_CONDITION_H

@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef DRIVERS_H
-#define DRIVERS_H
+#ifndef MATHEMATICAPP_DRIVERS_H
+#define MATHEMATICAPP_DRIVERS_H
 
 #include <string>
 
@@ -69,4 +69,4 @@ namespace ml{
 }
 }
 
-#endif // DRIVERS_H
+#endif // MATHEMATICAPP_DRIVERS_H

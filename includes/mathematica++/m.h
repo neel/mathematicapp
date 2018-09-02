@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef SHORTHAND_H
-#define SHORTHAND_H
+#ifndef MATHEMATICAPP_SHORTHAND_H
+#define MATHEMATICAPP_SHORTHAND_H
 
 #include <string>
 #include <vector>
@@ -379,4 +379,4 @@ struct m{
 
 }
 
-#endif // SHORTHAND_H
+#endif // MATHEMATICAPP_SHORTHAND_H

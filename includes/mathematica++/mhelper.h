@@ -24,8 +24,8 @@
  * DAMAGE. 
  */
 
-#ifndef MHELPER_H
-#define MHELPER_H
+#ifndef MATHEMATICAPP_MHELPER_H
+#define MATHEMATICAPP_MHELPER_H
 
 #include "mathematica++/m.h"
 #include "mathematica++/tokens.h"
@@ -35,4 +35,4 @@ namespace mathematica{
 
 }
 
-#endif // MHELPER_H
+#endif // MATHEMATICAPP_MHELPER_H
