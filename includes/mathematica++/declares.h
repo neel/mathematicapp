@@ -34,7 +34,7 @@ template <typename... T> \
 mathematica::m F(T... args){return mathematica::m(#F)(args...);} \
 }
 
-
+// Following is an example of MATHEMATICA_DECLARE
 // namespace mathematica{
 // template <typename... T>
 // mathematica::m Power(T... args){return mathematica::m("Power")(args...);}
