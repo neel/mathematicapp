@@ -24,6 +24,7 @@
  * DAMAGE. 
  */
 
+#include "mathematica++/compatibility.h"
 #include "mathematica++/symbol.h"
 #include "mathematica++/rules.h"
 #include "mathematica++/connection.h"
@@ -53,11 +54,11 @@ mathematica::driver::ws::connection::connection(){
     int argc = 2;
     
     int err;
-    WSENV env =  WSInitialize((WSParametersPointer)0);
-    WSLINK link = WSOpenArgcArgv(env, argc, argv, &err);
-    _connected = (err == WSEOK);
+    WMK_ENV env =  WMK_Initialize((WMK_ParametersPointer)0);
+    WMK_LINK link = WMK_OpenArgcArgv(env, argc, argv, &err);
+    _connected = (err == WMK_EOK);
     if(_connected){
-        err = WSActivate(link);
+        err = WMK_Activate(link);
 
         _link = link;
         _env  = env;
@@ -66,11 +67,11 @@ mathematica::driver::ws::connection::connection(){
 
 mathematica::driver::ws::connection::connection(int argc, char** argv){
 		int err;
-		WSENV env =  WSInitialize((WSParametersPointer)0);
-		WSLINK link = WSOpenArgcArgv(env, argc, argv, &err);
-        _connected = (err == WSEOK);
+		WMK_ENV env =  WMK_Initialize((WMK_ParametersPointer)0);
+		WMK_LINK link = WMK_OpenArgcArgv(env, argc, argv, &err);
+        _connected = (err == WMK_EOK);
         if(_connected){
-            err = WSActivate(link);
+            err = WMK_Activate(link);
 
             _link = link;
             _env  = env;
@@ -79,11 +80,11 @@ mathematica::driver::ws::connection::connection(int argc, char** argv){
 
 mathematica::driver::ws::connection::connection(const std::string& name){
     int err;
-    WSENV env =  WSInitialize((WSParametersPointer)0);
-    WSLINK link = WSOpenString(env, name.c_str(), &err);
-    _connected = (err == WSEOK);
+    WMK_ENV env =  WMK_Initialize((WMK_ParametersPointer)0);
+    WMK_LINK link = WMK_OpenString(env, name.c_str(), &err);
+    _connected = (err == WMK_EOK);
     if(_connected){
-        err = WSActivate(link);
+        err = WMK_Activate(link);
 
         _link = link;
         _env  = env;
@@ -92,10 +93,10 @@ mathematica::driver::ws::connection::connection(const std::string& name){
 
 std::string mathematica::driver::ws::connection::link_name() const{
     const char* name;
-    name = WSLinkName(_link);
+    name = WMK_LinkName(_link);
     if(name){
         std::string name_str(name);
-        WSReleaseLinkName(_link, name);
+        WMK_ReleaseLinkName(_link, name);
         return name_str;
     }else{
         return std::string();
@@ -113,7 +114,7 @@ void mathematica::driver::ws::connection::function(const std::string& name, unsi
 #ifdef M_DEBUG
 		std::cout << "mathematica::driver::ws::connection::function " << boost::format("WSPutFunction[%1%, %2%]")% name % nargs << std::endl;
 #endif
-		if(!WSPutFunction(_link, name.c_str(), nargs)){
+		if(!WMK_PutFunction(_link, name.c_str(), nargs)){
 				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::function");
 		}
 }
@@ -122,7 +123,7 @@ void mathematica::driver::ws::connection::integer(int n){
 #ifdef M_DEBUG
 		std::cout << "mathematica::driver::ws::connection::integer " << n << std::endl;
 #endif
-		if(!WSPutInteger(_link, n)){
+		if(!WMK_PutInteger(_link, n)){
 				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::integer");
 		}
 }
@@ -138,9 +139,9 @@ void mathematica::driver::ws::connection::uinteger(unsigned int n){
 
 void mathematica::driver::ws::connection::long_integer(long int n){
 #ifdef M_DEBUG
-    std::cout << "mathematica::driver::ws::connection::integer " << n << std::endl;
+    std::cout << "mathematica::driver::ws::connection::long integer " << n << std::endl;
 #endif
-    if(!WSPutLongInteger(_link, n)){
+    if(!WMK_PutLongInteger(_link, n)){
         throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::integer");
     }
 }
@@ -149,7 +150,7 @@ void mathematica::driver::ws::connection::real(double n){
 		#ifdef M_DEBUG
 		std::cout << "mathematica::driver::ws::connection::real " << n << std::endl;
 		#endif
-		if(!WSPutReal(_link, n)){
+		if(!WMK_PutReal(_link, n)){
 				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::real");
 		}
 }
@@ -158,7 +159,7 @@ void mathematica::driver::ws::connection::str(const std::string& s){
 #ifdef M_DEBUG
 		std::cout << "mathematica::driver::ws::connection::str \"" << s << "\"" << std::endl;
 #endif
-		if(!WSPutString(_link, s.c_str())){
+		if(!WMK_PutString(_link, s.c_str())){
 				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::str");
 		}
 }
@@ -167,7 +168,7 @@ void mathematica::driver::ws::connection::symbol(const std::string& s){
 #ifdef M_DEBUG
 		std::cout << "mathematica::driver::ws::connection::symbol " << s << std::endl;
 #endif
-		if(!WSPutSymbol(_link, s.c_str())){
+		if(!WMK_PutSymbol(_link, s.c_str())){
 				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::symbol");
 		}
 }
@@ -187,7 +188,7 @@ void mathematica::driver::ws::connection::end(){
 #ifdef M_DEBUG
     std::cout << "mathematica::driver::ws::connection::end" << std::endl;
 #endif
-	if(!WSEndPacket(_link)){
+	if(!WMK_EndPacket(_link)){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::end");
 	}
 }
@@ -195,7 +196,7 @@ void mathematica::driver::ws::connection::end(){
 std::pair<std::string, int> mathematica::driver::ws::connection::get_function(){
 	int args;
 	const char* symbol = "";
-	int success = WSGetFunction(_link, &symbol, &args);
+	int success = WMK_GetFunction(_link, &symbol, &args);
 	if(!success){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_function");
 	}
@@ -205,13 +206,13 @@ std::pair<std::string, int> mathematica::driver::ws::connection::get_function(){
     }
 #endif
 	std::string name(symbol);
-	WSReleaseSymbol(_link, symbol);
+	WMK_ReleaseSymbol(_link, symbol);
 	return std::make_pair(name, args);
 }
 
 int mathematica::driver::ws::connection::get_integer(){
 	int data;
-	int success = WSGetInteger(_link, &data);
+	int success = WMK_GetInteger(_link, &data);
 	if(!success){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
 	}
@@ -225,7 +226,7 @@ int mathematica::driver::ws::connection::get_integer(){
 
 double mathematica::driver::ws::connection::get_real(){
 	double data;
-	int success = WSGetReal(_link, &data);
+	int success = WMK_GetReal(_link, &data);
 	if(!success){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_real");
 	}
@@ -239,7 +240,7 @@ double mathematica::driver::ws::connection::get_real(){
 
 std::string mathematica::driver::ws::connection::get_str(){
     const char* message;
-    int success = WSGetString(_link, &message);
+    int success = WMK_GetString(_link, &message);
     if(!success){
         throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_str");
     }
@@ -249,13 +250,13 @@ std::string mathematica::driver::ws::connection::get_str(){
     }
 #endif
   std::string symbol(message);
-  WSReleaseString(_link, message);
+  WMK_ReleaseString(_link, message);
   return symbol;
 }
 
 std::string mathematica::driver::ws::connection::get_symbol(){
 	const char* name;
-	int success = WSGetSymbol(_link, &name);
+	int success = WMK_GetSymbol(_link, &name);
 	if(!success){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_symbol");
 	}
@@ -265,23 +266,23 @@ std::string mathematica::driver::ws::connection::get_symbol(){
     }
 #endif
 	std::string symbol(name);
-	WSReleaseSymbol(_link, name);
+	WMK_ReleaseSymbol(_link, name);
 	return symbol;
 }
 
 void mathematica::driver::ws::connection::disconnect(){
-	WSClose(_link);
-  WSDeinitialize(_env);
+    WMK_Close(_link);
+    WMK_Deinitialize(_env);
 }
 
 boost::shared_ptr<mathematica::packet> mathematica::driver::ws::connection::fetch_packet(mathematica::accessor* accessor){
     boost::shared_ptr<mathematica::packet> packet;
     flush();
-    int pkt = WSNextPacket(_link);
+    int pkt = WMK_NextPacket(_link);
     push();
     boost::shared_ptr<mathematica::token> token = fetch_token(accessor);
     pop();
-    WSNewPacket(_link);
+    WMK_NewPacket(_link);
     packet = packets::create(mathematica::packet_type(pkt), token);
     return packet;
 }
@@ -289,9 +290,9 @@ boost::shared_ptr<mathematica::packet> mathematica::driver::ws::connection::fetc
 boost::shared_ptr<mathematica::packet> mathematica::driver::ws::connection::ignore_packet(mathematica::accessor* accessor){
     boost::shared_ptr<mathematica::packet> packet;
     flush();
-    int pkt = WSNextPacket(_link);
+    int pkt = WMK_NextPacket(_link);
     boost::shared_ptr<mathematica::token> token;
-    WSNewPacket(_link);
+    WMK_NewPacket(_link);
     packet = packets::create(mathematica::packet_type(pkt), token);
     return packet;
 }
@@ -299,7 +300,7 @@ boost::shared_ptr<mathematica::packet> mathematica::driver::ws::connection::igno
 
 boost::shared_ptr<mathematica::token> mathematica::driver::ws::connection::fetch_token(mathematica::accessor* accessor){
 //     int token_type = WSGetType(_link);
-    int token_type = WSGetNext(_link);
+    int token_type = WMK_GetNext(_link);
     boost::shared_ptr<mathematica::token> token = tokens::factory(accessor, token_type);
     if(token){
         token->fetch();
@@ -351,7 +352,7 @@ boost::shared_ptr<mathematica::token> mathematica::driver::ws::connection::fetch
 
 int mathematica::driver::ws::connection::next(mathematica::accessor* accessor){
 //   int token_type = WSGetType(_link);
-  int token_type = WSGetNext(_link);
+  int token_type = WMK_GetNext(_link);
   return token_type;
 }
 
@@ -366,19 +367,19 @@ int mathematica::driver::ws::connection::next(mathematica::accessor* accessor){
 
 void mathematica::driver::ws::connection::pull(){
     flush();
-    WSWaitForLinkActivity(_link);
+    WMK_WaitForLinkActivity(_link);
 }
 
 
 void mathematica::driver::ws::connection::flush(){
-	if(!WSFlush(_link)){
+	if(!WMK_Flush(_link)){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::flush");
 	}
 }
 
 int mathematica::driver::ws::connection::test(std::string head, int& nargs){
 		int n;
-		int c = WSTestHead(_link, head.c_str(), &n);
+		int c = WMK_TestHead(_link, head.c_str(), &n);
 		if(!c){
 				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::test");
 		}
@@ -387,38 +388,38 @@ int mathematica::driver::ws::connection::test(std::string head, int& nargs){
 }
 
 int mathematica::driver::ws::connection::head(std::string& type, int& nargs){
-		WSMARK mark = WSCreateMark(_link);
+		WMK_MARK mark = WMK_CreateMark(_link);
 		const char* tname;
 		int n;
-		int c = WSGetFunction(_link, &tname, &n);
+		int c = WMK_GetFunction(_link, &tname, &n);
 		nargs = n;
 		if(c){
 				type = std::string(tname);
-				WSReleaseSymbol(_link, tname);
+				WMK_ReleaseSymbol(_link, tname);
 		}else{
 				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::head");
 		}
-		WSSeekToMark(_link, mark, 0);
-		WSDestroyMark(_link, mark);
+		WMK_SeekToMark(_link, mark, 0);
+		WMK_DestroyMark(_link, mark);
 		return c;
 }
 
 
 std::string mathematica::driver::ws::connection::error(int& code){
-	int ec = WSError(_link);
+	int ec = WMK_Error(_link);
 	if(ec){
-		return std::string(WSErrorMessage(_link));
+		return std::string(WMK_ErrorMessage(_link));
 	}
 	return std::string();
 }
 
 void mathematica::driver::ws::connection::push(){
-    _checkpoints.push(WSCreateMark(_link));
+    _checkpoints.push(WMK_CreateMark(_link));
 }
 
 void mathematica::driver::ws::connection::pop(){
-    WSMARK mark = _checkpoints.top();
-    WSSeekToMark(_link, mark, 0);
-    WSDestroyMark(_link, mark);
+    WMK_MARK mark = _checkpoints.top();
+    WMK_SeekToMark(_link, mark, 0);
+    WMK_DestroyMark(_link, mark);
     _checkpoints.pop();
 }

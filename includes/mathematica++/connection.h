@@ -27,8 +27,13 @@
 #ifndef MATHEMATICAPP_CONNECTION_H
 #define MATHEMATICAPP_CONNECTION_H
 
-#include "defs.h"
+#ifdef USING_ML
+#include "mathlink.h"
+#else
 #include "wstp.h"
+#endif
+
+#include "compatibility.h"
 #include <string>
 #include <stack>
 #include <boost/shared_ptr.hpp>
@@ -46,9 +51,9 @@ namespace ws{
  * have connector, wrapper etc.. as the interface to connection
  */
 struct connection{
-  typedef WSLINK link_type;
-  typedef WSENV  env_type;
-  typedef WSMARK mark_type;
+  typedef WMK_LINK link_type;
+  typedef WMK_ENV  env_type;
+  typedef WMK_MARK mark_type;
   
   connection();
   connection(int argc, char** argv);
@@ -99,7 +104,7 @@ struct connection{
     env_type  _env;
     std::stack<mark_type> _checkpoints;
 		
-		connection(connection& other);
+    connection(connection& other);
 };
 
 }

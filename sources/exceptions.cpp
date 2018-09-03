@@ -24,6 +24,7 @@
  * DAMAGE. 
  */
 
+#include "mathematica++/compatibility.h"
 #include "mathematica++/exceptions.h"
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
@@ -34,9 +35,9 @@ mathematica::exceptions::error::error(int ec, const std::string& context, const 
 
 }
 
-mathematica::exceptions::error mathematica::exceptions::dispatch(WSLINK link, const std::string& context){
-	int ec = WSError(link);
-	return error(ec, context, std::string(WSErrorMessage(link)));
+mathematica::exceptions::error mathematica::exceptions::dispatch(WMK_LINK link, const std::string& context){
+	int ec = WMK_Error(link);
+	return error(ec, context, std::string(WMK_ErrorMessage(link)));
 }
 
 mathematica::exceptions::error mathematica::exceptions::dispatch(mathematica::driver::ws::connection& conn, const std::string& context){

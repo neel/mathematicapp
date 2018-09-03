@@ -24,6 +24,7 @@
  * DAMAGE. 
  */
 
+#include "mathematica++/compatibility.h"
 #include "mathematica++/tokens.h"
 #include "mathematica++/exceptions.h"
 #include "mathematica++/connector.h"
@@ -70,7 +71,7 @@ std::ostream& mathematica::operator<<(std::ostream& stream, const mathematica::v
     }
 }
 
-mathematica::tokens::integer::integer(mathematica::accessor* accessor): token(accessor, WSTKINT, token_integer){
+mathematica::tokens::integer::integer(mathematica::accessor* accessor): token(accessor, WMK_TKINT, token_integer){
 
 }
 
@@ -91,7 +92,7 @@ int mathematica::tokens::integer::value() const{
 }
 
 
-mathematica::tokens::real::real(mathematica::accessor* accessor): token(accessor, WSTKREAL, token_real){
+mathematica::tokens::real::real(mathematica::accessor* accessor): token(accessor, WMK_TKREAL, token_real){
 
 }
 
@@ -113,7 +114,7 @@ double mathematica::tokens::real::value() const{
 }
 
 
-mathematica::tokens::str::str(mathematica::accessor* accessor): token(accessor, WSTKSTR, token_str){
+mathematica::tokens::str::str(mathematica::accessor* accessor): token(accessor, WMK_TKSTR, token_str){
 
 }
 
@@ -129,7 +130,7 @@ mathematica::variant mathematica::tokens::str::serialize() const{
     return mathematica::variant(stringify());
 }
 
-mathematica::tokens::symbol::symbol(mathematica::accessor* accessor): token(accessor, WSTKSYM, token_symbol){
+mathematica::tokens::symbol::symbol(mathematica::accessor* accessor): token(accessor, WMK_TKSYM, token_symbol){
 
 }
 
@@ -150,7 +151,7 @@ mathematica::variant mathematica::tokens::symbol::serialize() const{
 }
 
 
-mathematica::tokens::function::function(mathematica::accessor* accessor): token(accessor, WSTKFUNC, token_function){
+mathematica::tokens::function::function(mathematica::accessor* accessor): token(accessor, WMK_TKFUNC, token_function){
 
 }
 
@@ -202,19 +203,19 @@ mathematica::variant mathematica::tokens::function::serialize() const{
 boost::shared_ptr<mathematica::token> mathematica::tokens::factory(mathematica::accessor* accessor, int type){
 	mathematica::token* t = 0x0;
 	switch(type){
-		case WSTKINT:
+		case WMK_TKINT:
 			t = new tokens::integer(accessor);
 			break;
-		case WSTKREAL:
+		case WMK_TKREAL:
 			t = new tokens::real(accessor);
 			break;
-		case WSTKSTR:
+		case WMK_TKSTR:
 			t = new tokens::str(accessor);
 			break;
-		case WSTKSYM:
+		case WMK_TKSYM:
 			t = new tokens::symbol(accessor);
 			break;
-		case WSTKFUNC:
+		case WMK_TKFUNC:
 			t = new tokens::function(accessor);
 			break;
     default:
