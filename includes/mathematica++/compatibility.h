@@ -59,6 +59,32 @@
 #define WMK_GetSymbol         MLGetSymbol
 #define WMK_ReleaseSymbol     MLReleaseSymbol
 #define WMK_ReleaseString     MLReleaseString
+
+#define WMK_PutInteger8List   MLPutInteger8List
+#define WMK_PutInteger16List  MLPutInteger16List
+#define WMK_PutInteger32List  MLPutInteger32List
+#define WMK_PutInteger64List  MLPutInteger64List
+#define WMK_PutReal32List     MLPutReal32List
+#define WMK_PutReal64List     MLPutReal64List
+#define WMK_PutInteger8Array  MLPutInteger8Array
+#define WMK_PutInteger16Array MLPutInteger16Array
+#define WMK_PutInteger32Array MLPutInteger32Array
+#define WMK_PutInteger64Array MLPutInteger64Array
+#define WMK_PutReal32Array    MLPutReal32Array
+#define WMK_PutReal64Array    MLPutReal64Array
+
+#define WMK_PutInteger8List_Name   "MLPutInteger8List"
+#define WMK_PutInteger16List_Name  "MLPutInteger16List"
+#define WMK_PutInteger32List_Name  "MLPutInteger32List"
+#define WMK_PutInteger64List_Name  "MLPutInteger64List"
+#define WMK_PutReal32List_Name     "MLPutReal32List"
+#define WMK_PutReal64List_Name     "MLPutReal64List"
+#define WMK_PutInteger8Array_Name  "MLPutInteger8Array"
+#define WMK_PutInteger16Array_Name "MLPutInteger16Array"
+#define WMK_PutInteger32Array_Name "MLPutInteger32Array"
+#define WMK_PutInteger64Array_Name "MLPutInteger64Array"
+#define WMK_PutReal32Array_Name    "MLPutReal32Array"
+#define WMK_PutReal64Array_Name    "MLPutReal64Array"
 #else
 #define WMK_LINK WSLINK
 #define WMK_ENV  WSENV
@@ -117,6 +143,19 @@
 #define WMK_GetSymbol         WSGetSymbol
 #define WMK_ReleaseSymbol     WSReleaseSymbol
 #define WMK_ReleaseString     WSReleaseString
+
+#define WMK_PutInteger8List_Name   "WSPutInteger8List"
+#define WMK_PutInteger16List_Name  "WSPutInteger16List"
+#define WMK_PutInteger32List_Name  "WSPutInteger32List"
+#define WMK_PutInteger64List_Name  "WSPutInteger64List"
+#define WMK_PutReal32List_Name     "WSPutReal32List"
+#define WMK_PutReal64List_Name     "WSPutReal64List"
+#define WMK_PutInteger8Array_Name  "WSPutInteger8Array"
+#define WMK_PutInteger16Array_Name "WSPutInteger16Array"
+#define WMK_PutInteger32Array_Name "WSPutInteger32Array"
+#define WMK_PutInteger64Array_Name "WSPutInteger64Array"
+#define WMK_PutReal32Array_Name    "WSPutReal32Array"
+#define WMK_PutReal64Array_Name    "WSPutReal64Array"
 #endif
 
 #endif // MATHEMATICAPP_COMPATIBILITY_H

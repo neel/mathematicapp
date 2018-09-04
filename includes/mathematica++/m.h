@@ -27,6 +27,7 @@
 #ifndef MATHEMATICAPP_SHORTHAND_H
 #define MATHEMATICAPP_SHORTHAND_H
 
+#include "mathematica++/compatibility.h"
 #include <string>
 #include <vector>
 #include <stack>
@@ -295,6 +296,150 @@ struct argument_helper<std::initializer_list<T>, M_Type>{
     }
 };
 
+template <typename T>
+struct bulk_transfer_argument_type{};
+
+template <>
+struct bulk_transfer_argument_type<boost::int16_t>{
+    typedef boost::int16_t target_type;
+    static std::string put_array(){
+        return std::string(WMK_PutInteger16Array_Name);
+    }
+};
+
+template <>
+struct bulk_transfer_argument_type<boost::uint16_t>{
+    typedef boost::int32_t target_type;
+    static std::string put_array(){
+        return std::string(WMK_PutInteger16Array_Name);
+    }
+};
+
+template <>
+struct bulk_transfer_argument_type<boost::int32_t>{
+    typedef boost::int32_t target_type;
+    static std::string put_array(){
+        return std::string(WMK_PutInteger32Array_Name);
+    }
+};
+
+template <>
+struct bulk_transfer_argument_type<boost::uint32_t>{
+    typedef boost::int64_t target_type;
+    static std::string put_array(){
+        return std::string(WMK_PutInteger64Array_Name);
+    }
+};
+
+template <>
+struct bulk_transfer_argument_type<boost::int64_t>{
+    typedef boost::int64_t target_type;
+    static std::string put_array(){
+        return std::string(WMK_PutInteger64Array_Name);
+    }
+};
+
+template <>
+struct bulk_transfer_argument_type<boost::uint64_t>{
+    typedef boost::int64_t target_type;
+    static std::string put_array(){
+        return std::string(WMK_PutInteger64Array_Name);
+    }
+};
+
+template <>
+struct bulk_transfer_argument_type<float>{
+    typedef float target_type;
+    static std::string put_array(){
+        return std::string(WMK_PutReal32Array_Name);
+    }
+};
+
+template <>
+struct bulk_transfer_argument_type<double>{
+    typedef double target_type;
+    static std::string put_array(){
+        return std::string(WMK_PutReal64Array_Name);
+    }
+};
+
+//{ derive the inner most type of an std::vector<std::vector<std::vector<std::vector<std::vector<T>>>>>
+// typedef std::vector<std::vector<std::vector<std::vector<std::vector<T>>>>> matrix_type;
+// usage bulk_transfer_inner_type<matrix_type>::inner_type
+template <typename T>
+struct bulk_transfer_inner_type{};
+template <typename T>
+struct bulk_transfer_inner_type<std::vector<T>>{
+    typedef T inner_type;
+};
+template <typename T>
+struct bulk_transfer_inner_type<std::vector<std::vector<T>>>: public bulk_transfer_inner_type<std::vector<T>>{};
+//}
+
+// { serialize a multidimentional vector to linear vector
+template <typename T, typename S>
+struct bulk_argument_helper{};
+
+template <typename T>
+struct bulk_argument_helper<std::vector<T>, std::vector<T>>{
+    typedef std::vector<T> S;
+    S& _l;
+    
+    bulk_argument_helper(S& list): _l(list){}
+    void operator()(const std::vector<T>& arg){
+        std::copy(arg.begin(), arg.end(), std::back_inserter(_l));
+    }
+};
+
+template <typename T, typename S>
+struct bulk_argument_helper<std::vector<std::vector<T>>, S>{
+    S& _l;
+    
+    bulk_argument_helper(S& list): _l(list){}
+    void operator()(const std::vector<std::vector<T>>& arg){
+        for(const std::vector<T>& v: arg){
+            bulk_argument_helper<std::vector<T>, S> helper(_l);
+            helper(v);
+        }
+    }
+};
+//}
+
+// { get dimentions of a multi dimentional vector
+template <typename T>
+struct bulk_dimention_helper{};
+
+template <typename T>
+struct bulk_dimention_helper<std::vector<T>>{
+    typedef std::vector<int> dims_type;
+    dims_type& _dims;
+    
+    bulk_dimention_helper(dims_type& dims): _dims(dims){}
+
+    void operator()(const std::vector<T>& vec){
+        _dims.push_back(vec.size());
+    }
+};
+
+template <typename T>
+struct bulk_dimention_helper<std::vector<std::vector<T>>>{
+    typedef std::vector<int> dims_type;
+    dims_type& _dims;
+    
+    bulk_dimention_helper(dims_type& dims): _dims(dims){}
+    
+    void operator()(const std::vector<std::vector<T>>& vec){
+        _dims.push_back(vec.size());
+        if(vec.size() > 0){
+            bulk_dimention_helper<std::vector<T>> helper(_dims);
+            helper(*vec.begin());
+        }else{
+            _dims.push_back(0);
+        }
+    }
+};
+//}
+
 template <typename T, typename M_Type>
 struct argument_helper<std::vector<T>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
@@ -302,11 +447,29 @@ struct argument_helper<std::vector<T>, M_Type>{
     
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const std::vector<T>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
-        for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
-//             _q.push_back(detail::M_Helper::make_argument(*i));
-            detail::M_Helper::argument_helper<T, M_Type> helper(_q);
-            helper(*i);
+        if(mathematica::accessor::enabled(mathematica::bulk_io)){
+            typedef typename bulk_transfer_inner_type<std::vector<T>>::inner_type value_type;
+            
+            std::vector<value_type> dimsv;
+            bulk_dimention_helper<std::vector<T>> dhelper(dimsv);
+            dhelper(arg);
+            
+            std::vector<value_type> list;
+            bulk_argument_helper<std::vector<T>, std::vector<value_type>> helper(list);
+            helper(arg);
+            std::string fn_name = bulk_transfer_argument_type<value_type>::put_array();
+            int count = list.size();
+            int dcount = dimsv.size();
+            value_type* elems = list[0];
+            value_type* dims = dimsv[0];
+            _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, fn_name , arg.size())));
+        }else{
+            _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+            for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
+    //             _q.push_back(detail::M_Helper::make_argument(*i));
+                detail::M_Helper::argument_helper<T, M_Type> helper(_q);
+                helper(*i);
+            }
         }
     }
 };

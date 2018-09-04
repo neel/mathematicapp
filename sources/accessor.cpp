@@ -126,6 +126,26 @@ mathematica::accessor::~accessor(){
     
 }
 
+void mathematica::accessor::set_features(int f){
+    _features = f;
+}
+
+int mathematica::accessor::features(){
+    return _features;
+}
+
+void mathematica::accessor::enable(mathematica::features f){
+    _features |= f;
+}
+
+bool mathematica::accessor::enabled(mathematica::features f){
+    return (_features & f);
+}
+
+void mathematica::accessor::disable(mathematica::features f){
+    _features &= ~f;
+}
+
 boost::shared_ptr<mathematica::token> mathematica::accessor::next(){
     std::vector<mathematica::packet::ptr> packets;
     
@@ -247,3 +267,5 @@ void mathematica::accessor::enable_transaction_lock(bool flag){
 bool mathematica::accessor::transaction_lock_enabled() const{
     return _transaction_lock_enabled;
 }
+
+int mathematica::accessor::_features = 0;

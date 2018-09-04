@@ -121,11 +121,11 @@ void mathematica::driver::ws::connection::function(const std::string& name, unsi
 
 void mathematica::driver::ws::connection::integer(int n){
 #ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::integer " << n << std::endl;
+    std::cout << "mathematica::driver::ws::connection::integer " << n << std::endl;
 #endif
-		if(!WMK_PutInteger(_link, n)){
-				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::integer");
-		}
+    if(!WMK_PutInteger(_link, n)){
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::integer");
+    }
 }
 
 void mathematica::driver::ws::connection::uinteger(unsigned int n){
@@ -147,12 +147,12 @@ void mathematica::driver::ws::connection::long_integer(long int n){
 }
 
 void mathematica::driver::ws::connection::real(double n){
-		#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::real " << n << std::endl;
-		#endif
-		if(!WMK_PutReal(_link, n)){
-				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::real");
-		}
+#ifdef M_DEBUG
+    std::cout << "mathematica::driver::ws::connection::real " << n << std::endl;
+#endif
+    if(!WMK_PutReal(_link, n)){
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::real");
+    }
 }
 
 void mathematica::driver::ws::connection::str(const std::string& s){

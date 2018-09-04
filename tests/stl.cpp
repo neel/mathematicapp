@@ -105,6 +105,30 @@ BOOST_AUTO_TEST_CASE(stl_vector){
         BOOST_CHECK(sbase == 551);
         BOOST_CHECK(spow == 8);
     }
+    {
+        typedef std::vector<std::vector<std::vector<int>>> ivv_type; // 2 x 2 x 3
+        ivv_type matrix;
+        std::vector<int> row11 = {111, 112, 113};
+        std::vector<int> row12 = {121, 122, 123};
+        
+        std::vector<int> row21 = {211, 212, 213};
+        std::vector<int> row22 = {221, 222, 223};
+        
+        std::vector<std::vector<int>> row1;
+        std::vector<std::vector<int>> row2;
+        
+        row1.push_back(row11);
+        row1.push_back(row12);
+        
+        row2.push_back(row21);
+        row2.push_back(row22);
+        
+        matrix.push_back(row1);
+        matrix.push_back(row2);
+        
+        shell.enable(mathematica::bulk_io);
+        shell << Total(matrix);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
