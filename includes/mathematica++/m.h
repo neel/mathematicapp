@@ -32,6 +32,8 @@
 #include <vector>
 #include <stack>
 #include <deque>
+#include <functional>
+#include <numeric>
 #include <list>
 #include "accessor.h"
 #include "drivers.h"
@@ -296,73 +298,6 @@ struct argument_helper<std::initializer_list<T>, M_Type>{
     }
 };
 
-template <typename T>
-struct bulk_transfer_argument_type{};
-
-template <>
-struct bulk_transfer_argument_type<boost::int16_t>{
-    typedef boost::int16_t target_type;
-    static std::string put_array(){
-        return std::string(WMK_PutInteger16Array_Name);
-    }
-};
-
-template <>
-struct bulk_transfer_argument_type<boost::uint16_t>{
-    typedef boost::int32_t target_type;
-    static std::string put_array(){
-        return std::string(WMK_PutInteger16Array_Name);
-    }
-};
-
-template <>
-struct bulk_transfer_argument_type<boost::int32_t>{
-    typedef boost::int32_t target_type;
-    static std::string put_array(){
-        return std::string(WMK_PutInteger32Array_Name);
-    }
-};
-
-template <>
-struct bulk_transfer_argument_type<boost::uint32_t>{
-    typedef boost::int64_t target_type;
-    static std::string put_array(){
-        return std::string(WMK_PutInteger64Array_Name);
-    }
-};
-
-template <>
-struct bulk_transfer_argument_type<boost::int64_t>{
-    typedef boost::int64_t target_type;
-    static std::string put_array(){
-        return std::string(WMK_PutInteger64Array_Name);
-    }
-};
-
-template <>
-struct bulk_transfer_argument_type<boost::uint64_t>{
-    typedef boost::int64_t target_type;
-    static std::string put_array(){
-        return std::string(WMK_PutInteger64Array_Name);
-    }
-};
-
-template <>
-struct bulk_transfer_argument_type<float>{
-    typedef float target_type;
-    static std::string put_array(){
-        return std::string(WMK_PutReal32Array_Name);
-    }
-};
-
-template <>
-struct bulk_transfer_argument_type<double>{
-    typedef double target_type;
-    static std::string put_array(){
-        return std::string(WMK_PutReal64Array_Name);
-    }
-};
-
 //{ derive the inner most type of an std::vector<std::vector<std::vector<std::vector<std::vector<T>>>>>
 // typedef std::vector<std::vector<std::vector<std::vector<std::vector<T>>>>> matrix_type;
 // usage bulk_transfer_inner_type<matrix_type>::inner_type
@@ -446,30 +381,38 @@ struct argument_helper<std::vector<T>, M_Type>{
     queue_type& _q;
     
     argument_helper(queue_type& queue): _q(queue){}
+    
+    void transfer_bulk(const std::vector<T>& arg){
+        typedef typename bulk_transfer_inner_type<std::vector<T>>::inner_type value_type;
+        
+        std::vector<int> dimsv;
+        bulk_dimention_helper<std::vector<T>> dhelper(dimsv);
+        dhelper(arg);
+        
+        std::vector<value_type> list;
+        bulk_argument_helper<std::vector<T>, std::vector<value_type>> helper(list);
+        helper(arg);
+        
+        int expected_elements = std::accumulate(dimsv.begin(), dimsv.end(), 1, std::multiplies<int>());
+        if(expected_elements == list.size()){
+            typedef void (*callback_type)(mathematica::driver::ws::connection&, std::vector<value_type>, std::vector<int>);
+            _q.push_back(detail::make_deyaled_call(boost::bind(static_cast<callback_type>(&mathematica::driver::ws::impl::put_array), _1, list, dimsv)));
+        }else{
+            transfer_chain(arg);
+        }
+    }
+    void transfer_chain(const std::vector<T>& arg){
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+        for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
+            detail::M_Helper::argument_helper<T, M_Type> helper(_q);
+            helper(*i);
+        }
+    }
     void operator()(const std::vector<T>& arg){
         if(mathematica::accessor::enabled(mathematica::bulk_io)){
-            typedef typename bulk_transfer_inner_type<std::vector<T>>::inner_type value_type;
-            
-            std::vector<value_type> dimsv;
-            bulk_dimention_helper<std::vector<T>> dhelper(dimsv);
-            dhelper(arg);
-            
-            std::vector<value_type> list;
-            bulk_argument_helper<std::vector<T>, std::vector<value_type>> helper(list);
-            helper(arg);
-            std::string fn_name = bulk_transfer_argument_type<value_type>::put_array();
-            int count = list.size();
-            int dcount = dimsv.size();
-//             value_type* elems = list[0];
-//             value_type* dims = dimsv[0];
-//             _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, fn_name , arg.size())));
+            transfer_bulk(arg);
         }else{
-            _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
-            for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
-    //             _q.push_back(detail::M_Helper::make_argument(*i));
-                detail::M_Helper::argument_helper<T, M_Type> helper(_q);
-                helper(*i);
-            }
+            transfer_chain(arg);
         }
     }
 };

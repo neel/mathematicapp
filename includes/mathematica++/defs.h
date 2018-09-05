@@ -27,7 +27,8 @@
 #ifndef MATHEMATICAPP_DEFS_H
 #define MATHEMATICAPP_DEFS_H
 
-#define STRING(s) #s
+#define STR_EXPAND(tok) #tok
+#define STR(tok) STR_EXPAND(tok)
 
 namespace mathematica{
 
