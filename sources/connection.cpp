@@ -121,11 +121,11 @@ void mathematica::driver::ws::connection::function(const std::string& name, unsi
 
 void mathematica::driver::ws::connection::integer(int n){
 #ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::integer " << n << std::endl;
+    std::cout << "mathematica::driver::ws::connection::integer " << n << std::endl;
 #endif
-		if(!WMK_PutInteger(_link, n)){
-				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::integer");
-		}
+    if(!WMK_PutInteger(_link, n)){
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::integer");
+    }
 }
 
 void mathematica::driver::ws::connection::uinteger(unsigned int n){
@@ -147,12 +147,12 @@ void mathematica::driver::ws::connection::long_integer(long int n){
 }
 
 void mathematica::driver::ws::connection::real(double n){
-		#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::real " << n << std::endl;
-		#endif
-		if(!WMK_PutReal(_link, n)){
-				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::real");
-		}
+#ifdef M_DEBUG
+    std::cout << "mathematica::driver::ws::connection::real " << n << std::endl;
+#endif
+    if(!WMK_PutReal(_link, n)){
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::real");
+    }
 }
 
 void mathematica::driver::ws::connection::str(const std::string& s){
@@ -183,6 +183,71 @@ void mathematica::driver::ws::connection::evaluate(std::string expression){
 //     }
 }
 
+void mathematica::driver::ws::connection::put_array_int8(const std::vector<boost::uint8_t>&  data, const std::vector<int>& dims){
+#ifdef M_DEBUG
+		std::cout << "mathematica::driver::ws::connection::put_array_int8 " << data.size() << std::endl;
+#endif
+    const boost::uint8_t* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutInteger8Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::put_array_int8");
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_int16(const std::vector<boost::int16_t>&  data, const std::vector<int>& dims){
+#ifdef M_DEBUG
+		std::cout << "mathematica::driver::ws::connection::put_array_int16 " << data.size() << std::endl;
+#endif
+    const boost::int16_t* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutInteger16Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::put_array_int16");
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_int32(const std::vector<boost::int32_t>&  data, const std::vector<int>& dims){
+#ifdef M_DEBUG
+		std::cout << "mathematica::driver::ws::connection::put_array_int32 " << data.size() << std::endl;
+#endif
+    const boost::int32_t* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutInteger32Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::put_array_int32");
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_int64(const std::vector<boost::int64_t>&  data, const std::vector<int>& dims){
+#ifdef M_DEBUG
+		std::cout << "mathematica::driver::ws::connection::put_array_int64 " << data.size() << std::endl;
+#endif
+    const boost::int64_t* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutInteger64Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::put_array_int64");
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_real32(const std::vector<float>&  data, const std::vector<int>& dims){
+#ifdef M_DEBUG
+		std::cout << "mathematica::driver::ws::connection::put_array_real32 " << data.size() << std::endl;
+#endif
+    const float* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutReal32Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::put_array_real32");
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_real64(const std::vector<double>&  data, const std::vector<int>& dims){
+#ifdef M_DEBUG
+		std::cout << "mathematica::driver::ws::connection::put_array_real64 " << data.size() << std::endl;
+#endif
+    const double* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutReal64Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::put_array_real64");
+    }
+}
 
 void mathematica::driver::ws::connection::end(){
 #ifdef M_DEBUG

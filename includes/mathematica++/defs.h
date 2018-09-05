@@ -27,6 +27,9 @@
 #ifndef MATHEMATICAPP_DEFS_H
 #define MATHEMATICAPP_DEFS_H
 
+#define STR_EXPAND(tok) #tok
+#define STR(tok) STR_EXPAND(tok)
+
 namespace mathematica{
 
 enum packet_type{
@@ -62,6 +65,12 @@ enum packet_type{
 
     packet_FIRSTUSER=128,
     packet_LASTUSER=255
+};
+
+enum features{
+    bulk_io             = 1 << 0,
+    sanity_check        = 1 << 1,
+    graphics_autosave   = 1 << 2
 };
 
 }

@@ -34,8 +34,10 @@
 #endif
 
 #include "compatibility.h"
-#include <string>
+#include <boost/cstdint.hpp>
 #include <stack>
+#include <vector>
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 namespace mathematica{
@@ -71,6 +73,13 @@ struct connection{
   void symbol(const std::string& s);
   void evaluate(std::string expression);
   void end();
+
+  void put_array_int8  (const std::vector<boost::uint8_t>& data, const std::vector<int>& dims);
+  void put_array_int16 (const std::vector<boost::int16_t>& data, const std::vector<int>& dims);
+  void put_array_int32 (const std::vector<boost::int32_t>& data, const std::vector<int>& dims);
+  void put_array_int64 (const std::vector<boost::int64_t>& data, const std::vector<int>& dims);
+  void put_array_real32(const std::vector<float>& data, const std::vector<int>& dims);
+  void put_array_real64(const std::vector<double>& data, const std::vector<int>& dims);
   
   std::pair<std::string, int> get_function();
   int get_integer();

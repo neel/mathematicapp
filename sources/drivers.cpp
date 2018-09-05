@@ -96,3 +96,33 @@ void mathematica::driver::ws::impl::put(mathematica::driver::ws::connection& con
     impl::symbol(conn, s.name());
 }
 
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int8_t>  data, std::vector<int> dims){
+    std::vector<boost::int16_t> transformed(data.begin(), data.end());
+    conn.put_array_int16(transformed, dims);
+}
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint8_t>  data, std::vector<int> dims){
+    conn.put_array_int8(data, dims);
+}
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int16_t>  data, std::vector<int> dims){
+    conn.put_array_int16(data, dims);
+}
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint16_t>  data, std::vector<int> dims){
+    std::vector<boost::int32_t> transformed(data.begin(), data.end());
+    conn.put_array_int32(transformed, dims);
+}
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int32_t>  data, std::vector<int> dims){
+    conn.put_array_int32(data, dims);
+}
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint32_t>  data, std::vector<int> dims){
+    std::vector<boost::int64_t> transformed(data.begin(), data.end());
+    conn.put_array_int64(transformed, dims);
+}
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int64_t>  data, std::vector<int> dims){
+    conn.put_array_int64(data, dims);
+}
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<float>  data, std::vector<int> dims){
+    conn.put_array_real32(data, dims);
+}
+void mathematica::driver::ws::impl::put_array(mathematica::driver::ws::connection& conn, std::vector<double>  data, std::vector<int> dims){
+    conn.put_array_real64(data, dims);
+}

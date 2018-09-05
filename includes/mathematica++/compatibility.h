@@ -59,6 +59,19 @@
 #define WMK_GetSymbol         MLGetSymbol
 #define WMK_ReleaseSymbol     MLReleaseSymbol
 #define WMK_ReleaseString     MLReleaseString
+
+#define WMK_PutInteger8List   MLPutInteger8List
+#define WMK_PutInteger16List  MLPutInteger16List
+#define WMK_PutInteger32List  MLPutInteger32List
+#define WMK_PutInteger64List  MLPutInteger64List
+#define WMK_PutReal32List     MLPutReal32List
+#define WMK_PutReal64List     MLPutReal64List
+#define WMK_PutInteger8Array  MLPutInteger8Array
+#define WMK_PutInteger16Array MLPutInteger16Array
+#define WMK_PutInteger32Array MLPutInteger32Array
+#define WMK_PutInteger64Array MLPutInteger64Array
+#define WMK_PutReal32Array    MLPutReal32Array
+#define WMK_PutReal64Array    MLPutReal64Array
 #else
 #define WMK_LINK WSLINK
 #define WMK_ENV  WSENV
@@ -117,6 +130,19 @@
 #define WMK_GetSymbol         WSGetSymbol
 #define WMK_ReleaseSymbol     WSReleaseSymbol
 #define WMK_ReleaseString     WSReleaseString
+
+#define WMK_PutInteger8List   WSPutInteger8List
+#define WMK_PutInteger16List  WSPutInteger16List
+#define WMK_PutInteger32List  WSPutInteger32List
+#define WMK_PutInteger64List  WSPutInteger64List
+#define WMK_PutReal32List     WSPutReal32List
+#define WMK_PutReal64List     WSPutReal64List
+#define WMK_PutInteger8Array  WSPutInteger8Array
+#define WMK_PutInteger16Array WSPutInteger16Array
+#define WMK_PutInteger32Array WSPutInteger32Array
+#define WMK_PutInteger64Array WSPutInteger64Array
+#define WMK_PutReal32Array    WSPutReal32Array
+#define WMK_PutReal64Array    WSPutReal64Array
 #endif
 
 #endif // MATHEMATICAPP_COMPATIBILITY_H

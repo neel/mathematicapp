@@ -27,10 +27,13 @@
 #ifndef MATHEMATICAPP_SHORTHAND_H
 #define MATHEMATICAPP_SHORTHAND_H
 
+#include "mathematica++/compatibility.h"
 #include <string>
 #include <vector>
 #include <stack>
 #include <deque>
+#include <functional>
+#include <numeric>
 #include <list>
 #include "accessor.h"
 #include "drivers.h"
@@ -295,18 +298,121 @@ struct argument_helper<std::initializer_list<T>, M_Type>{
     }
 };
 
+//{ derive the inner most type of an std::vector<std::vector<std::vector<std::vector<std::vector<T>>>>>
+// typedef std::vector<std::vector<std::vector<std::vector<std::vector<T>>>>> matrix_type;
+// usage bulk_transfer_inner_type<matrix_type>::inner_type
+template <typename T>
+struct bulk_transfer_inner_type{};
+template <typename T>
+struct bulk_transfer_inner_type<std::vector<T>>{
+    typedef T inner_type;
+};
+template <typename T>
+struct bulk_transfer_inner_type<std::vector<std::vector<T>>>: public bulk_transfer_inner_type<std::vector<T>>{};
+//}
+
+// { serialize a multidimentional vector to linear vector
+template <typename T, typename S>
+struct bulk_argument_helper{};
+
+template <typename T>
+struct bulk_argument_helper<std::vector<T>, std::vector<T>>{
+    typedef std::vector<T> S;
+    S& _l;
+    
+    bulk_argument_helper(S& list): _l(list){}
+    void operator()(const std::vector<T>& arg){
+        std::copy(arg.begin(), arg.end(), std::back_inserter(_l));
+    }
+};
+
+template <typename T, typename S>
+struct bulk_argument_helper<std::vector<std::vector<T>>, S>{
+    S& _l;
+    
+    bulk_argument_helper(S& list): _l(list){}
+    void operator()(const std::vector<std::vector<T>>& arg){
+        for(const std::vector<T>& v: arg){
+            bulk_argument_helper<std::vector<T>, S> helper(_l);
+            helper(v);
+        }
+    }
+};
+//}
+
+// { get dimentions of a multi dimentional vector
+template <typename T>
+struct bulk_dimention_helper{};
+
+template <typename T>
+struct bulk_dimention_helper<std::vector<T>>{
+    typedef std::vector<int> dims_type;
+    dims_type& _dims;
+    
+    bulk_dimention_helper(dims_type& dims): _dims(dims){}
+
+    void operator()(const std::vector<T>& vec){
+        _dims.push_back(vec.size());
+    }
+};
+
+template <typename T>
+struct bulk_dimention_helper<std::vector<std::vector<T>>>{
+    typedef std::vector<int> dims_type;
+    dims_type& _dims;
+    
+    bulk_dimention_helper(dims_type& dims): _dims(dims){}
+    
+    void operator()(const std::vector<std::vector<T>>& vec){
+        _dims.push_back(vec.size());
+        if(vec.size() > 0){
+            bulk_dimention_helper<std::vector<T>> helper(_dims);
+            helper(*vec.begin());
+        }else{
+            _dims.push_back(0);
+        }
+    }
+};
+//}
+
 template <typename T, typename M_Type>
 struct argument_helper<std::vector<T>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
     queue_type& _q;
     
     argument_helper(queue_type& queue): _q(queue){}
-    void operator()(const std::vector<T>& arg){
+    
+    void transfer_bulk(const std::vector<T>& arg){
+        typedef typename bulk_transfer_inner_type<std::vector<T>>::inner_type value_type;
+        
+        std::vector<int> dimsv;
+        bulk_dimention_helper<std::vector<T>> dhelper(dimsv);
+        dhelper(arg);
+        
+        std::vector<value_type> list;
+        bulk_argument_helper<std::vector<T>, std::vector<value_type>> helper(list);
+        helper(arg);
+        
+        int expected_elements = std::accumulate(dimsv.begin(), dimsv.end(), 1, std::multiplies<int>());
+        if(expected_elements == list.size()){
+            typedef void (*callback_type)(mathematica::driver::ws::connection&, std::vector<value_type>, std::vector<int>);
+            _q.push_back(detail::make_deyaled_call(boost::bind(static_cast<callback_type>(&mathematica::driver::ws::impl::put_array), _1, list, dimsv)));
+        }else{
+            transfer_chain(arg);
+        }
+    }
+    void transfer_chain(const std::vector<T>& arg){
         _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
         for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
-//             _q.push_back(detail::M_Helper::make_argument(*i));
             detail::M_Helper::argument_helper<T, M_Type> helper(_q);
             helper(*i);
+        }
+    }
+    void operator()(const std::vector<T>& arg){
+        if(mathematica::accessor::enabled(mathematica::bulk_io)){
+            transfer_bulk(arg);
+        }else{
+            transfer_chain(arg);
         }
     }
 };
