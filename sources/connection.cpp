@@ -34,11 +34,13 @@
 #include "mathematica++/accessor.h"
 #include <boost/lexical_cast.hpp>
 
-// #define M_DEBUG 1
+// #define USING_DEBUG_TRACE 1
 
-#ifdef M_DEBUG
+#ifdef USING_DEBUG_TRACE
+#include <iterator>
 #include <iostream>
 #include <boost/format.hpp>
+#include <boost/date_time.hpp>
 #endif
 
 mathematica::driver::ws::connection::connection(){
@@ -111,8 +113,8 @@ bool mathematica::driver::ws::connection::connected() const{
 mathematica::driver::ws::connection::connection(mathematica::driver::ws::connection& other){/*noncopyable*/}
 
 void mathematica::driver::ws::connection::function(const std::string& name, unsigned int nargs){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::function " << boost::format("WSPutFunction[%1%, %2%]")% name % nargs << std::endl;
+#ifdef USING_DEBUG_TRACE
+		std::clog << boost::format("[%1%]: %2%(\"%3%\", %4%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutFunction) % name % nargs << std::endl;
 #endif
 		if(!WMK_PutFunction(_link, name.c_str(), nargs)){
 				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::function");
@@ -120,8 +122,8 @@ void mathematica::driver::ws::connection::function(const std::string& name, unsi
 }
 
 void mathematica::driver::ws::connection::integer(int n){
-#ifdef M_DEBUG
-    std::cout << "mathematica::driver::ws::connection::integer " << n << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutInteger) % n << std::endl;
 #endif
     if(!WMK_PutInteger(_link, n)){
             throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::integer");
@@ -129,17 +131,14 @@ void mathematica::driver::ws::connection::integer(int n){
 }
 
 void mathematica::driver::ws::connection::uinteger(unsigned int n){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::uinteger " << n << std::endl;
-#endif
-		long int m = (long int)n;
-        long_integer(m);
+    long int m = (long int)n;
+    long_integer(m);
 }
 
 
 void mathematica::driver::ws::connection::long_integer(long int n){
-#ifdef M_DEBUG
-    std::cout << "mathematica::driver::ws::connection::long integer " << n << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutLongInteger) % n << std::endl;
 #endif
     if(!WMK_PutLongInteger(_link, n)){
         throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::integer");
@@ -147,8 +146,8 @@ void mathematica::driver::ws::connection::long_integer(long int n){
 }
 
 void mathematica::driver::ws::connection::real(double n){
-#ifdef M_DEBUG
-    std::cout << "mathematica::driver::ws::connection::real " << n << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutReal) % n << std::endl;
 #endif
     if(!WMK_PutReal(_link, n)){
             throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::real");
@@ -156,25 +155,25 @@ void mathematica::driver::ws::connection::real(double n){
 }
 
 void mathematica::driver::ws::connection::str(const std::string& s){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::str \"" << s << "\"" << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%(\"%3%\")") % boost::posix_time::second_clock::local_time() % STR(WMK_PutString) % s << std::endl;
 #endif
-		if(!WMK_PutString(_link, s.c_str())){
-				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::str");
-		}
+    if(!WMK_PutString(_link, s.c_str())){
+        throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::str");
+    }
 }
 
 void mathematica::driver::ws::connection::symbol(const std::string& s){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::symbol " << s << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%(\"%3%\")") % boost::posix_time::second_clock::local_time() % STR(WMK_PutSymbol) % s << std::endl;
 #endif
-		if(!WMK_PutSymbol(_link, s.c_str())){
-				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::symbol");
-		}
+    if(!WMK_PutSymbol(_link, s.c_str())){
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::symbol");
+    }
 }
 
 void mathematica::driver::ws::connection::evaluate(std::string expression){
-// #ifdef M_DEBUG
+// #ifdef USING_DEBUG_TRACE
 //     std::cout << "mathematica::driver::ws::connection::evaluate " << expression << std::endl;
 // #endif
 //     char* expr = const_cast<char*>(expression.c_str());
@@ -184,8 +183,18 @@ void mathematica::driver::ws::connection::evaluate(std::string expression){
 }
 
 void mathematica::driver::ws::connection::put_array_int8(const std::vector<boost::uint8_t>&  data, const std::vector<int>& dims){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::put_array_int8 " << data.size() << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::ostringstream data_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::uint8_t>(data_stream, ","));
+    std::string data_str = data_stream.str();
+    data_str.pop_back();
+    
+    std::ostringstream depth_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::uint8_t>(depth_stream, ","));
+    std::string depth_str = depth_stream.str();
+    depth_str.pop_back();
+    
+    std::clog << boost::format("[%1%]: %2%({%3%}, {%4%}, 0, %5%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutInteger8Array) % data_str % depth_str % dims.size() << std::endl;
 #endif
     const boost::uint8_t* elems = data.data();
     const int* dimsa = dims.data();
@@ -195,8 +204,18 @@ void mathematica::driver::ws::connection::put_array_int8(const std::vector<boost
 }
 
 void mathematica::driver::ws::connection::put_array_int16(const std::vector<boost::int16_t>&  data, const std::vector<int>& dims){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::put_array_int16 " << data.size() << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::ostringstream data_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int16_t>(data_stream, ","));
+    std::string data_str = data_stream.str();
+    data_str.pop_back();
+    
+    std::ostringstream depth_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int16_t>(depth_stream, ","));
+    std::string depth_str = depth_stream.str();
+    depth_str.pop_back();
+    
+    std::clog << boost::format("[%1%]: %2%({%3%}, {%4%}, 0, %5%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutInteger16Array) % data_str % depth_str % dims.size() << std::endl;
 #endif
     const boost::int16_t* elems = data.data();
     const int* dimsa = dims.data();
@@ -206,8 +225,18 @@ void mathematica::driver::ws::connection::put_array_int16(const std::vector<boos
 }
 
 void mathematica::driver::ws::connection::put_array_int32(const std::vector<boost::int32_t>&  data, const std::vector<int>& dims){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::put_array_int32 " << data.size() << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::ostringstream data_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int32_t>(data_stream, ","));
+    std::string data_str = data_stream.str();
+    data_str.pop_back();
+    
+    std::ostringstream depth_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int32_t>(depth_stream, ","));
+    std::string depth_str = depth_stream.str();
+    depth_str.pop_back();
+    
+    std::clog << boost::format("[%1%]: %2%({%3%}, {%4%}, 0, %5%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutInteger32Array) % data_str % depth_str % dims.size() << std::endl;
 #endif
     const boost::int32_t* elems = data.data();
     const int* dimsa = dims.data();
@@ -217,8 +246,18 @@ void mathematica::driver::ws::connection::put_array_int32(const std::vector<boos
 }
 
 void mathematica::driver::ws::connection::put_array_int64(const std::vector<boost::int64_t>&  data, const std::vector<int>& dims){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::put_array_int64 " << data.size() << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::ostringstream data_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int64_t>(data_stream, ","));
+    std::string data_str = data_stream.str();
+    data_str.pop_back();
+    
+    std::ostringstream depth_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int64_t>(depth_stream, ","));
+    std::string depth_str = depth_stream.str();
+    depth_str.pop_back();
+    
+    std::clog << boost::format("[%1%]: %2%({%3%}, {%4%}, 0, %5%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutInteger64Array) % data_str % depth_str % dims.size() << std::endl;
 #endif
     const boost::int64_t* elems = data.data();
     const int* dimsa = dims.data();
@@ -228,8 +267,18 @@ void mathematica::driver::ws::connection::put_array_int64(const std::vector<boos
 }
 
 void mathematica::driver::ws::connection::put_array_real32(const std::vector<float>&  data, const std::vector<int>& dims){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::put_array_real32 " << data.size() << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::ostringstream data_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<float>(data_stream, ","));
+    std::string data_str = data_stream.str();
+    data_str.pop_back();
+    
+    std::ostringstream depth_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<float>(depth_stream, ","));
+    std::string depth_str = depth_stream.str();
+    depth_str.pop_back();
+    
+    std::clog << boost::format("[%1%]: %2%({%3%}, {%4%}, 0, %5%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutReal32Array) % data_str % depth_str % dims.size() << std::endl;
 #endif
     const float* elems = data.data();
     const int* dimsa = dims.data();
@@ -239,8 +288,18 @@ void mathematica::driver::ws::connection::put_array_real32(const std::vector<flo
 }
 
 void mathematica::driver::ws::connection::put_array_real64(const std::vector<double>&  data, const std::vector<int>& dims){
-#ifdef M_DEBUG
-		std::cout << "mathematica::driver::ws::connection::put_array_real64 " << data.size() << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::ostringstream data_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<double>(data_stream, ","));
+    std::string data_str = data_stream.str();
+    data_str.pop_back();
+    
+    std::ostringstream depth_stream;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<double>(depth_stream, ","));
+    std::string depth_str = depth_stream.str();
+    depth_str.pop_back();
+    
+    std::clog << boost::format("[%1%]: %2%({%3%}, {%4%}, 0, %5%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutReal64Array) % data_str % depth_str % dims.size() << std::endl;
 #endif
     const double* elems = data.data();
     const int* dimsa = dims.data();
@@ -250,8 +309,8 @@ void mathematica::driver::ws::connection::put_array_real64(const std::vector<dou
 }
 
 void mathematica::driver::ws::connection::end(){
-#ifdef M_DEBUG
-    std::cout << "mathematica::driver::ws::connection::end" << std::endl;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_EndPacket) << std::endl;
 #endif
 	if(!WMK_EndPacket(_link)){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::end");
@@ -265,9 +324,9 @@ std::pair<std::string, int> mathematica::driver::ws::connection::get_function(){
 	if(!success){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_function");
 	}
-#ifdef M_DEBUG
+#ifdef USING_DEBUG_TRACE
     else{
-		std::cout << "mathematica::driver::ws::connection::get_function " << std::string(symbol) << " " << args << std::endl;
+		std::clog << boost::format("[%1%]: %2%(\"%3%\", %4%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetFunction) % symbol % args << std::endl;
     }
 #endif
 	std::string name(symbol);
@@ -281,9 +340,9 @@ int mathematica::driver::ws::connection::get_integer(){
 	if(!success){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
 	}
-#ifdef M_DEBUG
+#ifdef USING_DEBUG_TRACE
     else{
-		std::cout << "mathematica::driver::ws::connection::get_integer " << data << std::endl;
+		std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetInteger) % data << std::endl;
     }
 #endif
 	return data;
@@ -295,9 +354,9 @@ double mathematica::driver::ws::connection::get_real(){
 	if(!success){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_real");
 	}
-#ifdef M_DEBUG
+#ifdef USING_DEBUG_TRACE
     else{
-		std::cout << "mathematica::driver::ws::connection::get_real " << data << std::endl;
+		std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetReal) % data << std::endl;
     }
 #endif
 	return data;
@@ -309,9 +368,9 @@ std::string mathematica::driver::ws::connection::get_str(){
     if(!success){
         throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_str");
     }
-#ifdef M_DEBUG
+#ifdef USING_DEBUG_TRACE
     else{
-		std::cout << "mathematica::driver::ws::connection::get_str " << std::string(message) << std::endl;
+		std::clog << boost::format("[%1%]: %2%(\"%3%\")") % boost::posix_time::second_clock::local_time() % STR(WMK_GetString) % message << std::endl;
     }
 #endif
   std::string symbol(message);
@@ -325,9 +384,9 @@ std::string mathematica::driver::ws::connection::get_symbol(){
 	if(!success){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_symbol");
 	}
-#ifdef M_DEBUG
+#ifdef USING_DEBUG_TRACE
     else{
-		std::cout << "mathematica::driver::ws::connection::get_symbol " << std::string(name) << std::endl;
+		std::clog << boost::format("[%1%]: %2%(\"%3%\")") % boost::posix_time::second_clock::local_time() % STR(WMK_GetSymbol) % name << std::endl;
     }
 #endif
 	std::string symbol(name);
