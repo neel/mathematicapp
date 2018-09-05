@@ -144,6 +144,19 @@
 #define WMK_ReleaseSymbol     WSReleaseSymbol
 #define WMK_ReleaseString     WSReleaseString
 
+#define WMK_PutInteger8List   WSPutInteger8List
+#define WMK_PutInteger16List  WSPutInteger16List
+#define WMK_PutInteger32List  WSPutInteger32List
+#define WMK_PutInteger64List  WSPutInteger64List
+#define WMK_PutReal32List     WSPutReal32List
+#define WMK_PutReal64List     WSPutReal64List
+#define WMK_PutInteger8Array  WSPutInteger8Array
+#define WMK_PutInteger16Array WSPutInteger16Array
+#define WMK_PutInteger32Array WSPutInteger32Array
+#define WMK_PutInteger64Array WSPutInteger64Array
+#define WMK_PutReal32Array    WSPutReal32Array
+#define WMK_PutReal64Array    WSPutReal64Array
+
 #define WMK_PutInteger8List_Name   "WSPutInteger8List"
 #define WMK_PutInteger16List_Name  "WSPutInteger16List"
 #define WMK_PutInteger32List_Name  "WSPutInteger32List"

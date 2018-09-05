@@ -183,6 +183,53 @@ void mathematica::driver::ws::connection::evaluate(std::string expression){
 //     }
 }
 
+void mathematica::driver::ws::connection::put_array_int8(const std::vector<boost::int8_t>&  data, const std::vector<int>& dims){
+    const boost::int8_t* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutInteger8Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_int16(const std::vector<boost::int16_t>&  data, const std::vector<int>& dims){
+    const boost::int16_t* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutInteger16Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_int32(const std::vector<boost::int32_t>&  data, const std::vector<int>& dims){
+    const boost::int32_t* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutInteger32Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_int64(const std::vector<boost::int64_t>&  data, const std::vector<int>& dims){
+    const boost::int64_t* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutInteger64Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_real32(const std::vector<float>&  data, const std::vector<int>& dims){
+    const float* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutReal32Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        
+    }
+}
+
+void mathematica::driver::ws::connection::put_array_real64(const std::vector<double>&  data, const std::vector<int>& dims){
+    const double* elems = data.data();
+    const int* dimsa = dims.data();
+    if(!WMK_PutReal64Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
+        
+    }
+}
 
 void mathematica::driver::ws::connection::end(){
 #ifdef M_DEBUG

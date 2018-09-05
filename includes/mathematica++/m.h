@@ -460,9 +460,9 @@ struct argument_helper<std::vector<T>, M_Type>{
             std::string fn_name = bulk_transfer_argument_type<value_type>::put_array();
             int count = list.size();
             int dcount = dimsv.size();
-            value_type* elems = list[0];
-            value_type* dims = dimsv[0];
-            _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, fn_name , arg.size())));
+//             value_type* elems = list[0];
+//             value_type* dims = dimsv[0];
+//             _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, fn_name , arg.size())));
         }else{
             _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
             for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
