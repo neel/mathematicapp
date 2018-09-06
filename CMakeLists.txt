@@ -53,8 +53,8 @@ SET(MATHEMATICAPP_INCLUDE_DIRS
 
 INCLUDE_DIRECTORIES(${MATHEMATICAPP_INCLUDE_DIRS})
 
-OPTION(WITH_ML "Use MathLink functions insteadof using WSTP")
-OPTION(PRING_TRACE "Print low level the WS/ML functions that are being used")
+OPTION(WITH_ML "Use MathLink functions insteadof using WSTP" OFF)
+OPTION(PRINT_TRACE "Print low level the WS/ML functions that are being used" OFF)
 
 IF(WITH_ML)
     MESSAGE("${BoldMagenta} Using MathLink instead of WSTP ${ColourReset}")
@@ -65,7 +65,7 @@ ELSE()
     INCLUDE_DIRECTORIES(${Mathematica_WSTP_INCLUDE_DIR})
 ENDIF()
 
-IF(PRING_TRACE)
+IF(PRINT_TRACE)
     ADD_COMPILE_DEFINITIONS(USING_DEBUG_TRACE)
 ENDIF()
 
