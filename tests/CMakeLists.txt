@@ -29,6 +29,15 @@ ADD_EXECUTABLE(stl stl.cpp)
 TARGET_LINK_LIBRARIES(stl ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(stl mathematica++)
 
+IF(NOT WITHOUT_EIGEN)
+    FIND_PACKAGE(Eigen3 NO_MODULE)
+    IF(Eigen3_FOUND)
+        ADD_EXECUTABLE(eigen eigen.cpp)
+        TARGET_LINK_LIBRARIES(eigen ${Boost_LIBRARIES})
+        TARGET_LINK_LIBRARIES(eigen mathematica++)
+    ENDIF()
+ENDIF()
+
 ENABLE_TESTING()
 
 ADD_TEST(connection connection --report_level=short --log_level=message --show_progress=true)

@@ -53,8 +53,10 @@ SET(MATHEMATICAPP_INCLUDE_DIRS
 
 INCLUDE_DIRECTORIES(${MATHEMATICAPP_INCLUDE_DIRS})
 
-OPTION(WITH_ML "Use MathLink functions insteadof using WSTP" OFF)
-OPTION(PRINT_TRACE "Print low level the WS/ML functions that are being used" OFF)
+OPTION(WITH_ML          "Use MathLink functions insteadof using WSTP"             OFF)
+OPTION(PRINT_TRACE      "Print low level the WS/ML functions that are being used" OFF)
+OPTION(WITHOUT_EIGEN    "Compile without using eigen even if available"           OFF)
+OPTION(WITHOUT_ARMADILO "Compile without using armadilo even if available"        OFF)
 
 IF(WITH_ML)
     MESSAGE("${BoldMagenta} Using MathLink instead of WSTP ${ColourReset}")
@@ -67,6 +69,15 @@ ENDIF()
 
 IF(PRINT_TRACE)
     ADD_COMPILE_DEFINITIONS(USING_DEBUG_TRACE)
+ENDIF()
+
+IF(NOT WITHOUT_EIGEN)
+    FIND_PACKAGE(Eigen3 NO_MODULE)
+    IF(Eigen3_FOUND)
+        INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
+        ADD_COMPILE_DEFINITIONS(USING_LIB_EIGEN)
+        MESSAGE("${BoldMagenta} Using Eigen3 library ${ColourReset}")
+    ENDIF()
 ENDIF()
 
 SET(MATHEMATICAPP_HEADERS

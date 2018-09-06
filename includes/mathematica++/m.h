@@ -41,8 +41,12 @@
 #include <iostream>
 #include <initializer_list>
 #include <boost/algorithm/string/predicate.hpp>
-#include "symbol.h"
-#include "rules.h"
+#include "mathematica++/symbol.h"
+#include "mathematica++/rules.h"
+
+#ifdef USING_LIB_EIGEN
+#include <Eigen/Dense>
+#endif
 
 #define M(x)  (mathematica::m((x)))
 #include "defs.h"
@@ -195,7 +199,7 @@ struct argument_helper{
         _q.push_back(detail::M_Helper::make_argument(arg));
     }
 };
-    
+
 template <typename T, typename U, typename M_Type>
 struct argument_helper<mathematica::rules_helper<T, U>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
@@ -226,7 +230,7 @@ struct argument_helper<T, T>{
         }
     }
 };
-    
+
 template <typename M_Type>
 struct argument_helper<mathematica::rule<M_Type>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
@@ -417,6 +421,30 @@ struct argument_helper<std::vector<T>, M_Type>{
     }
 };
 
+#ifdef USING_LIB_EIGEN
+template <typename T, int Rows, int Cols, typename M_Type>
+struct argument_helper<Eigen::Matrix<T, Rows, Cols>, M_Type>{
+    typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
+    queue_type& _q;
+    
+    argument_helper(queue_type& queue): _q(queue){}    
+    void operator()(const Eigen::Matrix<T, Rows, Cols>& arg){
+        int mrows = arg.rows();        
+        int mcols = arg.cols();
+        int nvals = mrows * mcols;
+        
+        const T* begin = arg.data();
+        const T* end = begin + nvals;
+        
+        std::vector<int> dims = {mrows, mcols};
+        std::vector<T> elems(begin, end);
+        
+        typedef void (*callback_type)(mathematica::driver::ws::connection&, std::vector<T>, std::vector<int>);
+        _q.push_back(detail::make_deyaled_call(boost::bind(static_cast<callback_type>(&mathematica::driver::ws::impl::put_array), _1, elems, dims)));
+    }
+};
+#endif
+
 template <typename T, typename M_Type>
 struct argument_helper<std::list<T>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
@@ -434,7 +462,7 @@ struct argument_helper<std::list<T>, M_Type>{
 }
 
 }
-    
+
 /**
  * A shortcut to build mathematica inputs which is mostly a chain function calls. Here this is internally expressed as a tree of held objects (delayed function calls).
  * Each of these held callables are described in detail namespace. They are invoked through the connection adapter.
@@ -481,6 +509,10 @@ struct m{
         std::string _name;
         std::deque<detail::abstract_delayed_call_ptr> _queue;
         unsigned int _length;
+    public:
+        mathematica::symbol symbol() const{
+            return mathematica::symbol(_name);
+        }
 };
 
 }
