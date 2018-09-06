@@ -24,8 +24,6 @@
  * DAMAGE. 
  */
 
-// #define M_DEBUG 1
-
 #include "mathematica++/drivers.h"
 #include "mathematica++/exceptions.h"
 #include <boost/lexical_cast.hpp>

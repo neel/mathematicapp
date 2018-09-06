@@ -34,8 +34,6 @@
 #include "mathematica++/accessor.h"
 #include <boost/lexical_cast.hpp>
 
-// #define USING_DEBUG_TRACE 1
-
 #ifdef USING_DEBUG_TRACE
 #include <iterator>
 #include <iostream>
@@ -190,7 +188,7 @@ void mathematica::driver::ws::connection::put_array_int8(const std::vector<boost
     data_str.pop_back();
     
     std::ostringstream depth_stream;
-    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::uint8_t>(depth_stream, ","));
+    std::copy(dims.begin(), dims.end(), std::ostream_iterator<int>(depth_stream, ","));
     std::string depth_str = depth_stream.str();
     depth_str.pop_back();
     
@@ -211,7 +209,7 @@ void mathematica::driver::ws::connection::put_array_int16(const std::vector<boos
     data_str.pop_back();
     
     std::ostringstream depth_stream;
-    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int16_t>(depth_stream, ","));
+    std::copy(dims.begin(), dims.end(), std::ostream_iterator<int>(depth_stream, ","));
     std::string depth_str = depth_stream.str();
     depth_str.pop_back();
     
@@ -232,7 +230,7 @@ void mathematica::driver::ws::connection::put_array_int32(const std::vector<boos
     data_str.pop_back();
     
     std::ostringstream depth_stream;
-    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int32_t>(depth_stream, ","));
+    std::copy(dims.begin(), dims.end(), std::ostream_iterator<int>(depth_stream, ","));
     std::string depth_str = depth_stream.str();
     depth_str.pop_back();
     
@@ -253,7 +251,7 @@ void mathematica::driver::ws::connection::put_array_int64(const std::vector<boos
     data_str.pop_back();
     
     std::ostringstream depth_stream;
-    std::copy(data.begin(), data.end(), std::ostream_iterator<boost::int64_t>(depth_stream, ","));
+    std::copy(dims.begin(), dims.end(), std::ostream_iterator<int>(depth_stream, ","));
     std::string depth_str = depth_stream.str();
     depth_str.pop_back();
     
@@ -274,7 +272,7 @@ void mathematica::driver::ws::connection::put_array_real32(const std::vector<flo
     data_str.pop_back();
     
     std::ostringstream depth_stream;
-    std::copy(data.begin(), data.end(), std::ostream_iterator<float>(depth_stream, ","));
+    std::copy(dims.begin(), dims.end(), std::ostream_iterator<int>(depth_stream, ","));
     std::string depth_str = depth_stream.str();
     depth_str.pop_back();
     
@@ -295,7 +293,7 @@ void mathematica::driver::ws::connection::put_array_real64(const std::vector<dou
     data_str.pop_back();
     
     std::ostringstream depth_stream;
-    std::copy(data.begin(), data.end(), std::ostream_iterator<double>(depth_stream, ","));
+    std::copy(dims.begin(), dims.end(), std::ostream_iterator<int>(depth_stream, ","));
     std::string depth_str = depth_stream.str();
     depth_str.pop_back();
     
