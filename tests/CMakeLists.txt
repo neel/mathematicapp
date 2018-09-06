@@ -35,6 +35,8 @@ IF(NOT WITHOUT_EIGEN)
         ADD_EXECUTABLE(eigen eigen.cpp)
         TARGET_LINK_LIBRARIES(eigen ${Boost_LIBRARIES})
         TARGET_LINK_LIBRARIES(eigen mathematica++)
+        
+        ADD_TEST(eigen eigen --report_level=short --log_level=message --show_progress=true)
     ENDIF()
 ENDIF()
 
