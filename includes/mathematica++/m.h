@@ -101,14 +101,14 @@ struct argument<unsigned int>{
 
 template <>
 struct argument<long>{
-    detail::abstract_delayed_call_ptr operator()(const int& arg){
+    detail::abstract_delayed_call_ptr operator()(const long& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
     }
 };
 
 template <>
 struct argument<long long>{
-    detail::abstract_delayed_call_ptr operator()(const int& arg){
+    detail::abstract_delayed_call_ptr operator()(const long long& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
     }
 };

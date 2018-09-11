@@ -355,6 +355,11 @@ std::pair<long long, std::string> mathematica::driver::ws::connection::get_integ
         if(!success){
             throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
         }
+#ifdef USING_DEBUG_TRACE
+        else{
+            std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetInteger16) % data << std::endl;
+        }
+#endif
         result_int = data;
     }else if(raw_type == WMK_TK_INT){
         int data;
@@ -362,6 +367,11 @@ std::pair<long long, std::string> mathematica::driver::ws::connection::get_integ
         if(!success){
             throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
         }
+#ifdef USING_DEBUG_TRACE
+        else{
+            std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetInteger32) % data << std::endl;
+        }
+#endif
         result_int = data;
     }else if(raw_type == WMK_TK_LONG){
         long data;
@@ -369,6 +379,11 @@ std::pair<long long, std::string> mathematica::driver::ws::connection::get_integ
         if(!success){
             throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
         }
+#ifdef USING_DEBUG_TRACE
+        else{
+            std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetInteger64) % data << std::endl;
+        }
+#endif
         result_int = data;
     }else if(raw_type == WMK_TK_INT64){
         long int data;
@@ -376,6 +391,11 @@ std::pair<long long, std::string> mathematica::driver::ws::connection::get_integ
         if(!success){
             throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
         }
+#ifdef USING_DEBUG_TRACE
+        else{
+            std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetInteger64) % data << std::endl;
+        }
+#endif
         result_int = data;
     }else if(raw_type == WMK_TK_SIZE_T){
         long int data;
@@ -383,6 +403,11 @@ std::pair<long long, std::string> mathematica::driver::ws::connection::get_integ
         if(!success){
             throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
         }
+#ifdef USING_DEBUG_TRACE
+        else{
+            std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetInteger64) % data << std::endl;
+        }
+#endif
         result_int = data;
     }else{
         const char* data;
@@ -390,17 +415,15 @@ std::pair<long long, std::string> mathematica::driver::ws::connection::get_integ
         if(!success){
             throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
         }else{
+#ifdef USING_DEBUG_TRACE
+            std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetNumberAsString) % data << std::endl;
+#endif            
             std::string number(data);
             number.insert(0, "#");
             WMK_ReleaseString(_link, data);
             result_str = number;
         }
     }
-#ifdef USING_DEBUG_TRACE
-    else{
-		std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetInteger) % data << std::endl;
-    }
-#endif
 	return std::make_pair(result_int, result_str);
 }
 

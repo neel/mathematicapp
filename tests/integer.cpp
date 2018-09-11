@@ -65,9 +65,26 @@ BOOST_AUTO_TEST_CASE(integer_size){
         std::string res_str = *result;
         res_str.erase(0, 1);
         
-        std::cout << *result << " " << res_str << std::endl;
+        // std::cout << *result << " " << res_str << std::endl;
         
         BOOST_CHECK(res_str == "295147905179352825856");
+    }
+    {
+        value res_intermediate;
+        value res_final;
+        
+        shell << List(Power(2, 61), Power(2, 62), Power(2, 63), Power(2, 64), Power(2, 65));
+        shell >> res_intermediate;
+        shell << Total(res_intermediate);
+        shell >> res_final;
+        
+        std::string res_nstr = *res_final;
+        res_nstr.erase(0, 1);
+        
+        // std::cout << res_intermediate << std::endl;
+        // std::cout << res_final << std::endl;
+        
+        BOOST_CHECK(res_nstr == "71481133285624512512");        
     }
     {
         mathematica::symbol i("i");

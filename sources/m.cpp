@@ -52,7 +52,7 @@ mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value v
             valstr.erase(0, 1);
             return mathematica::m("Evaluate")(mathematica::m("ToExpression")(valstr));
         }else{
-            return mathematica::m("Evaluate")((long long)*val);
+            return mathematica::m("Evaluate")((long long)*token_int);
         }
     }else if(val->type() == mathematica::token::token_real){
         return mathematica::m("Evaluate")((double)*val);
