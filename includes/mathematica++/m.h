@@ -107,6 +107,13 @@ struct argument<long>{
 };
 
 template <>
+struct argument<long long>{
+    detail::abstract_delayed_call_ptr operator()(const int& arg){
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
+    }
+};
+
+template <>
 struct argument<double>{
     detail::abstract_delayed_call_ptr operator()(const double& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::real, _1, arg)));

@@ -33,6 +33,7 @@
 #include "mathematica++/packet.h"
 #include "mathematica++/accessor.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #ifdef USING_DEBUG_TRACE
 #include <iterator>
@@ -153,11 +154,22 @@ void mathematica::driver::ws::connection::real(double n){
 }
 
 void mathematica::driver::ws::connection::str(const std::string& s){
+    if(boost::starts_with(s, "#")){
+        std::string nstr = s;
+        nstr.erase(0, 1);
 #ifdef USING_DEBUG_TRACE
-    std::clog << boost::format("[%1%]: %2%(\"%3%\")") % boost::posix_time::second_clock::local_time() % STR(WMK_PutString) % s << std::endl;
+        std::clog << boost::format("[%1%]: %2%(\"%3%\")") % boost::posix_time::second_clock::local_time() % STR(WMK_PutRealNumberAsString) % nstr << std::endl;
 #endif
-    if(!WMK_PutString(_link, s.c_str())){
-        throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::str");
+        if(!WMK_PutRealNumberAsString(_link, nstr.c_str())){
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::str");
+        }
+    }else{
+#ifdef USING_DEBUG_TRACE
+        std::clog << boost::format("[%1%]: %2%(\"%3%\")") % boost::posix_time::second_clock::local_time() % STR(WMK_PutString) % s << std::endl;
+#endif
+        if(!WMK_PutString(_link, s.c_str())){
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::str");
+        }
     }
 }
 
@@ -332,18 +344,64 @@ std::pair<std::string, int> mathematica::driver::ws::connection::get_function(){
 	return std::make_pair(name, args);
 }
 
-int mathematica::driver::ws::connection::get_integer(){
-	int data;
-	int success = WMK_GetInteger(_link, &data);
-	if(!success){
-		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
-	}
+std::pair<long long, std::string> mathematica::driver::ws::connection::get_integer(){
+    long int result_int = 0;
+    std::string result_str;
+    
+    int raw_type = WMK_GetRawType(_link);
+    if(raw_type == WMK_TK_SHORT){
+        short data;
+        int success = WMK_GetInteger16(_link, &data);
+        if(!success){
+            throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
+        }
+        result_int = data;
+    }else if(raw_type == WMK_TK_INT){
+        int data;
+        int success = WMK_GetInteger32(_link, &data);
+        if(!success){
+            throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
+        }
+        result_int = data;
+    }else if(raw_type == WMK_TK_LONG){
+        long data;
+        int success = WMK_GetInteger64(_link, &data);
+        if(!success){
+            throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
+        }
+        result_int = data;
+    }else if(raw_type == WMK_TK_INT64){
+        long int data;
+        int success = WMK_GetInteger64(_link, &data);
+        if(!success){
+            throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
+        }
+        result_int = data;
+    }else if(raw_type == WMK_TK_SIZE_T){
+        long int data;
+        int success = WMK_GetInteger64(_link, &data);
+        if(!success){
+            throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
+        }
+        result_int = data;
+    }else{
+        const char* data;
+        int success = WMK_GetNumberAsString(_link, &data);
+        if(!success){
+            throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::get_integer");
+        }else{
+            std::string number(data);
+            number.insert(0, "#");
+            WMK_ReleaseString(_link, data);
+            result_str = number;
+        }
+    }
 #ifdef USING_DEBUG_TRACE
     else{
 		std::clog << boost::format("[%1%]: %2%(%3%)") % boost::posix_time::second_clock::local_time() % STR(WMK_GetInteger) % data << std::endl;
     }
 #endif
-	return data;
+	return std::make_pair(result_int, result_str);
 }
 
 double mathematica::driver::ws::connection::get_real(){

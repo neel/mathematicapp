@@ -49,6 +49,10 @@ mathematica::token::operator int() const{
     return boost::lexical_cast<int>(stringify());
 }
 
+mathematica::token::operator long long() const{
+    return boost::lexical_cast<long long>(stringify());
+}
+
 mathematica::token::operator double() const{
     return boost::lexical_cast<double>(stringify());
 }
@@ -71,26 +75,43 @@ std::ostream& mathematica::operator<<(std::ostream& stream, const mathematica::v
     }
 }
 
-mathematica::tokens::integer::integer(mathematica::accessor* accessor): token(accessor, WMK_TKINT, token_integer){
+mathematica::tokens::integer::integer(mathematica::accessor* accessor): token(accessor, WMK_TKINT, token_integer), _storage(native){
 
 }
 
 void mathematica::tokens::integer::fetch(){
-	_data = _accessor->connection().get_integer();
+	std::pair<long long, std::string> data = _accessor->connection().get_integer();
+    if(data.second.empty()){
+        _data = data.first;
+        _storage = native;
+    }else{
+        _data_str = data.second;
+        _storage = multiprecision;
+    }
 }
 
 std::string mathematica::tokens::integer::stringify() const{
-	return boost::lexical_cast<std::string>(value());
+	return storage() == multiprecision ? value_str() : boost::lexical_cast<std::string>(value());
 }
 
 mathematica::variant mathematica::tokens::integer::serialize() const{
+    if(storage() == multiprecision){
+        return mathematica::variant(value_str());
+    }
     return mathematica::variant(value());
 }
 
-int mathematica::tokens::integer::value() const{
+long long mathematica::tokens::integer::value() const{
 	return _data;
 }
 
+std::string mathematica::tokens::integer::value_str() const{
+    return _data_str;
+}
+
+mathematica::tokens::integer::data_storage mathematica::tokens::integer::storage() const{
+    return _storage;
+}
 
 mathematica::tokens::real::real(mathematica::accessor* accessor): token(accessor, WMK_TKREAL, token_real){
 

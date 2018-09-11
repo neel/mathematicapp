@@ -67,7 +67,7 @@ struct composite_type{
     }
 };
 
-typedef boost::make_recursive_variant<int, double, std::string, composite_type<boost::recursive_variant_>>::type variant;
+typedef boost::make_recursive_variant<int, long long, double, std::string, composite_type<boost::recursive_variant_>>::type variant;
 typedef composite_type<variant> composite;
 
 template <typename variant_type>

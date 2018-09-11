@@ -46,7 +46,14 @@ mathematica::m& mathematica::m::invoke(mathematica::driver::ws::connection& conn
 
 mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value val){
     if(val->type() == mathematica::token::token_integer){
-        return mathematica::m("Evaluate")((int)*val);
+        auto token_int = boost::dynamic_pointer_cast<mathematica::tokens::integer>(val);
+        if(token_int->storage() == mathematica::tokens::integer::multiprecision){
+            std::string valstr = token_int->value_str();
+            valstr.erase(0, 1);
+            return mathematica::m("Evaluate")(mathematica::m("ToExpression")(valstr));
+        }else{
+            return mathematica::m("Evaluate")((long long)*val);
+        }
     }else if(val->type() == mathematica::token::token_real){
         return mathematica::m("Evaluate")((double)*val);
     }else if(val->type() == mathematica::token::token_str){

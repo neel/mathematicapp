@@ -64,6 +64,7 @@ class token{
 		virtual mathematica::variant serialize() const = 0;
     public:
         operator int() const;
+        operator long long() const;
         operator double() const;
         operator std::string() const;
 };
@@ -129,7 +130,15 @@ T cast(mathematica::value var){
 
 namespace tokens{
 class integer: public token{
-	int _data;
+    public:
+        enum data_storage{
+            native,
+            multiprecision
+        };
+    private:
+        long long _data;
+        std::string _data_str;
+        data_storage _storage;
 	public:
         typedef boost::shared_ptr<integer> ptr;
 		integer(mathematica::accessor* accessor);
@@ -137,7 +146,10 @@ class integer: public token{
 		virtual void fetch();
 		virtual std::string stringify() const;
         virtual mathematica::variant serialize() const;
-		int value() const;
+        data_storage storage() const;
+        long long value() const;
+        std::string value_str() const;
+        
 };
 class real: public token{
 	double _data;

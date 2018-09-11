@@ -82,7 +82,7 @@ struct connection{
   void put_array_real64(const std::vector<double>& data, const std::vector<int>& dims);
   
   std::pair<std::string, int> get_function();
-  int get_integer();
+  std::pair<long long, std::string> get_integer();
   double get_real();
   std::string get_str();
   std::string get_symbol();
