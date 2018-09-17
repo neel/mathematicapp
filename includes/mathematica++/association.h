@@ -45,10 +45,42 @@ template <int C>
 struct property{
 
 };
+
+namespace detail{
+
+template <typename U, typename V>
+struct deduce_serialized_type{ // type U is not handled by mathematica::m as input
+    typedef mathematica::m serialized_type;
+    typedef mathematica::m composite_type;
+};
+
+template <typename T>
+struct deduce_serialized_type<T, T>{ // type T is handled by mathematica::m as input
+    typedef T serialized_type;
+    typedef T simple_type;
+};
+    
+template <typename T>
+struct pack_helper: deduce_serialized_type<T, typename mathematica::detail::M_Helper::argument<T>::type>{
+    template <typename ReturnT, typename ClassT, typename CallbackT>
+    static typename deduce_serialized_type<ReturnT, typename mathematica::detail::M_Helper::argument<ReturnT>::type>::simple_type compile(const ClassT& obj, CallbackT callback){
+        ReturnT v = boost::bind(callback, obj)();
+        return v;
+    }
+
+    template <typename ReturnT, typename ClassT, typename CallbackT>
+    static typename deduce_serialized_type<ReturnT, typename mathematica::detail::M_Helper::argument<ReturnT>::type>::composite_type compile(const ClassT& obj, CallbackT callback){
+        association<ReturnT> assoc;
+        ReturnT v = boost::bind(callback, obj)();
+        return assoc.serialize(v);
+    }
+};
+
+}
     
 template <typename D, typename U, int c=0, typename ... Ts>
 struct pack{
-    typedef U                       class_type;
+    typedef U class_type;
     
     void build(const class_type& obj, std::vector<mathematica::m>& rules) const {}
 };
@@ -62,7 +94,8 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
     typedef U                       class_type;
     typedef T U::*                  callback_type;
     
-    typedef std::pair<std::string, callback_type> property_meta;
+    typedef std::pair<std::string, callback_type>            property_meta;
+    typedef typename detail::pack_helper<T>::serialized_type serialized_type;
     enum {argument_count = c};
     
     std::string _name;
@@ -75,13 +108,9 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
         _name = details.first;
         _callback = details.second;
     }
-    property_type value(const class_type& obj) const{
-        property_type v = boost::bind(_callback, obj)();
-        return v;
-    }
     
     void build(const class_type& obj, std::vector<mathematica::m>& rules) const{
-        property_type v = value(obj);
+        serialized_type v = detail::pack_helper<T>::template compile<property_type>(obj, _callback);
         rules.push_back(mathematica::m("Rule")(_name, v));
         base_type::build(obj, rules);
     }

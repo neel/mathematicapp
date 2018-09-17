@@ -69,23 +69,23 @@ namespace mathematica{
     };
 }
 
-// namespace mathematica{
-//     typedef std::pair<int, int> pair_ii;
-//     template <>
-//     struct association<pair_ii>: dictionary<association<pair_ii>, pair_ii, int, int>{
-//         static auto detail(property<0>){return std::make_pair("first",   &pair_ii::first);}
-//         static auto detail(property<1>){return std::make_pair("second",  &pair_ii::second);}
-//     };
-// }
-// 
-// namespace mathematica{
-//     template <>
-//     struct association<point2>: dictionary<association<point2>, point2, std::pair<int, int>, std::string, double>{
-//         static auto detail(property<0>){return std::make_pair("location",   &point2::location);}
-//         static auto detail(property<1>){return std::make_pair("name",       &point2::name);}
-//         static auto detail(property<2>){return std::make_pair("weight",     &point2::weight);}
-//     };
-// }
+namespace mathematica{
+    typedef std::pair<int, int> pair_ii;
+    template <>
+    struct association<pair_ii>: dictionary<association<pair_ii>, pair_ii, int, int>{
+        static auto detail(property<0>){return std::make_pair("first",   &pair_ii::first);}
+        static auto detail(property<1>){return std::make_pair("second",  &pair_ii::second);}
+    };
+}
+
+namespace mathematica{
+    template <>
+    struct association<point2>: dictionary<association<point2>, point2, std::pair<int, int>, std::string, double>{
+        static auto detail(property<0>){return std::make_pair("location",   &point2::location);}
+        static auto detail(property<1>){return std::make_pair("name",       &point2::name);}
+        static auto detail(property<2>){return std::make_pair("weight",     &point2::weight);}
+    };
+}
 
 using namespace mathematica;
 
@@ -108,18 +108,18 @@ BOOST_AUTO_TEST_CASE(association_struct){
         shell >> result;
         std::cout << result << std::endl;
     }
-//     {
-//         value result;
-//         association<point2> pm;
-//         point2 pt;
-//         pt.location = std::make_pair(0, 0);
-//         pt.name = "hi";
-//         pt.weight = 0.0f;
-//         mathematica::m assoc = pm.serialize(pt);
-//         shell << assoc;
-//         shell >> result;
-//         std::cout << result << std::endl;
-//     }
+    {
+        value result;
+        association<point2> pm;
+        point2 pt;
+        pt.location = std::make_pair(0, 0);
+        pt.name = "hi";
+        pt.weight = 0.0f;
+        mathematica::m assoc = pm.serialize(pt);
+        shell << assoc;
+        shell >> result;
+        std::cout << result << std::endl;
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

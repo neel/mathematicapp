@@ -83,10 +83,14 @@ abstract_delayed_call_ptr make_deyaled_call(T f){
 
 namespace M_Helper{
 template <typename T>
-struct argument{};
+struct argument{
+    typedef mathematica::m type;
+};
 
 template <>
 struct argument<int>{
+    typedef int type;
+    
     detail::abstract_delayed_call_ptr operator()(const int& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::integer, _1, arg)));
     }
@@ -94,6 +98,8 @@ struct argument<int>{
     
 template <>
 struct argument<unsigned int>{
+    typedef unsigned int type;
+    
     detail::abstract_delayed_call_ptr operator()(const unsigned int& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::uinteger, _1, arg)));
     }
@@ -101,6 +107,8 @@ struct argument<unsigned int>{
 
 template <>
 struct argument<long>{
+    typedef long type;
+    
     detail::abstract_delayed_call_ptr operator()(const long& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
     }
@@ -108,6 +116,8 @@ struct argument<long>{
 
 template <>
 struct argument<long long>{
+    typedef long long type;
+    
     detail::abstract_delayed_call_ptr operator()(const long long& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
     }
@@ -115,6 +125,8 @@ struct argument<long long>{
 
 template <>
 struct argument<double>{
+    typedef double type;
+    
     detail::abstract_delayed_call_ptr operator()(const double& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::real, _1, arg)));
     }
@@ -122,6 +134,8 @@ struct argument<double>{
 
 template <>
 struct argument<std::string>{
+    typedef std::string type;
+    
     detail::abstract_delayed_call_ptr operator()(const std::string& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, arg)));
     }
@@ -129,6 +143,8 @@ struct argument<std::string>{
 
 template <>
 struct argument<mathematica::symbol>{
+    typedef mathematica::symbol type;
+    
     detail::abstract_delayed_call_ptr operator()(const mathematica::symbol& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::symbol, _1, boost::bind(&mathematica::symbol::name, arg))));
     }
@@ -136,6 +152,7 @@ struct argument<mathematica::symbol>{
 
 template <typename T>
 struct argument<std::complex<T>>{
+    typedef std::complex<T> type;
     typedef argument<std::complex<T>> self_type;
     
     static void generate_ftor(mathematica::driver::ws::connection& link, std::complex<T> z){
@@ -168,6 +185,7 @@ struct argument<std::complex<T>>{
 
 template <typename T>
 struct argument<mathematica::rule<T>>{
+    typedef mathematica::rule<T> type;
     typedef argument<mathematica::rule<T>> self_type;
     
     static void generate_ftor(mathematica::driver::ws::connection& link, mathematica::rule<T> rule){
