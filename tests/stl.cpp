@@ -165,9 +165,6 @@ BOOST_AUTO_TEST_CASE(stl_vector){
         
         BOOST_CHECK(*res == 1781);
     }
-    point_meta pm;
-    point pt;
-    std::cout << pm.build(pt) << std::endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -27,6 +27,8 @@
 #ifndef MATHEMATICAPP_ASSOCIATION_H
 #define MATHEMATICAPP_ASSOCIATION_H
 
+#include <boost/type_traits/is_pod.hpp>
+#include <boost/utility/enable_if.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
 #include <string>
@@ -34,19 +36,11 @@
 #include <map>
 #include <mathematica++/m.h>
 
-struct point{
-    std::pair<int, int> location;
-    std::string name;
-    double weight;
-};
-
 namespace mathematica{
 
-// template <typename T>
-// struct assoc{
-//     
-// };
-
+template <typename T>
+struct association{};
+    
 template <int C>
 struct property{
 
@@ -56,9 +50,7 @@ template <typename D, typename U, int c=0, typename ... Ts>
 struct pack{
     typedef U                       class_type;
     
-    std::string build(const class_type& obj) const {
-        return std::string();
-    }
+    void build(const class_type& obj, std::vector<mathematica::m>& rules) const {}
 };
 
 template <typename D, typename U, int c, typename T, typename ... Ts>
@@ -83,51 +75,34 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
         _name = details.first;
         _callback = details.second;
     }
-    const property_type& value(const class_type& obj) const{
-        return boost::bind(_callback, obj)();
+    property_type value(const class_type& obj) const{
+        property_type v = boost::bind(_callback, obj)();
+        return v;
     }
-    std::string build(const class_type& obj) const{
-        std::string buff = _name+" ";
-        return buff + base_type::build(obj);
-        const property_type& v = value(obj);
+    
+    void build(const class_type& obj, std::vector<mathematica::m>& rules) const{
+        property_type v = value(obj);
+        rules.push_back(mathematica::m("Rule")(_name, v));
+        base_type::build(obj, rules);
     }
 };
+
+template <typename D, typename U, typename ... Ts>
+struct dictionary: pack<D, U, 0, Ts...> {
+    typedef U                       class_type;
+    typedef pack<D, U, 0, Ts...>    pack_type;
+    typedef boost::tuple<Ts...>     tuple_type;
+    typedef mathematica::m          target_type;
     
-// template <typename U, typename T>
-// struct property{
-//     typedef U class_type;
-//     typedef T property_type;
-//     typedef T U::* callback_type;
-//     
-//     std::string   _name;
-//     callback_type _callback;
-// 
-//     property(const std::string& name, callback_type property): _name(name), _callback(property){}
-//     
-//     property<U, T>& operator()(point& p, const property_type& value){
-//         boost::bind(_callback, p) = value;
-//         return *this;
-//     }
-// };
-
-// template <>
-// struct assoc<point>{
-//     property<point, std::pair<int, int>>   location;
-//     property<point, std::string>           name;
-//     property<point, double>                weight;
-//     
-//     assoc(): 
-//         location("location", &point::location), 
-//         name("name", &point::name), 
-//         weight("weight", &point::weight){}
-// };
-
-struct point_meta: pack<point_meta, point, 0, std::pair<int, int>, std::string, double>{
-    static auto detail(property<0>){return std::make_pair("location",   &point::location);}
-    static auto detail(property<1>){return std::make_pair("name",       &point::name);}
-    static auto detail(property<2>){return std::make_pair("weight",     &point::weight);}
+    mathematica::m serialize(const class_type& obj){
+        std::vector<m> rules;
+        pack_type::build(obj, rules);
+        return mathematica::m("Association")(rules);
+    }
 };
 
 }
+
+
 
 #endif // MATHEMATICAPP_ASSOCIATION_H

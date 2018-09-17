@@ -33,6 +33,10 @@ ADD_EXECUTABLE(integer integer.cpp)
 TARGET_LINK_LIBRARIES(integer ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(integer mathematica++)
 
+ADD_EXECUTABLE(association association.cpp)
+TARGET_LINK_LIBRARIES(association ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(association mathematica++)
+
 IF(NOT WITHOUT_EIGEN)
     FIND_PACKAGE(Eigen3 NO_MODULE)
     IF(Eigen3_FOUND)
@@ -53,3 +57,4 @@ ADD_TEST(common common --report_level=short --log_level=message --show_progress=
 ADD_TEST(storage storage --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(stl stl --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(integer integer --report_level=short --log_level=message --show_progress=true)
+ADD_TEST(association association --report_level=short --log_level=message --show_progress=true)

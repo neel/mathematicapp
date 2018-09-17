@@ -428,6 +428,25 @@ struct argument_helper<std::vector<T>, M_Type>{
     }
 };
 
+template <typename T>
+struct argument_helper<std::vector<T>, T>{
+    typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
+    queue_type& _q;
+    
+    argument_helper(queue_type& queue): _q(queue){}
+
+    void transfer_chain(const std::vector<T>& arg){
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+        for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
+            detail::M_Helper::argument_helper<T, T> helper(_q);
+            helper(*i);
+        }
+    }
+    void operator()(const std::vector<T>& arg){
+        transfer_chain(arg);
+    }
+};
+
 #ifdef USING_LIB_EIGEN
 template <typename T, int Rows, int Cols, typename M_Type>
 struct argument_helper<Eigen::Matrix<T, Rows, Cols>, M_Type>{
