@@ -117,6 +117,7 @@ SET(MATHEMATICAPP_SOURCES
     sources/packet.cpp
     sources/history.cpp
     sources/mhelper.cpp
+    sources/association.cpp
 )
 
 IF (DEFINED XCODE_VERSION)

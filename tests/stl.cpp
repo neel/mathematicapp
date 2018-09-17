@@ -45,6 +45,7 @@
 #include "mathematica++/operators.h"
 #include "mathematica++/rules.h"
 
+#include "mathematica++/association.h"
 using namespace mathematica;
 
 // MATHEMATICA_DECLARE(FactorInteger)
@@ -164,6 +165,8 @@ BOOST_AUTO_TEST_CASE(stl_vector){
         
         BOOST_CHECK(*res == 1781);
     }
+    point_meta pm;
+    std::cout << pm.build() << std::endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
