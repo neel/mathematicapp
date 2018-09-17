@@ -29,10 +29,10 @@
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
-
 #include <string>
 #include <vector>
 #include <map>
+#include <mathematica++/m.h>
 
 struct point{
     std::pair<int, int> location;
@@ -54,7 +54,9 @@ struct property{
     
 template <typename D, typename U, int c=0, typename ... Ts>
 struct pack{
-    std::string build() const {
+    typedef U                       class_type;
+    
+    std::string build(const class_type& obj) const {
         return std::string();
     }
 };
@@ -81,9 +83,13 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
         _name = details.first;
         _callback = details.second;
     }
-    std::string build() const{
+    const property_type& value(const class_type& obj) const{
+        return boost::bind(_callback, obj)();
+    }
+    std::string build(const class_type& obj) const{
         std::string buff = _name+" ";
-        return buff + base_type::build();
+        return buff + base_type::build(obj);
+        const property_type& v = value(obj);
     }
 };
     
