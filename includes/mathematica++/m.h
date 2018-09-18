@@ -43,6 +43,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "mathematica++/symbol.h"
 #include "mathematica++/rules.h"
+#include <mathematica++/serialization.h>
 
 #ifdef USING_LIB_EIGEN
 #include <Eigen/Dense>
@@ -50,11 +51,6 @@
 
 #define M(x)  (mathematica::m((x)))
 #include "defs.h"
-
-namespace mathematica{
-    template <typename T>
-    struct association{};
-}
 
 namespace mathematica{
 namespace driver{

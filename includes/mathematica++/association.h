@@ -27,14 +27,12 @@
 #ifndef MATHEMATICAPP_ASSOCIATION_H
 #define MATHEMATICAPP_ASSOCIATION_H
 
-#include <boost/type_traits/is_pod.hpp>
-#include <boost/utility/enable_if.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/bind.hpp>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
+#include <boost/bind.hpp>
 #include <mathematica++/m.h>
+#include <boost/tuple/tuple.hpp>
 
 namespace mathematica{
     
@@ -78,6 +76,8 @@ struct pack{
     typedef U class_type;
     
     void build(const class_type& obj, std::vector<mathematica::m>& rules) const {}
+    template <typename TupleT>
+    void restore(class_type& obj, const TupleT& tuple){}
 };
 
 template <typename D, typename U, int c, typename T, typename ... Ts>
@@ -109,6 +109,11 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
         rules.push_back(mathematica::m("Rule")(_name, v));
         base_type::build(obj, rules);
     }
+    template <typename TupleT>
+    void restore(class_type& obj, const TupleT& tuple){
+        boost::bind(_callback, obj)() = boost::get<argument_count>(tuple);
+        base_type::restore(obj, tuple);
+    }
 };
 
 template <typename D, typename U, typename ... Ts>
@@ -122,6 +127,11 @@ struct dictionary: pack<D, U, 0, Ts...> {
         std::vector<m> rules;
         pack_type::build(obj, rules);
         return mathematica::m("Association")(rules);
+    }
+    class_type deserialize(const tuple_type& tuple){
+        class_type obj;
+        pack_type::restore(obj, tuple);
+        return obj;
     }
 };
 
