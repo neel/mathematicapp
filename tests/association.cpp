@@ -113,9 +113,7 @@ BOOST_AUTO_TEST_CASE(association_struct){
         pt.location = std::make_pair(0, 0);
         pt.name = "hi";
         pt.weight = 0.0f;
-        List(pt);
-        mathematica::m assoc = serialize(pt);
-        shell << assoc;
+        shell << List(pt);
         shell >> result;
         std::cout << result << std::endl;
     }

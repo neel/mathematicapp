@@ -72,7 +72,7 @@ struct pack_helper: deduce_serialized_type<T, typename mathematica::detail::M_He
 };
 
 }
-    
+
 template <typename D, typename U, int c=0, typename ... Ts>
 struct pack{
     typedef U class_type;
