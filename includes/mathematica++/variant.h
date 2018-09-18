@@ -38,6 +38,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/type_traits.hpp>
 #include "mathematica++/rules.h"
+#include <mathematica++/serialization.h>
 
 namespace mathematica{
 
@@ -364,7 +365,29 @@ struct cast_helper<T, mathematica::composite>{
 	static T cast(const mathematica::composite& value){
 		return T();
 	}
+// 	static T cast(const mathematica::composite& value){
+// 		typedef association<T> aassociator_type;
+//         typedef typename aassociator_type::tuple_type tuple_type;
+//         
+//         tuple_type tuple = boost::apply_visitor(detail::cast_visitor<tuple_type>(), value);
+//         aassociator_type associator;
+//         
+//         return associator.deserialize(tuple);
+// 	}
 };
+
+// template <typename T>
+// struct cast_helper<typename association<T>::class_type, mathematica::composite>{
+// 	static T cast(const mathematica::composite& value){
+// 		typedef association<T> aassociator_type;
+//         typedef typename aassociator_type::tuple_type tuple_type;
+//         
+//         tuple_type tuple = boost::apply_visitor(detail::cast_visitor<tuple_type>(), value);
+//         aassociator_type associator;
+//         
+//         return associator.deserialize(tuple);
+// 	}
+// };
 
 /**
  * cast a composite to tuple T
