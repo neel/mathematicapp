@@ -52,6 +52,11 @@
 #include "defs.h"
 
 namespace mathematica{
+    template <typename T>
+    struct association{};
+}
+
+namespace mathematica{
 namespace driver{
 namespace ws{
 struct connection;
@@ -222,6 +227,21 @@ struct argument_helper{
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const T& arg){
         _q.push_back(detail::M_Helper::make_argument(arg));
+    }
+};
+
+template <typename T>
+struct argument_helper<T, typename association<T>::target_type>{
+    typedef typename association<T>::target_type mtype;
+    typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
+    queue_type& _q;
+    
+    argument_helper(queue_type& queue): _q(queue){}
+    void operator()(const T& arg){
+        association<T> associator;
+        mtype marg = associator.serialize(arg);
+        argument_helper<mtype, mtype> helper(_q);
+        helper(marg);
     }
 };
 

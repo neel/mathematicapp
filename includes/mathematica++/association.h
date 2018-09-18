@@ -37,14 +37,9 @@
 #include <mathematica++/m.h>
 
 namespace mathematica{
-
-template <typename T>
-struct association{};
     
 template <int C>
-struct property{
-
-};
+struct property{};
 
 namespace detail{
 

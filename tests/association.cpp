@@ -46,6 +46,14 @@
 #include "mathematica++/rules.h"
 #include "mathematica++/association.h"
 
+namespace mathematica{
+    template <typename T>
+    mathematica::m serialize(const T& obj){
+        association<T> serializer;
+        return serializer.serialize(obj);
+    }
+}
+
 struct point{
     int x;
     int y;
@@ -59,36 +67,28 @@ struct point2{
     double weight;
 };
 
+MATHEMATICA_ASSOCIATE(point, int, int, std::string, double){
+    MATHEMATICA_PROPERTY(0, x)
+    MATHEMATICA_PROPERTY(1, y)
+    MATHEMATICA_PROPERTY(2, name)
+    MATHEMATICA_PROPERTY(3, weight)
+};
+
 namespace mathematica{
-    template <>
-    struct association<point>: dictionary<association<point>, point, int, int, std::string, double>{
-        static auto detail(property<0>){return std::make_pair("x",          &point::x);}
-        static auto detail(property<1>){return std::make_pair("y",          &point::y);}
-        static auto detail(property<2>){return std::make_pair("name",       &point::name);}
-        static auto detail(property<3>){return std::make_pair("weight",     &point::weight);}
+    template <typename U, typename V>
+    struct association<std::pair<U, V>>: dictionary<association<std::pair<U, V>>, std::pair<U, V>, U, V>{
+        static auto detail(property<0>){return std::make_pair("first",   &std::pair<U, V>::first);}
+        static auto detail(property<1>){return std::make_pair("second",  &std::pair<U, V>::second);}
     };
 }
 
-namespace mathematica{
-    typedef std::pair<int, int> pair_ii;
-    template <>
-    struct association<pair_ii>: dictionary<association<pair_ii>, pair_ii, int, int>{
-        static auto detail(property<0>){return std::make_pair("first",   &pair_ii::first);}
-        static auto detail(property<1>){return std::make_pair("second",  &pair_ii::second);}
-    };
-}
-
-namespace mathematica{
-    template <>
-    struct association<point2>: dictionary<association<point2>, point2, std::pair<int, int>, std::string, double>{
-        static auto detail(property<0>){return std::make_pair("location",   &point2::location);}
-        static auto detail(property<1>){return std::make_pair("name",       &point2::name);}
-        static auto detail(property<2>){return std::make_pair("weight",     &point2::weight);}
-    };
-}
+MATHEMATICA_ASSOCIATE(point2, std::pair<int, int>, std::string, double){
+    MATHEMATICA_PROPERTY(0, location)
+    MATHEMATICA_PROPERTY(1, name)
+    MATHEMATICA_PROPERTY(2, weight)
+};
 
 using namespace mathematica;
-
 
 BOOST_AUTO_TEST_SUITE(assoc)
 
@@ -97,25 +97,24 @@ BOOST_AUTO_TEST_CASE(association_struct){
     BOOST_CHECK(shell.connected());
     {
         value result;
-        association<point> pm;
         point pt;
         pt.x = 0;
         pt.y = 0;
         pt.name = "hi";
         pt.weight = 0.0f;
-        mathematica::m assoc = pm.serialize(pt);
+        mathematica::m assoc = serialize(pt);
         shell << assoc;
         shell >> result;
         std::cout << result << std::endl;
     }
     {
         value result;
-        association<point2> pm;
         point2 pt;
         pt.location = std::make_pair(0, 0);
         pt.name = "hi";
         pt.weight = 0.0f;
-        mathematica::m assoc = pm.serialize(pt);
+        List(pt);
+        mathematica::m assoc = serialize(pt);
         shell << assoc;
         shell >> result;
         std::cout << result << std::endl;
