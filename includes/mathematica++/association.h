@@ -69,6 +69,57 @@ struct pack_helper: deduce_serialized_type<T, typename mathematica::detail::M_He
     }
 };
 
+// namespace internal{
+//     template <typename U, typename V>
+//     struct convert_to{ // is associated
+//         static U cast(int){return U();}
+//         static U cast(long long){return U();}
+//         static U cast(double){return U();}
+//         static U cast(const std::string&){return U();}
+//         static U cast(const mathematica::composite& value){
+//             U obj;
+//             association<U> associator;
+//             associator.restore(obj, value);
+//             return obj;
+//         }
+//     };
+//     
+//     template <typename U>
+//     struct convert_to<U, U>{ // is not associated
+//         template <typename T>
+//         static U cast(const T& value){
+//             return U();
+//         }
+//     };
+//     
+//     template <typename T>
+//     struct convert: convert_to<T, typename association<T>::serialized_type>{};
+// }
+// 
+// template <typename U, typename T, typename Y=void>
+// struct property_converter{
+//     static T convert_to(const U& value){// If T is associated then uses a different specialization
+//         T val = internal::convert<T>::cast(value);
+//         std::cout << __LINE__ << " " << value << std::endl;
+//         return val;        
+//     }
+// };
+// 
+// template <typename U, typename T>
+// struct property_converter<U, T, typename std::enable_if<boost::is_convertible<U, T>::value>::type>{
+//     static T convert_to(const U& value){
+//         return T(value);
+//     }
+// };
+// 
+// template <typename T>
+// struct unpack_visitor{
+//     template <typename U>
+//     T operator()(const U& arg){
+//         return property_converter<U, T>::convert_to(arg);
+//     }
+// };
+
 }
 
 template <typename D, typename U, int c=0, typename ... Ts>
@@ -109,10 +160,12 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
         rules.push_back(mathematica::m("Rule")(_name, v));
         base_type::build(obj, rules);
     }
-    template <typename TupleT>
-    void restore(class_type& obj, const TupleT& tuple){
-        boost::bind(_callback, obj)() = boost::get<argument_count>(tuple);
-        base_type::restore(obj, tuple);
+    void restore(class_type& obj, const mathematica::composite& composite){
+        typedef mathematica::rule<property_type> rule_type;
+        rule_type rule = cast<rule_type>(composite._children[argument_count]);
+        property_type v = rule.value();
+        obj.*_callback = v; // https://stackoverflow.com/a/1485990/256007
+        base_type::restore(obj, composite);
     }
 };
 
@@ -122,15 +175,16 @@ struct dictionary: pack<D, U, 0, Ts...> {
     typedef pack<D, U, 0, Ts...>    pack_type;
     typedef boost::tuple<Ts...>     tuple_type;
     typedef mathematica::m          target_type;
+    typedef mathematica::m          serialized_type;
     
     mathematica::m serialize(const class_type& obj){
         std::vector<m> rules;
         pack_type::build(obj, rules);
         return mathematica::m("Association")(rules);
     }
-    class_type deserialize(const tuple_type& tuple){
+    class_type deserialize(const mathematica::composite& composite){
         class_type obj;
-        pack_type::restore(obj, tuple);
+        pack_type::restore(obj, composite);
         return obj;
     }
 };

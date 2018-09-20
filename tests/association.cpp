@@ -45,6 +45,7 @@
 #include "mathematica++/operators.h"
 #include "mathematica++/rules.h"
 #include "mathematica++/association.h"
+#include "mathematica++/serialization.h"
 
 namespace mathematica{
     template <typename T>
@@ -59,19 +60,27 @@ struct point{
     int y;
     std::string name;
     double weight;
+    std::complex<double> cw;
+    
+    point(): x(0), y(0), name(""), weight(0.0f), cw(0){}
+    point(int x_, int y_, const std::string& name_, double weight_, const std::complex<double>& cw_): x(x_), y(y_), name(name_), weight(weight_), cw(cw_){}
 };
 
 struct point2{
     std::pair<int, int> location;
     std::string name;
     double weight;
+    
+    point2(): location(std::make_pair(0, 0)), name(""), weight(0.0f){}
+    point2(std::pair<int, int> loc, const std::string& name_, double w): location(loc), name(name_), weight(w){}
 };
 
-MATHEMATICA_ASSOCIATE(point, int, int, std::string, double){
+MATHEMATICA_ASSOCIATE(point, int, int, std::string, double, std::complex<double>){
     MATHEMATICA_PROPERTY(0, x)
     MATHEMATICA_PROPERTY(1, y)
     MATHEMATICA_PROPERTY(2, name)
     MATHEMATICA_PROPERTY(3, weight)
+    MATHEMATICA_PROPERTY(4, cw)
 };
 
 namespace mathematica{
@@ -88,6 +97,8 @@ MATHEMATICA_ASSOCIATE(point2, std::pair<int, int>, std::string, double){
     MATHEMATICA_PROPERTY(2, weight)
 };
 
+MATHEMATICA_DECLARE(Part)
+
 using namespace mathematica;
 
 BOOST_AUTO_TEST_SUITE(assoc)
@@ -98,24 +109,43 @@ BOOST_AUTO_TEST_CASE(association_struct){
     {
         value result;
         point pt;
-        pt.x = 0;
-        pt.y = 0;
-        pt.name = "hi";
-        pt.weight = 0.0f;
         mathematica::m assoc = serialize(pt);
         shell << assoc;
         shell >> result;
         std::cout << result << std::endl;
     }
     {
+//         typedef std::vector<point2> pair_type;
         value result;
-        point2 pt;
-        pt.location = std::make_pair(0, 0);
-        pt.name = "hi";
-        pt.weight = 0.0f;
-        shell << List(pt);
-        shell >> result;
-        std::cout << result << std::endl;
+        point pt_0(3, 3, "Jupiter", 3.0f, std::complex<double>(2, 3));
+        point2 pt_1(std::make_pair(1, 1), "Hallo", 1.0f);
+        point2 pt_2(std::make_pair(2, 2), "World", 2.0f);
+        {
+            shell << Part(List(pt_0, pt_1, pt_2), 1);
+            shell >> result;
+            std::cout << result << std::endl;
+            point pt = cast<point>(result);
+            std::cout << pt.x << " " << pt.y << " " << pt.name << " " << pt.weight << " " << pt.cw << std::endl;
+        }
+        {
+            shell << Part(List(pt_0, pt_1, pt_2), 2);
+            shell >> result;
+            point2 pt = cast<point2>(result);
+            std::cout << pt.location.first << " " << pt.location.second << " " << pt.name << " " << pt.weight << std::endl;
+        }
+        {
+            shell << Part(List(pt_0, pt_1, pt_2), 3);
+            shell >> result;
+            point2 pt = cast<point2>(result);
+            std::cout << pt.location.first << " " << pt.location.second << " " << pt.name << " " << pt.weight << std::endl;
+        }
+        
+//         pair_type pair = cast<pair_type>(result);
+        
+//         association<point2>::tuple_type pt = cast<association<point2>::tuple_type>(result);
+        
+//         std::cout << "output: " << pair[0].name << " " << pair[1].name << std::endl;
+//         std::cout << boost::get<1>(pt) << " " << boost::get<2>(pt) << std::endl;
     }
 }
 

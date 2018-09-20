@@ -3,7 +3,9 @@
 
 namespace mathematica{
     template <typename T>
-    struct association{};
+    struct association{
+        typedef T serialized_type;
+    };
 }
 
 #endif // MATHEMATICAPP_SERIALIZATION_H
