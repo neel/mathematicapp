@@ -97,6 +97,7 @@ SET(MATHEMATICAPP_HEADERS
     includes/mathematica++/packet.h
     includes/mathematica++/history.h
     includes/mathematica++/mhelper.h
+    includes/mathematica++/association.h
 )
 
 SET(MATHEMATICAPP_SOURCES
