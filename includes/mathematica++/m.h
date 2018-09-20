@@ -555,7 +555,7 @@ struct m{
     }
     template <typename T>
     m& part(const T& index){
-        _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Part", 1)));
+        _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Part", 2)));
         _queue.push_back(detail::M_Helper::make_argument(index));
         return *this;
     }

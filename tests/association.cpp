@@ -45,56 +45,21 @@
 #include "mathematica++/operators.h"
 #include "mathematica++/rules.h"
 #include "mathematica++/association.h"
-// #include "mathematica++/serialization.h"
 
-namespace mathematica{
-    template <typename T>
-    mathematica::m serialize(const T& obj){
-        association<T> serializer;
-        return serializer.serialize(obj);
-    }
-}
 
 struct point{
-    int x;
-    int y;
-    std::string name;
-    double weight;
-    std::complex<double> cw;
-    
-    point(): x(0), y(0), name(""), weight(0.0f), cw(0){}
-    point(int x_, int y_, const std::string& name_, double weight_, const std::complex<double>& cw_): x(x_), y(y_), name(name_), weight(weight_), cw(cw_){}
-};
-
-struct point2{
     std::pair<int, int> location;
     std::string name;
-    double weight;
-    
-    point2(): location(std::make_pair(0, 0)), name(""), weight(0.0f){}
-    point2(std::pair<int, int> loc, const std::string& name_, double w): location(loc), name(name_), weight(w){}
+    double elevation;
+
+    point(): location(std::make_pair(0, 0)), name(""), elevation (0.0f){}
+    point (std::pair<int, int> loc, const std::string& name_, double elevation_): location(loc), name(name_), elevation(elevation_){}
 };
 
-MATHEMATICA_ASSOCIATE(point, int, int, std::string, double, std::complex<double>){
-    MATHEMATICA_PROPERTY(0, x)
-    MATHEMATICA_PROPERTY(1, y)
-    MATHEMATICA_PROPERTY(2, name)
-    MATHEMATICA_PROPERTY(3, weight)
-    MATHEMATICA_PROPERTY(4, cw)
-};
-
-// namespace mathematica{
-//     template <typename U, typename V>
-//     struct association<std::pair<U, V>>: dictionary<association<std::pair<U, V>>, std::pair<U, V>, U, V>{
-//         static auto detail(property<0>){return std::make_pair("first",   &std::pair<U, V>::first);}
-//         static auto detail(property<1>){return std::make_pair("second",  &std::pair<U, V>::second);}
-//     };
-// }
-
-MATHEMATICA_ASSOCIATE(point2, std::pair<int, int>, std::string, double){
+MATHEMATICA_ASSOCIATE(point, std::pair<int, int>, std::string, double){
     MATHEMATICA_PROPERTY(0, location)
     MATHEMATICA_PROPERTY(1, name)
-    MATHEMATICA_PROPERTY(2, weight)
+    MATHEMATICA_PROPERTY(2, elevation)
 };
 
 MATHEMATICA_DECLARE(Part)
@@ -108,46 +73,64 @@ BOOST_AUTO_TEST_CASE(association_struct){
     BOOST_CHECK(shell.connected());
     {
         value result;
-        point pt;
-        mathematica::m assoc = serialize(pt);
-        shell << assoc;
-        shell >> result;
-        std::cout << result << std::endl;
-    }
-    {
-//         typedef std::vector<point2> pair_type;
-        value result;
-        point pt_0(3, 3, "Jupiter", 3.0f, std::complex<double>(2, 3));
-        point2 pt_1(std::make_pair(1, 1), "Hallo", 1.0f);
-        point2 pt_2(std::make_pair(2, 2), "World", 2.0f);
+        point pt_1(std::make_pair(1, 1), "Hallo", 100.0f);
+        point pt_2(std::make_pair(2, 2), "World", 200.0f);
         {
-            shell << Part(List(pt_0, pt_1, pt_2), 1);
+            shell << List(pt_1, pt_2)[1];
             shell >> result;
-            std::cout << result << std::endl;
             point pt = cast<point>(result);
-            std::cout << pt.x << " " << pt.y << " " << pt.name << " " << pt.weight << " " << pt.cw << std::endl;
+            BOOST_CHECK(pt.location == std::make_pair(1, 1));
+            BOOST_CHECK(pt.name == "Hallo");
+            BOOST_CHECK(pt.elevation == 100.0f);
         }
         {
-            shell << Part(List(pt_0, pt_1, pt_2), 2);
+            shell << List(pt_1, pt_2)[2];
             shell >> result;
-            std::cout << result << std::endl;
-            point2 pt = cast<point2>(result);
-            std::cout << pt.location.first << " " << pt.location.second << " " << pt.name << " " << pt.weight << std::endl;
+            point pt = cast<point>(result);
+            BOOST_CHECK(pt.location == std::make_pair(2, 2));
+            BOOST_CHECK(pt.name == "World");
+            BOOST_CHECK(pt.elevation == 200.0f);
         }
         {
-            shell << Part(List(pt_0, pt_1, pt_2), 3);
+            typedef std::vector<point> collection_type;
+            
+            shell << List(pt_1, pt_2);
             shell >> result;
-            std::cout << result << std::endl;
-            point2 pt = cast<point2>(result);
-            std::cout << pt.location.first << " " << pt.location.second << " " << pt.name << " " << pt.weight << std::endl;
+            collection_type points = cast<collection_type>(result);
+            BOOST_CHECK(points.size() == 2);
+            BOOST_CHECK(points[0].location == std::make_pair(1, 1));
+            BOOST_CHECK(points[0].name == "Hallo");
+            BOOST_CHECK(points[0].elevation == 100.0f);
+            BOOST_CHECK(points[1].location == std::make_pair(2, 2));
+            BOOST_CHECK(points[1].name == "World");
+            BOOST_CHECK(points[1].elevation == 200.0f);
         }
-        
-//         pair_type pair = cast<pair_type>(result);
-        
-//         association<point2>::tuple_type pt = cast<association<point2>::tuple_type>(result);
-        
-//         std::cout << "output: " << pair[0].name << " " << pair[1].name << std::endl;
-//         std::cout << boost::get<1>(pt) << " " << boost::get<2>(pt) << std::endl;
+        {
+            typedef std::pair<point, point> collection_type;
+            
+            shell << List(pt_1, pt_2);
+            shell >> result;
+            collection_type points = cast<collection_type>(result);
+            BOOST_CHECK(points.first.location == std::make_pair(1, 1));
+            BOOST_CHECK(points.first.name == "Hallo");
+            BOOST_CHECK(points.first.elevation == 100.0f);
+            BOOST_CHECK(points.second.location == std::make_pair(2, 2));
+            BOOST_CHECK(points.second.name == "World");
+            BOOST_CHECK(points.second.elevation == 200.0f);
+        }
+        {
+            typedef boost::tuple<point, point> collection_type;
+            
+            shell << List(pt_1, pt_2);
+            shell >> result;
+            collection_type points = cast<collection_type>(result);
+            BOOST_CHECK(boost::get<0>(points).location == std::make_pair(1, 1));
+            BOOST_CHECK(boost::get<0>(points).name == "Hallo");
+            BOOST_CHECK(boost::get<0>(points).elevation == 100.0f);
+            BOOST_CHECK(boost::get<1>(points).location == std::make_pair(2, 2));
+            BOOST_CHECK(boost::get<1>(points).name == "World");
+            BOOST_CHECK(boost::get<1>(points).elevation == 200.0f);
+        }
     }
 }
 
