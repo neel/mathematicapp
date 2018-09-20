@@ -56,10 +56,23 @@ struct point{
     point (std::pair<int, int> loc, const std::string& name_, double elevation_): location(loc), name(name_), elevation(elevation_){}
 };
 
+struct circle{
+    point center;
+    int radius;
+    
+    circle(): center(point()), radius(0){}
+    circle(const point& c, int r): center(c), radius(r){}
+};
+
 MATHEMATICA_ASSOCIATE(point, std::pair<int, int>, std::string, double){
     MATHEMATICA_PROPERTY(0, location)
     MATHEMATICA_PROPERTY(1, name)
     MATHEMATICA_PROPERTY(2, elevation)
+};
+
+MATHEMATICA_ASSOCIATE(circle, point, int){
+    MATHEMATICA_PROPERTY(0, center)
+    MATHEMATICA_PROPERTY(1, radius)
 };
 
 MATHEMATICA_DECLARE(Part)
@@ -131,6 +144,55 @@ BOOST_AUTO_TEST_CASE(association_struct){
             BOOST_CHECK(boost::get<1>(points).name == "World");
             BOOST_CHECK(boost::get<1>(points).elevation == 200.0f);
         }
+    }
+    {
+        value result;
+        circle disc_1(point(std::make_pair(4, 5), "c1", 300.0f), 4);
+        circle disc_2(point(std::make_pair(5, 6), "c2", 300.0f), 5);
+        {
+            typedef std::vector<circle> collection_type;
+            
+            shell << List(disc_1, disc_2);
+            shell >> result;
+            collection_type circles = cast<collection_type>(result);
+            BOOST_CHECK(circles.size() == 2);
+            BOOST_CHECK(circles[0].center.location == std::make_pair(4, 5));
+            BOOST_CHECK(circles[0].center.name == "c1");
+            BOOST_CHECK(circles[0].center.elevation == 300.0f);
+            BOOST_CHECK(circles[0].radius == 4);
+            BOOST_CHECK(circles[1].center.location == std::make_pair(5, 6));
+            BOOST_CHECK(circles[1].center.name == "c2");
+            BOOST_CHECK(circles[1].center.elevation == 300.0f);
+            BOOST_CHECK(circles[1].radius == 5);
+        }
+        {
+            typedef std::pair<circle, circle> collection_type;
+            
+            shell << List(disc_1, disc_2);
+            shell >> result;
+            collection_type circles = cast<collection_type>(result);
+            BOOST_CHECK(circles.first.center.location == std::make_pair(4, 5));
+            BOOST_CHECK(circles.first.center.name == "c1");
+            BOOST_CHECK(circles.first.center.elevation == 300.0f);
+            BOOST_CHECK(circles.first.radius == 4);
+            BOOST_CHECK(circles.second.center.location == std::make_pair(5, 6));
+            BOOST_CHECK(circles.second.center.name == "c2");
+            BOOST_CHECK(circles.second.center.elevation == 300.0f);
+            BOOST_CHECK(circles.second.radius == 5);
+        }
+//         {
+//             typedef std::vector<circle> collection_type;
+//             
+//             collection_type circles;
+//             circles.push_back(disc_1);
+//             circles.push_back(disc_2);
+//             
+//             shell << Part(circles, 1);
+//             shell >> result;
+//             
+//             std::cout << result << std::endl;
+//             circle disc = cast<circle>(result);
+//         }
     }
 }
 
