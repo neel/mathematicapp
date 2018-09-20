@@ -130,12 +130,14 @@ BOOST_AUTO_TEST_CASE(association_struct){
         {
             shell << Part(List(pt_0, pt_1, pt_2), 2);
             shell >> result;
+            std::cout << result << std::endl;
             point2 pt = cast<point2>(result);
             std::cout << pt.location.first << " " << pt.location.second << " " << pt.name << " " << pt.weight << std::endl;
         }
         {
             shell << Part(List(pt_0, pt_1, pt_2), 3);
             shell >> result;
+            std::cout << result << std::endl;
             point2 pt = cast<point2>(result);
             std::cout << pt.location.first << " " << pt.location.second << " " << pt.name << " " << pt.weight << std::endl;
         }

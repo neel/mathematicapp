@@ -436,15 +436,15 @@ struct cast_helper<std::pair<U, V>, mathematica::composite>{
     static pair_type cast(const mathematica::composite& value){
         U first;
         V second;
-        if(value.is_list()){
+//         if(value.is_list()){
             first = boost::apply_visitor(detail::cast_visitor<U>(), value._children[0]); // coerce variant of value._children[0] to T
             second = boost::apply_visitor(detail::cast_visitor<V>(), value._children[1]);
-        }else if(value.is_association()){
-            mathematica::rule<U> first_rule  = boost::apply_visitor(detail::cast_visitor<mathematica::rule<U>>(), value._children[0]);
-            mathematica::rule<V> second_rule = boost::apply_visitor(detail::cast_visitor<mathematica::rule<V>>(), value._children[1]);
-            first  = first_rule.value();
-            second = second_rule.value();
-        }
+//         }else if(value.is_association()){
+//             mathematica::rule<U> first_rule  = boost::apply_visitor(detail::cast_visitor<mathematica::rule<U>>(), value._children[0]);
+//             mathematica::rule<V> second_rule = boost::apply_visitor(detail::cast_visitor<mathematica::rule<V>>(), value._children[1]);
+//             first  = first_rule.value();
+//             second = second_rule.value();
+//         }
         return pair_type(first, second);
     }
 };

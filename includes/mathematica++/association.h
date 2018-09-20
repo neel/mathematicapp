@@ -127,8 +127,7 @@ struct pack{
     typedef U class_type;
     
     void build(const class_type& obj, std::vector<mathematica::m>& rules) const {}
-    template <typename TupleT>
-    void restore(class_type& obj, const TupleT& tuple){}
+    void restore(class_type& obj, const mathematica::composite& composite){}
 };
 
 template <typename D, typename U, int c, typename T, typename ... Ts>
@@ -148,9 +147,8 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
     callback_type _callback;
     
     pack(){
-        // https://stackoverflow.com/a/3057522/256007
-        property_meta details = derived_type::detail(property<argument_count>());
-        
+        // call detail(property<I>) method of the derived class for the i'th property
+        property_meta details = derived_type::detail(property<argument_count>()); 
         _name = details.first;
         _callback = details.second;
     }
@@ -164,7 +162,46 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
         typedef mathematica::rule<property_type> rule_type;
         rule_type rule = cast<rule_type>(composite._children[argument_count]);
         property_type v = rule.value();
-        obj.*_callback = v; // https://stackoverflow.com/a/1485990/256007
+        obj.*_callback = v; // set the value of the property
+        base_type::restore(obj, composite);
+    }
+};
+
+template <typename D, typename U, int c=0, typename ... Ts>
+struct chain{
+    typedef U class_type;
+    
+    void build(const class_type& obj, mathematica::m& list) const {}
+    void restore(class_type& obj, const mathematica::composite& composite){}
+};
+
+template <typename D, typename U, int c, typename T, typename ... Ts>
+struct chain<D, U, c, T, Ts...>: chain<D, U, c+1, Ts...>{
+    typedef chain<D, U, c, T, Ts...> self_type;
+    typedef chain<D, U, c+1, Ts...>  base_type;
+    typedef T                       property_type;
+    typedef D                       derived_type;
+    typedef U                       class_type;
+    typedef T U::*                  callback_type;
+    
+    typedef typename detail::pack_helper<T>::serialized_type serialized_type;
+    enum {argument_count = c};
+    
+    callback_type _callback;
+    
+    chain(){
+        // call detail(property<I>) method of the derived class for the i'th property
+        _callback = derived_type::detail(property<argument_count>());
+    }
+    
+    void build(const class_type& obj, mathematica::m& list) const{
+        serialized_type v = detail::pack_helper<T>::template compile<property_type>(obj, _callback);
+        list.arg(v);
+        base_type::build(obj, list);
+    }
+    void restore(class_type& obj, const mathematica::composite& composite){
+        property_type v = cast<property_type>(composite._children[argument_count]);
+        obj.*_callback = v; // set the value of the property
         base_type::restore(obj, composite);
     }
 };
@@ -189,13 +226,42 @@ struct dictionary: pack<D, U, 0, Ts...> {
     }
 };
 
+template <typename D, typename U, typename ... Ts>
+struct sequence: chain<D, U, 0, Ts...> {
+    typedef U                       class_type;
+    typedef chain<D, U, 0, Ts...>   pack_type;
+    typedef boost::tuple<Ts...>     tuple_type;
+    typedef mathematica::m          target_type;
+    typedef mathematica::m          serialized_type;
+    
+    mathematica::m serialize(const class_type& obj){
+        mathematica::m list("List");
+        pack_type::build(obj, list);
+        list();
+        return list;
+    }
+    class_type deserialize(const mathematica::composite& composite){
+        class_type obj;
+        pack_type::restore(obj, composite);
+        return obj;
+    }
+};
+
 }
+
+// namespace mathematica{
+//     template <typename U, typename V>
+//     struct association<std::pair<U, V>>: dictionary<association<std::pair<U, V>>, std::pair<U, V>, U, V>{
+//         static auto detail(property<0>){return std::make_pair("first",   &std::pair<U, V>::first);}
+//         static auto detail(property<1>){return std::make_pair("second",  &std::pair<U, V>::second);}
+//     };
+// }
 
 namespace mathematica{
     template <typename U, typename V>
-    struct association<std::pair<U, V>>: dictionary<association<std::pair<U, V>>, std::pair<U, V>, U, V>{
-        static auto detail(property<0>){return std::make_pair("first",   &std::pair<U, V>::first);}
-        static auto detail(property<1>){return std::make_pair("second",  &std::pair<U, V>::second);}
+    struct association<std::pair<U, V>>: sequence<association<std::pair<U, V>>, std::pair<U, V>, U, V>{
+        static auto detail(property<0>){return &std::pair<U, V>::first;}
+        static auto detail(property<1>){return &std::pair<U, V>::second;}
     };
 }
 
