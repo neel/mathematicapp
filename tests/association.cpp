@@ -83,13 +83,13 @@ MATHEMATICA_ASSOCIATE(point, int, int, std::string, double, std::complex<double>
     MATHEMATICA_PROPERTY(4, cw)
 };
 
-namespace mathematica{
-    template <typename U, typename V>
-    struct association<std::pair<U, V>>: dictionary<association<std::pair<U, V>>, std::pair<U, V>, U, V>{
-        static auto detail(property<0>){return std::make_pair("first",   &std::pair<U, V>::first);}
-        static auto detail(property<1>){return std::make_pair("second",  &std::pair<U, V>::second);}
-    };
-}
+// namespace mathematica{
+//     template <typename U, typename V>
+//     struct association<std::pair<U, V>>: dictionary<association<std::pair<U, V>>, std::pair<U, V>, U, V>{
+//         static auto detail(property<0>){return std::make_pair("first",   &std::pair<U, V>::first);}
+//         static auto detail(property<1>){return std::make_pair("second",  &std::pair<U, V>::second);}
+//     };
+// }
 
 MATHEMATICA_ASSOCIATE(point2, std::pair<int, int>, std::string, double){
     MATHEMATICA_PROPERTY(0, location)

@@ -191,6 +191,14 @@ struct dictionary: pack<D, U, 0, Ts...> {
 
 }
 
+namespace mathematica{
+    template <typename U, typename V>
+    struct association<std::pair<U, V>>: dictionary<association<std::pair<U, V>>, std::pair<U, V>, U, V>{
+        static auto detail(property<0>){return std::make_pair("first",   &std::pair<U, V>::first);}
+        static auto detail(property<1>){return std::make_pair("second",  &std::pair<U, V>::second);}
+    };
+}
+
 
 
 #endif // MATHEMATICAPP_ASSOCIATION_H

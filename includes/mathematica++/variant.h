@@ -60,6 +60,9 @@ struct composite_type{
     bool is_rule() const{
         return _name == "Rule";
     }
+    bool is_association() const{
+        return _name == "Association";
+    }
     bool is_graphics() const{
         return _name == "Graphics";
     }
@@ -431,7 +434,7 @@ struct cast_helper<std::pair<U, V>, mathematica::composite>{
         if(value.is_list()){
             first = boost::apply_visitor(detail::cast_visitor<U>(), value._children[0]); // coerce variant of value._children[0] to T
             second = boost::apply_visitor(detail::cast_visitor<V>(), value._children[1]);
-        }else{
+        }else if(value.is_association()){
             mathematica::rule<U> first_rule  = boost::apply_visitor(detail::cast_visitor<mathematica::rule<U>>(), value._children[0]);
             mathematica::rule<V> second_rule = boost::apply_visitor(detail::cast_visitor<mathematica::rule<V>>(), value._children[1]);
             first  = first_rule.value();
