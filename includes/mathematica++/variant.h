@@ -38,9 +38,14 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/type_traits.hpp>
 #include "mathematica++/rules.h"
-#include <mathematica++/serialization.h>
+// #include <mathematica++/serialization.h>
 
 namespace mathematica{
+    
+template <typename T>
+struct association{
+    typedef T serialized_type;
+};
 
 template <typename variant_type>
 struct composite_type{

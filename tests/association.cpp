@@ -45,7 +45,7 @@
 #include "mathematica++/operators.h"
 #include "mathematica++/rules.h"
 #include "mathematica++/association.h"
-#include "mathematica++/serialization.h"
+// #include "mathematica++/serialization.h"
 
 namespace mathematica{
     template <typename T>
