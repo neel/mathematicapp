@@ -43,7 +43,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "mathematica++/symbol.h"
 #include "mathematica++/rules.h"
-#include <mathematica++/serialization.h>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits.hpp>
 
