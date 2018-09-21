@@ -39,89 +39,6 @@ namespace mathematica{
 template <int C>
 struct property{};
 
-namespace detail{
-
-template <typename U, typename V>
-struct deduce_serialized_type{ // type U is not handled by mathematica::m as input
-    typedef mathematica::m serialized_type;
-    typedef mathematica::m composite_type;
-};
-
-template <typename T>
-struct deduce_serialized_type<T, T>{ // type T is handled by mathematica::m as input
-    typedef T serialized_type;
-    typedef T simple_type;
-};
-    
-template <typename T>
-struct pack_helper: deduce_serialized_type<T, typename mathematica::detail::M_Helper::argument<T>::type>{
-    template <typename ReturnT, typename ClassT, typename CallbackT>
-    static typename deduce_serialized_type<ReturnT, typename mathematica::detail::M_Helper::argument<ReturnT>::type>::simple_type compile(const ClassT& obj, CallbackT callback){
-        ReturnT v = boost::bind(callback, obj)();
-        return v;
-    }
-
-    template <typename ReturnT, typename ClassT, typename CallbackT>
-    static typename deduce_serialized_type<ReturnT, typename mathematica::detail::M_Helper::argument<ReturnT>::type>::composite_type compile(const ClassT& obj, CallbackT callback){
-        association<ReturnT> assoc;
-        ReturnT v = boost::bind(callback, obj)();
-        return assoc.serialize(v);
-    }
-};
-
-// namespace internal{
-//     template <typename U, typename V>
-//     struct convert_to{ // is associated
-//         static U cast(int){return U();}
-//         static U cast(long long){return U();}
-//         static U cast(double){return U();}
-//         static U cast(const std::string&){return U();}
-//         static U cast(const mathematica::composite& value){
-//             U obj;
-//             association<U> associator;
-//             associator.restore(obj, value);
-//             return obj;
-//         }
-//     };
-//     
-//     template <typename U>
-//     struct convert_to<U, U>{ // is not associated
-//         template <typename T>
-//         static U cast(const T& value){
-//             return U();
-//         }
-//     };
-//     
-//     template <typename T>
-//     struct convert: convert_to<T, typename association<T>::serialized_type>{};
-// }
-// 
-// template <typename U, typename T, typename Y=void>
-// struct property_converter{
-//     static T convert_to(const U& value){// If T is associated then uses a different specialization
-//         T val = internal::convert<T>::cast(value);
-//         std::cout << __LINE__ << " " << value << std::endl;
-//         return val;        
-//     }
-// };
-// 
-// template <typename U, typename T>
-// struct property_converter<U, T, typename std::enable_if<boost::is_convertible<U, T>::value>::type>{
-//     static T convert_to(const U& value){
-//         return T(value);
-//     }
-// };
-// 
-// template <typename T>
-// struct unpack_visitor{
-//     template <typename U>
-//     T operator()(const U& arg){
-//         return property_converter<U, T>::convert_to(arg);
-//     }
-// };
-
-}
-
 template <typename D, typename U, int c=0, typename ... Ts>
 struct pack{
     typedef U class_type;
@@ -140,7 +57,6 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
     typedef T U::*                  callback_type;
     
     typedef std::pair<std::string, callback_type>            property_meta;
-    typedef typename detail::pack_helper<T>::serialized_type serialized_type;
     enum {argument_count = c};
     
     std::string _name;
@@ -153,9 +69,11 @@ struct pack<D, U, c, T, Ts...>: pack<D, U, c+1, Ts...>{
         _callback = details.second;
     }
     
+    /**
+     * make and return the rule for the c'th property
+     */
     void build(const class_type& obj, std::vector<mathematica::m>& rules) const{
-        serialized_type v = detail::pack_helper<T>::template compile<property_type>(obj, _callback);
-        rules.push_back(mathematica::m("Rule")(_name, v));
+        rules.push_back(mathematica::m("Rule")(_name, boost::bind(_callback, obj)()));
         base_type::build(obj, rules);
     }
     void restore(class_type& obj, const mathematica::composite& composite){
@@ -184,7 +102,6 @@ struct chain<D, U, c, T, Ts...>: chain<D, U, c+1, Ts...>{
     typedef U                       class_type;
     typedef T U::*                  callback_type;
     
-    typedef typename detail::pack_helper<T>::serialized_type serialized_type;
     enum {argument_count = c};
     
     callback_type _callback;
@@ -195,8 +112,7 @@ struct chain<D, U, c, T, Ts...>: chain<D, U, c+1, Ts...>{
     }
     
     void build(const class_type& obj, mathematica::m& list) const{
-        serialized_type v = detail::pack_helper<T>::template compile<property_type>(obj, _callback);
-        list.arg(v);
+        list.arg(boost::bind(_callback, obj)());
         base_type::build(obj, list);
     }
     void restore(class_type& obj, const mathematica::composite& composite){
@@ -214,6 +130,10 @@ struct dictionary: pack<D, U, 0, Ts...> {
     typedef mathematica::m          target_type;
     typedef mathematica::m          serialized_type;
     
+    /**
+     * creates a mathematica Association and uses base class pack_type recursively to put rules into it
+     * pack_type::build is supposed to populate the rules vector with rules for each property
+     */
     mathematica::m serialize(const class_type& obj){
         std::vector<m> rules;
         pack_type::build(obj, rules);

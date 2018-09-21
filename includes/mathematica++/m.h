@@ -51,7 +51,7 @@
 #include <Eigen/Dense>
 #endif
 
-#define M(x)  (mathematica::m((x)))
+// #define M(x)  (mathematica::m((x)))
 #include "defs.h"
 
 namespace mathematica{
@@ -217,6 +217,9 @@ detail::abstract_delayed_call_ptr make_argument(const T& value){
 
 mathematica::m convert(mathematica::token::ptr val);
 
+/**
+ * T is scaler
+ */
 template <typename T, typename M_Type>
 struct argument_helper{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
@@ -289,7 +292,7 @@ struct argument_helper<mathematica::rule<M_Type>, M_Type>{
 };
     
 template <typename T, typename M_Type>
-    struct argument_helper<mathematica::rule<std::vector<T>>, M_Type>{
+struct argument_helper<mathematica::rule<std::vector<T>>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
     queue_type& _q;
     
@@ -318,7 +321,7 @@ struct argument_helper<mathematica::rule<std::list<T>>, M_Type>{
 
     
 template <typename T, typename U, typename M_Type>
-    struct argument_helper<mathematica::rule<mathematica::rules_helper<T, U>>, M_Type>{
+struct argument_helper<mathematica::rule<mathematica::rules_helper<T, U>>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
     queue_type& _q;
     

@@ -45,6 +45,7 @@
 #include "mathematica++/operators.h"
 #include "mathematica++/rules.h"
 #include "mathematica++/association.h"
+#include <boost/date_time.hpp>
 
 
 struct point{
@@ -64,6 +65,20 @@ struct circle{
     circle(const point& c, int r): center(c), radius(r){}
 };
 
+struct sensor_deployment{
+    std::vector<circle> sensors;
+    int start;
+    int duration;
+    long job;
+};
+
+// struct sensor_deployment{
+//     std::vector<circle> sensors;
+//     boost::posix_time::ptime start;
+//     boost::posix_time::time_duration duration;
+//     long job;
+// };
+
 MATHEMATICA_ASSOCIATE(point, std::pair<int, int>, std::string, double){
     MATHEMATICA_PROPERTY(0, location)
     MATHEMATICA_PROPERTY(1, name)
@@ -73,6 +88,13 @@ MATHEMATICA_ASSOCIATE(point, std::pair<int, int>, std::string, double){
 MATHEMATICA_ASSOCIATE(circle, point, int){
     MATHEMATICA_PROPERTY(0, center)
     MATHEMATICA_PROPERTY(1, radius)
+};
+
+MATHEMATICA_ASSOCIATE(sensor_deployment, std::vector<circle>, int, int, long){
+    MATHEMATICA_PROPERTY(0, sensors)
+    MATHEMATICA_PROPERTY(1, start)
+    MATHEMATICA_PROPERTY(2, duration)
+    MATHEMATICA_PROPERTY(3, job)
 };
 
 MATHEMATICA_DECLARE(Part)
@@ -195,6 +217,37 @@ BOOST_AUTO_TEST_CASE(association_struct){
             BOOST_CHECK(disc.center.name == "c1");
             BOOST_CHECK(disc.center.elevation == 300.0f);
             BOOST_CHECK(disc.radius == 4);
+        }
+    }
+    {
+        value result;
+        circle area_1(point(std::make_pair(4, 5), "c1", 300.0f), 4);
+        circle area_2(point(std::make_pair(5, 6), "c2", 300.0f), 5);
+        sensor_deployment deployment;
+        deployment.sensors.push_back(area_1);
+        deployment.sensors.push_back(area_2);
+        deployment.start = 0;
+        deployment.duration = 0;
+//         deployment.start = boost::posix_time::second_clock::local_time();
+//         deployment.duration = boost::posix_time::hours(1);
+        deployment.job = 1;
+        
+        shell << List(deployment)[1];
+        shell >> result;
+        
+        std::cout << result << std::endl;
+        
+        {
+            sensor_deployment deplr = cast<sensor_deployment>(result);
+            BOOST_CHECK(deplr.sensors.size() == 2);
+            BOOST_CHECK(deplr.sensors[0].center.location == std::make_pair(4, 5));
+            BOOST_CHECK(deplr.sensors[0].center.name == "c1");
+            BOOST_CHECK(deplr.sensors[0].center.elevation == 300.0f);
+            BOOST_CHECK(deplr.sensors[0].radius == 4);
+            BOOST_CHECK(deplr.sensors[1].center.location == std::make_pair(5, 6));
+            BOOST_CHECK(deplr.sensors[1].center.name == "c2");
+            BOOST_CHECK(deplr.sensors[1].center.elevation == 300.0f);
+            BOOST_CHECK(deplr.sensors[1].radius == 5);
         }
     }
 }

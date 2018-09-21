@@ -37,6 +37,7 @@
 #define MATHEMATICA_PROPERTY_NAMED(I, N, P) static auto detail(property<I>){return std::make_pair(N,  &class_type::P);}
 #define MATHEMATICA_PROPERTY_AUTO(I, P) static auto detail(property<I>){return std::make_pair(STR_EXPAND(P), &class_type::P);}
 #define MATHEMATICA_PROPERTY(...) GET_MACRO(__VA_ARGS__, MATHEMATICA_PROPERTY_NAMED, MATHEMATICA_PROPERTY_AUTO)(__VA_ARGS__)
+#define MATHEMATICA_SEQUENCE(I, P) static auto detail(property<I>){return &class_type::P;}
 
 namespace mathematica{
 
