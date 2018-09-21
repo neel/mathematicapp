@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(token_conversion){
         value soln;
         shell << Solve(Power(x, 2) == 2, x, opt);
         shell >> soln;
-        
+
         typedef std::vector<std::vector<std::pair<std::string, double>>> type;
         // BOOST_CHECK(soln == std::string("List[List[Rule[x, -1.4142135623730951]], List[Rule[x, 1.4142135623730951]]]"));
         type sol = cast<type>(soln);

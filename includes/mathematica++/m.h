@@ -43,12 +43,14 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "mathematica++/symbol.h"
 #include "mathematica++/rules.h"
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits.hpp>
 
 #ifdef USING_LIB_EIGEN
 #include <Eigen/Dense>
 #endif
 
-#define M(x)  (mathematica::m((x)))
+// #define M(x)  (mathematica::m((x)))
 #include "defs.h"
 
 namespace mathematica{
@@ -83,10 +85,14 @@ abstract_delayed_call_ptr make_deyaled_call(T f){
 
 namespace M_Helper{
 template <typename T>
-struct argument{};
+struct argument{
+    typedef mathematica::m type;
+};
 
 template <>
 struct argument<int>{
+    typedef int type;
+    
     detail::abstract_delayed_call_ptr operator()(const int& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::integer, _1, arg)));
     }
@@ -94,6 +100,8 @@ struct argument<int>{
     
 template <>
 struct argument<unsigned int>{
+    typedef unsigned int type;
+    
     detail::abstract_delayed_call_ptr operator()(const unsigned int& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::uinteger, _1, arg)));
     }
@@ -101,6 +109,8 @@ struct argument<unsigned int>{
 
 template <>
 struct argument<long>{
+    typedef long type;
+    
     detail::abstract_delayed_call_ptr operator()(const long& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
     }
@@ -108,6 +118,8 @@ struct argument<long>{
 
 template <>
 struct argument<long long>{
+    typedef long long type;
+    
     detail::abstract_delayed_call_ptr operator()(const long long& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
     }
@@ -115,6 +127,8 @@ struct argument<long long>{
 
 template <>
 struct argument<double>{
+    typedef double type;
+    
     detail::abstract_delayed_call_ptr operator()(const double& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::real, _1, arg)));
     }
@@ -122,6 +136,8 @@ struct argument<double>{
 
 template <>
 struct argument<std::string>{
+    typedef std::string type;
+    
     detail::abstract_delayed_call_ptr operator()(const std::string& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, arg)));
     }
@@ -129,6 +145,8 @@ struct argument<std::string>{
 
 template <>
 struct argument<mathematica::symbol>{
+    typedef mathematica::symbol type;
+    
     detail::abstract_delayed_call_ptr operator()(const mathematica::symbol& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::symbol, _1, boost::bind(&mathematica::symbol::name, arg))));
     }
@@ -136,6 +154,7 @@ struct argument<mathematica::symbol>{
 
 template <typename T>
 struct argument<std::complex<T>>{
+    typedef std::complex<T> type;
     typedef argument<std::complex<T>> self_type;
     
     static void generate_ftor(mathematica::driver::ws::connection& link, std::complex<T> z){
@@ -168,6 +187,7 @@ struct argument<std::complex<T>>{
 
 template <typename T>
 struct argument<mathematica::rule<T>>{
+    typedef mathematica::rule<T> type;
     typedef argument<mathematica::rule<T>> self_type;
     
     static void generate_ftor(mathematica::driver::ws::connection& link, mathematica::rule<T> rule){
@@ -196,6 +216,9 @@ detail::abstract_delayed_call_ptr make_argument(const T& value){
 
 mathematica::m convert(mathematica::token::ptr val);
 
+/**
+ * T is scaler
+ */
 template <typename T, typename M_Type>
 struct argument_helper{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
@@ -204,6 +227,21 @@ struct argument_helper{
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const T& arg){
         _q.push_back(detail::M_Helper::make_argument(arg));
+    }
+};
+
+template <typename T>
+struct argument_helper<T, typename association<T>::target_type>{
+    typedef typename association<T>::target_type mtype;
+    typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
+    queue_type& _q;
+    
+    argument_helper(queue_type& queue): _q(queue){}
+    void operator()(const T& arg){
+        association<T> associator;
+        mtype marg = associator.serialize(arg);
+        argument_helper<mtype, mtype> helper(_q);
+        helper(marg);
     }
 };
 
@@ -253,7 +291,7 @@ struct argument_helper<mathematica::rule<M_Type>, M_Type>{
 };
     
 template <typename T, typename M_Type>
-    struct argument_helper<mathematica::rule<std::vector<T>>, M_Type>{
+struct argument_helper<mathematica::rule<std::vector<T>>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
     queue_type& _q;
     
@@ -282,7 +320,7 @@ struct argument_helper<mathematica::rule<std::list<T>>, M_Type>{
 
     
 template <typename T, typename U, typename M_Type>
-    struct argument_helper<mathematica::rule<mathematica::rules_helper<T, U>>, M_Type>{
+struct argument_helper<mathematica::rule<mathematica::rules_helper<T, U>>, M_Type>{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
     queue_type& _q;
     
@@ -386,12 +424,31 @@ struct bulk_dimention_helper<std::vector<std::vector<T>>>{
 };
 //}
 
-template <typename T, typename M_Type>
-struct argument_helper<std::vector<T>, M_Type>{
+template <typename T, typename M_Type, typename U=void>
+struct array_helper{
     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
     queue_type& _q;
     
-    argument_helper(queue_type& queue): _q(queue){}
+    array_helper(queue_type& queue): _q(queue){}
+
+    void transfer_chain(const std::vector<T>& arg){
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+        for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
+            detail::M_Helper::argument_helper<T, M_Type> helper(_q);
+            helper(*i);
+        }
+    }
+    void operator()(const std::vector<T>& arg){
+        transfer_chain(arg);
+    }
+};
+
+template <typename T, typename M_Type>
+struct array_helper<T, M_Type, typename boost::enable_if_c<boost::is_arithmetic<T>::value>::type>{
+    typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
+    queue_type& _q;
+    
+    array_helper(queue_type& queue): _q(queue){}
     
     void transfer_bulk(const std::vector<T>& arg){
         typedef typename bulk_transfer_inner_type<std::vector<T>>::inner_type value_type;
@@ -426,6 +483,13 @@ struct argument_helper<std::vector<T>, M_Type>{
             transfer_chain(arg);
         }
     }
+};
+
+template <typename T, typename M_Type>
+struct argument_helper<std::vector<T>, M_Type>: public array_helper<T, M_Type>{
+    typedef array_helper<T, M_Type> base_type;
+    
+    argument_helper(typename base_type::queue_type& queue): base_type(queue){}
 };
 
 #ifdef USING_LIB_EIGEN
@@ -502,7 +566,7 @@ struct m{
     }
     template <typename T>
     m& part(const T& index){
-        _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Part", 1)));
+        _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Part", 2)));
         _queue.push_back(detail::M_Helper::make_argument(index));
         return *this;
     }

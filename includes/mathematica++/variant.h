@@ -38,8 +38,14 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/type_traits.hpp>
 #include "mathematica++/rules.h"
+// #include <mathematica++/serialization.h>
 
 namespace mathematica{
+    
+template <typename T>
+struct association{
+    typedef T serialized_type;
+};
 
 template <typename variant_type>
 struct composite_type{
@@ -58,6 +64,9 @@ struct composite_type{
     }
     bool is_rule() const{
         return _name == "Rule";
+    }
+    bool is_association() const{
+        return _name == "Association";
     }
     bool is_graphics() const{
         return _name == "Graphics";
@@ -355,6 +364,23 @@ struct force_lexical<T, T>{
     }
 };
 
+template <typename U, typename V>
+struct IsAssociated{
+    static U cast(const mathematica::composite& value){
+        typedef association<U> aassociator_type;
+        aassociator_type associator;
+        U obj = associator.deserialize(value);
+        return obj;
+    }
+};
+
+template <typename T>
+struct IsAssociated<T, T>{
+    static T cast(const mathematica::composite& value){
+        return T();
+    }
+};
+
 /**
  * cast a composite to scaler T
  */
@@ -362,7 +388,8 @@ template <typename T>
 struct cast_helper<T, mathematica::composite>{
 
 	static T cast(const mathematica::composite& value){
-		return T();
+        return IsAssociated<T, typename association<T>::serialized_type>::cast(value);
+// 		return T();
 	}
 };
 
@@ -407,8 +434,17 @@ struct cast_helper<std::pair<U, V>, mathematica::composite>{
     typedef std::pair<U, V> pair_type;
     
     static pair_type cast(const mathematica::composite& value){
-        U first = boost::apply_visitor(detail::cast_visitor<U>(), value._children[0]); // coerce variant of value._children[0] to T
-        V second = boost::apply_visitor(detail::cast_visitor<V>(), value._children[1]);
+        U first;
+        V second;
+//         if(value.is_list()){
+            first = boost::apply_visitor(detail::cast_visitor<U>(), value._children[0]); // coerce variant of value._children[0] to T
+            second = boost::apply_visitor(detail::cast_visitor<V>(), value._children[1]);
+//         }else if(value.is_association()){
+//             mathematica::rule<U> first_rule  = boost::apply_visitor(detail::cast_visitor<mathematica::rule<U>>(), value._children[0]);
+//             mathematica::rule<V> second_rule = boost::apply_visitor(detail::cast_visitor<mathematica::rule<V>>(), value._children[1]);
+//             first  = first_rule.value();
+//             second = second_rule.value();
+//         }
         return pair_type(first, second);
     }
 };

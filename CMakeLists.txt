@@ -97,6 +97,7 @@ SET(MATHEMATICAPP_HEADERS
     includes/mathematica++/packet.h
     includes/mathematica++/history.h
     includes/mathematica++/mhelper.h
+    includes/mathematica++/association.h
 )
 
 SET(MATHEMATICAPP_SOURCES
@@ -117,6 +118,7 @@ SET(MATHEMATICAPP_SOURCES
     sources/packet.cpp
     sources/history.cpp
     sources/mhelper.cpp
+    sources/association.cpp
 )
 
 IF (DEFINED XCODE_VERSION)

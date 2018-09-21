@@ -45,6 +45,7 @@
 #include "mathematica++/operators.h"
 #include "mathematica++/rules.h"
 
+#include "mathematica++/association.h"
 using namespace mathematica;
 
 // MATHEMATICA_DECLARE(FactorInteger)
