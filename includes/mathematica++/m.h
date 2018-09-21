@@ -492,67 +492,6 @@ struct argument_helper<std::vector<T>, M_Type>: public array_helper<T, M_Type>{
     argument_helper(typename base_type::queue_type& queue): base_type(queue){}
 };
 
-// template <typename T, typename M_Type>
-// struct argument_helper<std::vector<T>, M_Type>{
-//     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
-//     queue_type& _q;
-//     
-//     argument_helper(queue_type& queue): _q(queue){}
-//     
-//     void transfer_bulk(const std::vector<T>& arg){
-//         typedef typename bulk_transfer_inner_type<std::vector<T>>::inner_type value_type;
-//         
-//         std::vector<int> dimsv;
-//         bulk_dimention_helper<std::vector<T>> dhelper(dimsv);
-//         dhelper(arg);
-//         
-//         std::vector<value_type> list;
-//         bulk_argument_helper<std::vector<T>, std::vector<value_type>> helper(list);
-//         helper(arg);
-//         
-//         int expected_elements = std::accumulate(dimsv.begin(), dimsv.end(), 1, std::multiplies<int>());
-//         if(expected_elements == list.size()){
-//             typedef void (*callback_type)(mathematica::driver::ws::connection&, std::vector<value_type>, std::vector<int>);
-//             _q.push_back(detail::make_deyaled_call(boost::bind(static_cast<callback_type>(&mathematica::driver::ws::impl::put_array), _1, list, dimsv)));
-//         }else{
-//             transfer_chain(arg);
-//         }
-//     }
-//     void transfer_chain(const std::vector<T>& arg){
-//         _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
-//         for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
-//             detail::M_Helper::argument_helper<T, M_Type> helper(_q);
-//             helper(*i);
-//         }
-//     }
-//     void operator()(const std::vector<T>& arg){
-//         if(mathematica::accessor::enabled(mathematica::bulk_io)){
-//             transfer_bulk(arg);
-//         }else{
-//             transfer_chain(arg);
-//         }
-//     }
-// };
-
-// template <typename T>
-// struct argument_helper<std::vector<T>, T>{
-//     typedef std::deque<detail::abstract_delayed_call_ptr> queue_type;
-//     queue_type& _q;
-//     
-//     argument_helper(queue_type& queue): _q(queue){}
-// 
-//     void transfer_chain(const std::vector<T>& arg){
-//         _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
-//         for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
-//             detail::M_Helper::argument_helper<T, T> helper(_q);
-//             helper(*i);
-//         }
-//     }
-//     void operator()(const std::vector<T>& arg){
-//         transfer_chain(arg);
-//     }
-// };
-
 #ifdef USING_LIB_EIGEN
 template <typename T, int Rows, int Cols, typename M_Type>
 struct argument_helper<Eigen::Matrix<T, Rows, Cols>, M_Type>{
