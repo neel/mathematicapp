@@ -180,19 +180,22 @@ BOOST_AUTO_TEST_CASE(association_struct){
             BOOST_CHECK(circles.second.center.elevation == 300.0f);
             BOOST_CHECK(circles.second.radius == 5);
         }
-//         {
-//             typedef std::vector<circle> collection_type;
-//             
-//             collection_type circles;
-//             circles.push_back(disc_1);
-//             circles.push_back(disc_2);
-//             
-//             shell << Part(circles, 1);
-//             shell >> result;
-//             
-//             std::cout << result << std::endl;
-//             circle disc = cast<circle>(result);
-//         }
+        {
+            typedef std::vector<circle> collection_type;
+            
+            collection_type circles;
+            circles.push_back(disc_1);
+            circles.push_back(disc_2);
+            
+            shell << Part(circles, 1);
+            shell >> result;
+            
+            circle disc = cast<circle>(result);
+            BOOST_CHECK(disc.center.location == std::make_pair(4, 5));
+            BOOST_CHECK(disc.center.name == "c1");
+            BOOST_CHECK(disc.center.elevation == 300.0f);
+            BOOST_CHECK(disc.radius == 4);
+        }
     }
 }
 
