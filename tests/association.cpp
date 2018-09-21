@@ -67,17 +67,39 @@ struct circle{
 
 struct sensor_deployment{
     std::vector<circle> sensors;
-    int start;
-    int duration;
+    boost::posix_time::ptime start;
+    long duration;
     long job;
 };
 
-// struct sensor_deployment{
-//     std::vector<circle> sensors;
-//     boost::posix_time::ptime start;
-//     boost::posix_time::time_duration duration;
-//     long job;
+// template <>
+// struct mathematica::association<boost::posix_time::ptime>: mathematica::typemap<association<boost::posix_time::ptime>, boost::posix_time::ptime, boost::tuple<boost::tuple<unsigned, unsigned, unsigned, unsigned, unsigned, unsigned>, std::string, std::string, double>>{
+//     mathematica::m operator()(const class_type& obj){
+//         auto date = obj.date();
+//         auto time = obj.time_of_day();
+//         return mathematica::m("DateObject")(List((int)date.year(), (int)date.month(), (int)date.day(), time.hours(), time.minutes(), time.seconds()));
+//     }
+//     class_type operator()(const capture_type& captured){
+//         int y, m, d, h, n, s;
+//         boost::tie(y, m, d, h, n, s) = boost::get<0>(captured);
+//         class_type ptime = class_type(boost::gregorian::date(y, m, d), boost::posix_time::time_duration(h, n, s));
+//         return ptime;
+//     }
 // };
+
+MATHEMATICA_TYPEMAP(boost::posix_time::ptime, (boost::tuple<boost::tuple<unsigned, unsigned, unsigned, unsigned, unsigned, unsigned>, std::string, std::string, double>)){
+    mathematica::m operator()(const class_type& obj){
+        auto date = obj.date();
+        auto time = obj.time_of_day();
+        return mathematica::m("DateObject")(List((int)date.year(), (int)date.month(), (int)date.day(), time.hours(), time.minutes(), time.seconds()));
+    }
+    class_type operator()(const capture_type& captured){
+        int y, m, d, h, n, s;
+        boost::tie(y, m, d, h, n, s) = boost::get<0>(captured);
+        class_type ptime = class_type(boost::gregorian::date(y, m, d), boost::posix_time::time_duration(h, n, s));
+        return ptime;
+    }
+};
 
 MATHEMATICA_ASSOCIATE(point, std::pair<int, int>, std::string, double){
     MATHEMATICA_PROPERTY(0, location)
@@ -90,7 +112,7 @@ MATHEMATICA_ASSOCIATE(circle, point, int){
     MATHEMATICA_PROPERTY(1, radius)
 };
 
-MATHEMATICA_ASSOCIATE(sensor_deployment, std::vector<circle>, int, int, long){
+MATHEMATICA_ASSOCIATE(sensor_deployment, std::vector<circle>, boost::posix_time::ptime, long, long){
     MATHEMATICA_PROPERTY(0, sensors)
     MATHEMATICA_PROPERTY(1, start)
     MATHEMATICA_PROPERTY(2, duration)
@@ -220,22 +242,19 @@ BOOST_AUTO_TEST_CASE(association_struct){
         }
     }
     {
+        boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
         value result;
         circle area_1(point(std::make_pair(4, 5), "c1", 300.0f), 4);
         circle area_2(point(std::make_pair(5, 6), "c2", 300.0f), 5);
         sensor_deployment deployment;
         deployment.sensors.push_back(area_1);
         deployment.sensors.push_back(area_2);
-        deployment.start = 0;
-        deployment.duration = 0;
-//         deployment.start = boost::posix_time::second_clock::local_time();
-//         deployment.duration = boost::posix_time::hours(1);
+        deployment.start = now;
+        deployment.duration = 100;
         deployment.job = 1;
         
         shell << List(deployment)[1];
         shell >> result;
-        
-        std::cout << result << std::endl;
         
         {
             sensor_deployment deplr = cast<sensor_deployment>(result);
@@ -248,6 +267,8 @@ BOOST_AUTO_TEST_CASE(association_struct){
             BOOST_CHECK(deplr.sensors[1].center.name == "c2");
             BOOST_CHECK(deplr.sensors[1].center.elevation == 300.0f);
             BOOST_CHECK(deplr.sensors[1].radius == 5);
+            BOOST_CHECK(deplr.start == now);
+            BOOST_CHECK(deplr.duration == 100);
         }
     }
 }

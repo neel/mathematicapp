@@ -167,6 +167,23 @@ struct sequence: chain<D, U, 0, Ts...> {
     }
 };
 
+template <typename D, typename U, typename C>
+struct typemap{
+    typedef D              derived_type;
+    typedef U              class_type;
+    typedef C              capture_type;
+    typedef mathematica::m target_type;
+    typedef mathematica::m serialized_type;
+    
+    mathematica::m serialize(const class_type& obj){
+        return static_cast<derived_type&>(*this)(obj);
+    }
+    class_type deserialize(const mathematica::composite& composite){
+        capture_type captured = cast<capture_type>(composite);
+        return static_cast<derived_type&>(*this)(captured);
+    }
+};
+
 }
 
 // namespace mathematica{
