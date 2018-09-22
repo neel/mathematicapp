@@ -26,6 +26,8 @@
 
 #include "mathematica++/m.h"
 #include <boost/ref.hpp>
+#include <boost/assert.hpp>
+#include <sstream>
 
 mathematica::m::m(const std::string& name): _name(name), _length(0){}
 mathematica::m::m(const mathematica::m& other): _name(other._name), _queue(other._queue), _length(other._length){}
@@ -69,5 +71,8 @@ mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value v
         }
         fnc();
         return fnc;
+    }else {
+        BOOST_ASSERT_MSG(true, static_cast<std::stringstream&>(std::stringstream() << "Unexpected token received of type " << val->type()).str().c_str());
+        return mathematica::m("Evaluate")(mathematica::m("ToExpression")(val->stringify()));
     }
 }
