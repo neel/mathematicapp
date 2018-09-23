@@ -46,6 +46,8 @@ struct symbol{
     static symbol var(const std::string& name);
     
     mathematica::m operator=(const mathematica::m& rhs);
+    
+    mathematica::m sub(int n);
 		
     std::string name() const;
     private:
