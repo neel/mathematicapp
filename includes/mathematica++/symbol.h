@@ -31,25 +31,25 @@
 
 namespace mathematica{
 
-struct m;    
+struct m;
 
 struct symbol{
-		symbol(const std::string& name);
-		symbol(const symbol& other);
-		
-		static symbol True();
-		static symbol False();
-		static symbol Pi();
-		static symbol E();
-		static symbol I();
-		static symbol Infinity();
-		static symbol var(const std::string& name);
+    symbol(const std::string& name);
+    symbol(const symbol& other);
+    
+    static symbol True();
+    static symbol False();
+    static symbol Pi();
+    static symbol E();
+    static symbol I();
+    static symbol Infinity();
+    static symbol var(const std::string& name);
     
     mathematica::m operator=(const mathematica::m& rhs);
 		
-		std::string name() const;
-		private:
-				std::string _name;
+    std::string name() const;
+    private:
+        std::string _name;
 };
 }
 

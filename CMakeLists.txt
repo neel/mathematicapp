@@ -16,6 +16,27 @@ ENDMACRO(USE_CXX11)
 
 USE_CXX11()
 
+# https://stackoverflow.com/a/19578320/256007
+if(NOT WIN32)
+  string(ASCII 27 Esc)
+  set(ColourReset "${Esc}[m")
+  set(ColourBold  "${Esc}[1m")
+  set(Red         "${Esc}[31m")
+  set(Green       "${Esc}[32m")
+  set(Yellow      "${Esc}[33m")
+  set(Blue        "${Esc}[34m")
+  set(Magenta     "${Esc}[35m")
+  set(Cyan        "${Esc}[36m")
+  set(White       "${Esc}[37m")
+  set(BoldRed     "${Esc}[1;31m")
+  set(BoldGreen   "${Esc}[1;32m")
+  set(BoldYellow  "${Esc}[1;33m")
+  set(BoldBlue    "${Esc}[1;34m")
+  set(BoldMagenta "${Esc}[1;35m")
+  set(BoldCyan    "${Esc}[1;36m")
+  set(BoldWhite   "${Esc}[1;37m")
+endif()
+
 SET(CMAKE_CXX_FLAGS "-ftemplate-backtrace-limit=0 ${CMAKE_CXX_FLAGS}")
 
 SET(Mathematica_USE_STATIC_LIBRARIES ON)
@@ -25,7 +46,6 @@ FIND_PACKAGE(Mathematica 11.0.0 REQUIRED)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${Mathematica_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${Mathematica_WSTP_INCLUDE_DIR})
 
 SET(MATHEMATICAPP_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/includes
@@ -33,13 +53,38 @@ SET(MATHEMATICAPP_INCLUDE_DIRS
 
 INCLUDE_DIRECTORIES(${MATHEMATICAPP_INCLUDE_DIRS})
 
+OPTION(WITH_ML          "Use MathLink functions insteadof using WSTP"             OFF)
+OPTION(PRINT_TRACE      "Print low level the WS/ML functions that are being used" OFF)
+OPTION(WITHOUT_EIGEN    "Compile without using eigen even if available"           OFF)
+
+IF(WITH_ML)
+    MESSAGE("${BoldMagenta} Using MathLink instead of WSTP ${ColourReset}")
+    ADD_COMPILE_DEFINITIONS(USING_ML)
+    INCLUDE_DIRECTORIES(${Mathematica_MathLink_INCLUDE_DIR})
+ELSE()
+    ADD_COMPILE_DEFINITIONS(USING_WS)
+    INCLUDE_DIRECTORIES(${Mathematica_WSTP_INCLUDE_DIR})
+ENDIF()
+
+IF(PRINT_TRACE)
+    ADD_COMPILE_DEFINITIONS(USING_DEBUG_TRACE)
+ENDIF()
+
+IF(NOT WITHOUT_EIGEN)
+    FIND_PACKAGE(Eigen3 NO_MODULE)
+    IF(Eigen3_FOUND)
+        INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
+        ADD_COMPILE_DEFINITIONS(USING_LIB_EIGEN)
+        MESSAGE("${BoldMagenta} Using Eigen3 library ${ColourReset}")
+    ENDIF()
+ENDIF()
+
 SET(MATHEMATICAPP_HEADERS
     includes/mathematica++/scope.h
     includes/mathematica++/connector.h
     includes/mathematica++/exceptions.h
     includes/mathematica++/tokens.h
     includes/mathematica++/accessor.h
-    #    includes/mathematica++/condition.h
     includes/mathematica++/variant.h
     includes/mathematica++/drivers.h
     includes/mathematica++/m.h
@@ -52,6 +97,7 @@ SET(MATHEMATICAPP_HEADERS
     includes/mathematica++/packet.h
     includes/mathematica++/history.h
     includes/mathematica++/mhelper.h
+    includes/mathematica++/association.h
 )
 
 SET(MATHEMATICAPP_SOURCES
@@ -60,7 +106,6 @@ SET(MATHEMATICAPP_SOURCES
     sources/exceptions.cpp
     sources/tokens.cpp
     sources/accessor.cpp
-#    sources/condition.cpp
     sources/variant.cpp
     sources/drivers.cpp
     sources/m.cpp
@@ -73,6 +118,7 @@ SET(MATHEMATICAPP_SOURCES
     sources/packet.cpp
     sources/history.cpp
     sources/mhelper.cpp
+    sources/association.cpp
 )
 
 IF (DEFINED XCODE_VERSION)
@@ -87,7 +133,7 @@ TARGET_LINK_LIBRARIES(mathematica++ ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(mathematica++ ${Mathematica_LIBRARIES})
 # TARGET_LINK_LIBRARIES(mathematica++ ${Mathematica_WSTP_LIBRARY})
 
-set(M_STORAGE_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/storage.m)
+SET(M_STORAGE_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/storage.m)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/includes/mathematica++/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/mathematica++/config.h)
 
 MESSAGE(STATUS "Expecting storage.m in " ${M_STORAGE_LIB_PATH})

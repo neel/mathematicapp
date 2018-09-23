@@ -27,6 +27,28 @@
 #ifndef MATHEMATICAPP_DEFS_H
 #define MATHEMATICAPP_DEFS_H
 
+#define STR_EXPAND(tok) #tok
+#define STR(tok) STR_EXPAND(tok)
+#define UNPACK(...) __VA_ARGS__
+#define GET_MACRO(_1,_2,_3, NAME,...) NAME
+#define MATHEMATICA_ASSOCIATE(T, ...)                                   \
+    template <>                                                         \
+    struct mathematica::association<T>: mathematica::dictionary<association<T>, T, __VA_ARGS__>
+    
+#define MATHEMATICA_SEQUENCE(T, ...)                                   \
+    template <>                                                        \
+    struct mathematica::association<T>: mathematica::sequence<association<T>, T, __VA_ARGS__>
+    
+#define MATHEMATICA_TYPEMAP(T, U)                                      \
+    template <>                                                        \
+    struct mathematica::association<T>: mathematica::typemap<association<T>, T, UNPACK U>
+    
+#define MATHEMATICA_PROPERTY_NAMED(I, N, P) static auto detail(property<I>){return std::make_pair(N,  &class_type::P);}
+#define MATHEMATICA_PROPERTY_AUTO(I, P) static auto detail(property<I>){return std::make_pair(STR_EXPAND(P), &class_type::P);}
+
+#define MATHEMATICA_PROPERTY(...) GET_MACRO(__VA_ARGS__, MATHEMATICA_PROPERTY_NAMED, MATHEMATICA_PROPERTY_AUTO)(__VA_ARGS__)
+#define MATHEMATICA_ELEMENT(I, P) static auto detail(property<I>){return &class_type::P;}
+
 namespace mathematica{
 
 enum packet_type{
@@ -62,6 +84,12 @@ enum packet_type{
 
     packet_FIRSTUSER=128,
     packet_LASTUSER=255
+};
+
+enum features{
+    bulk_io             = 1 << 0,
+    sanity_check        = 1 << 1,
+    graphics_autosave   = 1 << 2
 };
 
 }

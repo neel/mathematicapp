@@ -27,10 +27,17 @@
 #ifndef MATHEMATICAPP_CONNECTION_H
 #define MATHEMATICAPP_CONNECTION_H
 
-#include "defs.h"
+#ifdef USING_ML
+#include "mathlink.h"
+#else
 #include "wstp.h"
-#include <string>
+#endif
+
+#include "compatibility.h"
+#include <boost/cstdint.hpp>
 #include <stack>
+#include <vector>
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 namespace mathematica{
@@ -46,9 +53,9 @@ namespace ws{
  * have connector, wrapper etc.. as the interface to connection
  */
 struct connection{
-  typedef WSLINK link_type;
-  typedef WSENV  env_type;
-  typedef WSMARK mark_type;
+  typedef WMK_LINK link_type;
+  typedef WMK_ENV  env_type;
+  typedef WMK_MARK mark_type;
   
   connection();
   connection(int argc, char** argv);
@@ -66,9 +73,16 @@ struct connection{
   void symbol(const std::string& s);
   void evaluate(std::string expression);
   void end();
+
+  void put_array_int8  (const std::vector<boost::uint8_t>& data, const std::vector<int>& dims);
+  void put_array_int16 (const std::vector<boost::int16_t>& data, const std::vector<int>& dims);
+  void put_array_int32 (const std::vector<boost::int32_t>& data, const std::vector<int>& dims);
+  void put_array_int64 (const std::vector<boost::int64_t>& data, const std::vector<int>& dims);
+  void put_array_real32(const std::vector<float>& data, const std::vector<int>& dims);
+  void put_array_real64(const std::vector<double>& data, const std::vector<int>& dims);
   
   std::pair<std::string, int> get_function();
-  int get_integer();
+  std::pair<long long, std::string> get_integer();
   double get_real();
   std::string get_str();
   std::string get_symbol();
@@ -99,7 +113,7 @@ struct connection{
     env_type  _env;
     std::stack<mark_type> _checkpoints;
 		
-		connection(connection& other);
+    connection(connection& other);
 };
 
 }

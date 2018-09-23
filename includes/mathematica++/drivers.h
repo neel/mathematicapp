@@ -27,7 +27,9 @@
 #ifndef MATHEMATICAPP_DRIVERS_H
 #define MATHEMATICAPP_DRIVERS_H
 
+#include <vector>
 #include <string>
+#include <boost/cstdint.hpp>
 
 namespace mathematica{
 namespace driver{
@@ -61,6 +63,16 @@ struct impl{
     static void put(mathematica::driver::ws::connection& conn, char s);
     static void put(mathematica::driver::ws::connection& conn, bool s);
     static void put(mathematica::driver::ws::connection& conn, const mathematica::symbol& s);
+    
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int8_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint8_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int16_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint16_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int32_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint32_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int64_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<float>           data, std::vector<int> dims);
+    static void put_array(mathematica::driver::ws::connection& conn, std::vector<double>          data, std::vector<int> dims);
 };
 
 namespace ml{

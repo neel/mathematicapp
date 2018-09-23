@@ -54,28 +54,35 @@ struct m;
  * \see wrapper::end
  */
 class accessor: public mathematica::history, private boost::noncopyable{
-    protected:
-        bool _transaction_lock_enabled;
-        boost::recursive_mutex _mutex;
-	public:
-		typedef std::pair<std::string, int> head_type;
-	protected:
-		boost::shared_ptr<mathematica::driver::ws::connection> _connection;
-    protected:
-		accessor(boost::shared_ptr<mathematica::driver::ws::connection> connection);
-	public:
+  static int _features;
+  public:
+    static void set_features(int f);
+    static int  features();
+    static void enable(mathematica::features f);
+    static bool enabled(mathematica::features f);
+    static void disable(mathematica::features f);
+  protected:
+    bool _transaction_lock_enabled;
+    boost::recursive_mutex _mutex;
+  public:
+    typedef std::pair<std::string, int> head_type;
+  protected:
+	boost::shared_ptr<mathematica::driver::ws::connection> _connection;
+  protected:
+	accessor(boost::shared_ptr<mathematica::driver::ws::connection> connection);
+  public:
     /**
      * Returns the return packets content as token
      */
-		boost::shared_ptr<mathematica::token> next();
+    boost::shared_ptr<mathematica::token> next();
     /**
      * ignores the output. Must ignore explicitely if you don't want to fetch the output, Otherwise it will mess up the next computation
      */
     void ignore();
     boost::shared_ptr<mathematica::token> fetch();
-	public:
-		accessor& flush();
-		accessor& pull();
+public:
+	accessor& flush();
+	accessor& pull();
   public:
     mathematica::driver::ws::connection& connection() const;
     bool connected() const;

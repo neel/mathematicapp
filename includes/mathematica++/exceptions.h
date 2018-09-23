@@ -27,8 +27,13 @@
 #ifndef MATHEMATICAPP_EXCEPTIONS_H
 #define MATHEMATICAPP_EXCEPTIONS_H
 
-#include "defs.h"
+#ifdef USING_ML
+#include "mathlink.h"
+#else
 #include "wstp.h"
+#endif
+
+#include "compatibility.h"
 #include <string>
 #include <stdexcept>
 
@@ -55,8 +60,7 @@ struct error: public std::runtime_error{
 	const std::string& context() const{return _context;}
 };
 
-error dispatch(WSLINK link, const std::string& context);
-
+error dispatch(WMK_LINK link, const std::string& context);
 error dispatch(mathematica::driver::ws::connection& conn, const std::string& context);
 }
 

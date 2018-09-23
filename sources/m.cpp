@@ -26,6 +26,8 @@
 
 #include "mathematica++/m.h"
 #include <boost/ref.hpp>
+#include <boost/assert.hpp>
+#include <sstream>
 
 mathematica::m::m(const std::string& name): _name(name), _length(0){}
 mathematica::m::m(const mathematica::m& other): _name(other._name), _queue(other._queue), _length(other._length){}
@@ -46,7 +48,14 @@ mathematica::m& mathematica::m::invoke(mathematica::driver::ws::connection& conn
 
 mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value val){
     if(val->type() == mathematica::token::token_integer){
-        return mathematica::m("Evaluate")((int)*val);
+        auto token_int = boost::dynamic_pointer_cast<mathematica::tokens::integer>(val);
+        if(token_int->storage() == mathematica::tokens::integer::multiprecision){
+            std::string valstr = token_int->value_str();
+            valstr.erase(0, 1);
+            return mathematica::m("Evaluate")(mathematica::m("ToExpression")(valstr));
+        }else{
+            return mathematica::m("Evaluate")((long long)*token_int);
+        }
     }else if(val->type() == mathematica::token::token_real){
         return mathematica::m("Evaluate")((double)*val);
     }else if(val->type() == mathematica::token::token_str){
@@ -62,5 +71,8 @@ mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value v
         }
         fnc();
         return fnc;
+    }else {
+        BOOST_ASSERT_MSG(true, static_cast<std::stringstream&>(std::stringstream() << "Unexpected token received of type " << val->type()).str().c_str());
+        return mathematica::m("Evaluate")(mathematica::m("ToExpression")(val->stringify()));
     }
 }

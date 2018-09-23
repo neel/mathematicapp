@@ -91,9 +91,9 @@ class connector: public mathematica::wrapper{
     connector(int argc, char** argv);
     connector(const std::string& argv);
     std::string name() const;
-	public:
-		typedef boost::shared_ptr<mathematica::connector> ptr;
-		~connector();
+  public:
+	typedef boost::shared_ptr<mathematica::connector> ptr;
+	~connector();
   public:
     void initialize();
   public:
