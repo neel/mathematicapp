@@ -67,3 +67,6 @@ mathematica::m mathematica::symbol::operator=(const mathematica::m& rhs){
     return mathematica::m("Set")(*this, rhs);
 }
 
+mathematica::m mathematica::symbol::sub(int n){
+    return mathematica::m("Subscript")(*this, n);
+}
