@@ -1,0 +1,12 @@
+- issue #4 serialize struct
+  added `MATHEMATICA_ASSOCIATE`, `MATHEMATICA_SEQUENCE` and `MATHEMATICA_TYPEMAP`
+  see test association
+- issue #3 support for multiprecision string
+  integers larger than machine size are fetched as string and are stored with an initial `#` character
+  Similarly strings strating with `#` character are treated as large integers while sending input to mathematica
+- issue #1 bulk IO support
+  supported `std::vector`, `Eigen::Matrix` (optionally if available) 
+  PutIntegerNArray functions are used if enabled using runtime flag `mathematica::bulk_io`
+  use `shell.enable(mathematica::bulk_io)` see http://community.wolfram.com/groups/-/m/t/1419096
+- issue #2 `MathLink` support
+  added cmake option `-DWITH_ML=ON` to use `MathLink` instead of `WSTP`
