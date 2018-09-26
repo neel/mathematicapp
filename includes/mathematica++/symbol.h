@@ -37,8 +37,8 @@ struct symbol{
     symbol(const std::string& name);
     symbol(const symbol& other);
     
-    static symbol True();
-    static symbol False();
+    static symbol TrueS();
+    static symbol FalseS();
     static symbol Pi();
     static symbol E();
     static symbol I();
