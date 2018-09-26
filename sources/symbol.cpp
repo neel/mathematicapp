@@ -30,11 +30,11 @@
 mathematica::symbol::symbol(const std::string& name): _name(name){}
 mathematica::symbol::symbol(const mathematica::symbol& other): _name(other._name){}
 
-mathematica::symbol mathematica::symbol::True(){
+mathematica::symbol mathematica::symbol::TrueS(){
     return mathematica::symbol("True");
 }
 
-mathematica::symbol mathematica::symbol::False(){
+mathematica::symbol mathematica::symbol::FalseS(){
     return mathematica::symbol("False");
 }
 
