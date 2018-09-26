@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(token_conversion){
     symbol y("y");
     
     {
-        auto opt = (Rule("WorkingPrecision")= 2, Rule("VerifySolutions")= symbol::True());
+        auto opt = (Rule("WorkingPrecision")= 2, Rule("VerifySolutions")= symbol::TrueS());
         value soln;
         shell << Solve(Power(x, 2) == 2, x, opt);
         shell >> soln;
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(token_conversion){
     }
     
     {
-        auto opt = (Rule("WorkingPrecision")= 2, Rule("VerifySolutions")= symbol::True());
+        auto opt = (Rule("WorkingPrecision")= 2, Rule("VerifySolutions")= symbol::TrueS());
         value soln;
         shell << Solve(Power(x, 2) == 2, x, opt);
         shell >> soln;
