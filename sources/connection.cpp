@@ -66,6 +66,12 @@ mathematica::driver::ws::connection::connection(){
     }
 }
 
+mathematica::driver::ws::connection::connection(mathematica::driver::ws::connection::link_type link){
+    _link = link;
+    _env  = 0x0;
+    _connected = true;
+}
+
 mathematica::driver::ws::connection::connection(int argc, char** argv){
 		int err;
 		WMK_ENV env =  WMK_Initialize((WMK_ParametersPointer)0);
@@ -90,6 +96,10 @@ mathematica::driver::ws::connection::connection(const std::string& name){
         _link = link;
         _env  = env;
     }
+}
+
+boost::shared_ptr<mathematica::driver::ws::connection> mathematica::driver::ws::connection::create(mathematica::driver::ws::connection::link_type link){
+    return boost::shared_ptr<mathematica::driver::ws::connection>(new connection(link));
 }
 
 std::string mathematica::driver::ws::connection::link_name() const{
@@ -474,17 +484,25 @@ std::string mathematica::driver::ws::connection::get_symbol(){
 }
 
 void mathematica::driver::ws::connection::disconnect(){
-    WMK_Close(_link);
-    WMK_Deinitialize(_env);
+    if(_env){
+        WMK_Close(_link);
+        WMK_Deinitialize(_env);
+    }
 }
 
 boost::shared_ptr<mathematica::packet> mathematica::driver::ws::connection::fetch_packet(mathematica::accessor* accessor){
     boost::shared_ptr<mathematica::packet> packet;
     flush();
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_NextPacket) << std::endl;
+#endif
     int pkt = WMK_NextPacket(_link);
     push();
     boost::shared_ptr<mathematica::token> token = fetch_token(accessor);
     pop();
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_NewPacket) << std::endl;
+#endif
     WMK_NewPacket(_link);
     packet = packets::create(mathematica::packet_type(pkt), token);
     return packet;
@@ -493,8 +511,14 @@ boost::shared_ptr<mathematica::packet> mathematica::driver::ws::connection::fetc
 boost::shared_ptr<mathematica::packet> mathematica::driver::ws::connection::ignore_packet(mathematica::accessor* accessor){
     boost::shared_ptr<mathematica::packet> packet;
     flush();
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_NextPacket) << std::endl;
+#endif
     int pkt = WMK_NextPacket(_link);
     boost::shared_ptr<mathematica::token> token;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_NewPacket) << std::endl;
+#endif
     WMK_NewPacket(_link);
     packet = packets::create(mathematica::packet_type(pkt), token);
     return packet;
@@ -503,6 +527,9 @@ boost::shared_ptr<mathematica::packet> mathematica::driver::ws::connection::igno
 
 boost::shared_ptr<mathematica::token> mathematica::driver::ws::connection::fetch_token(mathematica::accessor* accessor){
 //     int token_type = WSGetType(_link);
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_GetNext) << std::endl;
+#endif
     int token_type = WMK_GetNext(_link);
     boost::shared_ptr<mathematica::token> token = tokens::factory(accessor, token_type);
     if(token){
@@ -555,6 +582,9 @@ boost::shared_ptr<mathematica::token> mathematica::driver::ws::connection::fetch
 
 int mathematica::driver::ws::connection::next(mathematica::accessor* accessor){
 //   int token_type = WSGetType(_link);
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_GetNext) << std::endl;
+#endif
   int token_type = WMK_GetNext(_link);
   return token_type;
 }
@@ -570,41 +600,63 @@ int mathematica::driver::ws::connection::next(mathematica::accessor* accessor){
 
 void mathematica::driver::ws::connection::pull(){
     flush();
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_WaitForLinkActivity) << std::endl;
+#endif
     WMK_WaitForLinkActivity(_link);
 }
 
 
 void mathematica::driver::ws::connection::flush(){
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_Flush) << std::endl;
+#endif
 	if(!WMK_Flush(_link)){
 		throw exceptions::dispatch(_link, "mathematica::driver::ws::connection::flush");
 	}
 }
 
 int mathematica::driver::ws::connection::test(std::string head, int& nargs){
-		int n;
-		int c = WMK_TestHead(_link, head.c_str(), &n);
-		if(!c){
-				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::test");
-		}
-		nargs = n;
-		return c;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_TestHead) << std::endl;
+#endif
+    int n;
+    int c = WMK_TestHead(_link, head.c_str(), &n);
+    if(!c){
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::test");
+    }
+    nargs = n;
+    return c;
 }
 
 int mathematica::driver::ws::connection::head(std::string& type, int& nargs){
-		WMK_MARK mark = WMK_CreateMark(_link);
-		const char* tname;
-		int n;
-		int c = WMK_GetFunction(_link, &tname, &n);
-		nargs = n;
-		if(c){
-				type = std::string(tname);
-				WMK_ReleaseSymbol(_link, tname);
-		}else{
-				throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::head");
-		}
-		WMK_SeekToMark(_link, mark, 0);
-		WMK_DestroyMark(_link, mark);
-		return c;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_CreateMark) << std::endl;
+#endif
+    WMK_MARK mark = WMK_CreateMark(_link);
+    const char* tname;
+    int n;
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_GetFunction) << std::endl;
+#endif
+    int c = WMK_GetFunction(_link, &tname, &n);
+    nargs = n;
+    if(c){
+            type = std::string(tname);
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_ReleaseSymbol) << std::endl;
+#endif
+            WMK_ReleaseSymbol(_link, tname);
+    }else{
+            throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::head");
+    }
+#ifdef USING_DEBUG_TRACE
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_SeekToMark) << std::endl;
+    std::clog << boost::format("[%1%]: %2%()") % boost::posix_time::second_clock::local_time() % STR(WMK_DestroyMark) << std::endl;
+#endif
+    WMK_SeekToMark(_link, mark, 0);
+    WMK_DestroyMark(_link, mark);
+    return c;
 }
 
 

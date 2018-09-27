@@ -50,8 +50,21 @@ struct stream_helper<mathematica::value>{
 };
 }
 
-wrapper& operator<<(wrapper& stream, const mathematica::symbol& symbol);
-wrapper& operator<<(wrapper& stream, const mathematica::m& expr);
+template <typename T>
+wrapper& operator<<(wrapper& stream, const T& value){
+    if(stream.transaction_lock_enabled()){
+        stream.lock();
+    }
+    stream(value);
+    stream.end();
+    return stream;
+}
+
+template <>
+mathematica::wrapper& mathematica::operator<<<mathematica::symbol>(mathematica::wrapper& stream, const mathematica::symbol& symbol);
+template <>
+mathematica::wrapper& mathematica::operator<<<mathematica::m>(mathematica::wrapper& stream, const mathematica::m& expr);
+
 wrapper& operator,(wrapper& stream, const mathematica::m& expr);
 template <typename T>
 wrapper& operator>>(wrapper& stream, T& expr){

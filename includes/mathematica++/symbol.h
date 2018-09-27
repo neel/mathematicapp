@@ -34,7 +34,7 @@ namespace mathematica{
 struct m;
 
 struct symbol{
-    symbol(const std::string& name);
+    explicit symbol(const std::string& name);
     symbol(const symbol& other);
     
     static symbol TrueS();
