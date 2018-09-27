@@ -39,7 +39,7 @@
 
 namespace mathematica{
 namespace driver{
-namespace ws{
+namespace io{
 struct connection;
 }
 }
@@ -67,9 +67,9 @@ class accessor: public mathematica::history, private boost::noncopyable{
   public:
     typedef std::pair<std::string, int> head_type;
   protected:
-	boost::shared_ptr<mathematica::driver::ws::connection> _connection;
+	boost::shared_ptr<mathematica::driver::io::connection> _connection;
   protected:
-	accessor(boost::shared_ptr<mathematica::driver::ws::connection> connection);
+	accessor(boost::shared_ptr<mathematica::driver::io::connection> connection);
   public:
     /**
      * Returns the return packets content as token
@@ -84,7 +84,7 @@ public:
 	accessor& flush();
 	accessor& pull();
   public:
-    mathematica::driver::ws::connection& connection() const;
+    mathematica::driver::io::connection& connection() const;
     bool connected() const;
   public:
     virtual ~accessor();
@@ -110,7 +110,7 @@ public:
  */
 class wrapper: public accessor{
 	protected:
-		wrapper(boost::shared_ptr<mathematica::driver::ws::connection> connection);
+		wrapper(boost::shared_ptr<mathematica::driver::io::connection> connection);
 	public:
 		mathematica::value import(const std::string& package);
 		void exit();
