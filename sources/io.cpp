@@ -27,7 +27,8 @@
 #include "mathematica++/io.h"
 #include "mathematica++/m.h"
 
-mathematica::wrapper& mathematica::operator<<(mathematica::wrapper& stream, const mathematica::symbol& symbol){
+template <>
+mathematica::wrapper& mathematica::operator<<<mathematica::symbol>(mathematica::wrapper& stream, const mathematica::symbol& symbol){
     if(stream.transaction_lock_enabled()){
         stream.lock();
     }
@@ -36,7 +37,8 @@ mathematica::wrapper& mathematica::operator<<(mathematica::wrapper& stream, cons
     return stream;
 }
 
-mathematica::wrapper& mathematica::operator<<(mathematica::wrapper& stream, const mathematica::m& expr){
+template <>
+mathematica::wrapper& mathematica::operator<<<mathematica::m>(mathematica::wrapper& stream, const mathematica::m& expr){
     if(stream.transaction_lock_enabled()){
         stream.lock();
     }

@@ -144,6 +144,15 @@ struct argument<std::string>{
 };
 
 template <>
+struct argument<const char*>{
+    typedef std::string type;
+    
+    detail::abstract_delayed_call_ptr operator()(const char*& arg){
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, std::string(arg))));
+    }
+};
+
+template <>
 struct argument<mathematica::symbol>{
     typedef mathematica::symbol type;
     

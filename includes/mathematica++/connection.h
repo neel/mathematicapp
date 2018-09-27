@@ -58,8 +58,11 @@ struct connection{
   typedef WMK_MARK mark_type;
   
   connection();
+  connection(link_type link);
   connection(int argc, char** argv);
   connection(const std::string& name);
+  
+  static boost::shared_ptr<connection> create(link_type link);
   
   std::string link_name() const;
   bool connected() const;
@@ -99,7 +102,7 @@ struct connection{
   int test(std::string head, int& nargs);
 
   std::string error(int& code);
-  private:
+  public:
     boost::shared_ptr<mathematica::token> fetch_token(mathematica::accessor* accessor);
   public:
     boost::shared_ptr<mathematica::packet> fetch_packet(mathematica::accessor* accessor);
