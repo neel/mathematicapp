@@ -1,3 +1,9 @@
+- `driver::ws` changed to `driver::io`
+- sending scaler types using operator<< is now supported
+- string literals supported by `mathematica::m`
+- LibraryLink compatibility added
+  `mathematica::connector` can now be constructed from native `WSLINK` or `MLINK`
+  is a connection is created using an existing native link it will not be closed in the destructor
 - issue #4 serialize struct
   added `MATHEMATICA_ASSOCIATE`, `MATHEMATICA_SEQUENCE` and `MATHEMATICA_TYPEMAP`
   see test association
