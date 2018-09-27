@@ -7,3 +7,4 @@
 #include "mathematica++/rules.h"
 #include "mathematica++/operators.h"
 #include "mathematica++/declares.h"
+#include "mathematica++/association.h"
