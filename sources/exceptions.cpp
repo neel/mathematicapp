@@ -40,7 +40,7 @@ mathematica::exceptions::error mathematica::exceptions::dispatch(WMK_LINK link, 
 	return error(ec, context, std::string(WMK_ErrorMessage(link)));
 }
 
-mathematica::exceptions::error mathematica::exceptions::dispatch(mathematica::driver::ws::connection& conn, const std::string& context){
+mathematica::exceptions::error mathematica::exceptions::dispatch(mathematica::driver::io::connection& conn, const std::string& context){
     int ec = 0;
     std::string message = conn.error(ec);
     return error(ec, context, message);

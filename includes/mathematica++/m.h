@@ -55,7 +55,7 @@
 
 namespace mathematica{
 namespace driver{
-namespace ws{
+namespace io{
 struct connection;
 }
 }
@@ -64,7 +64,7 @@ struct connection;
 namespace mathematica{
 namespace detail{
 struct abstract_delayed_call{
-	virtual void invoke(mathematica::driver::ws::connection& link) = 0;
+	virtual void invoke(mathematica::driver::io::connection& link) = 0;
     virtual ~abstract_delayed_call(){}
 };
 typedef boost::shared_ptr<abstract_delayed_call> abstract_delayed_call_ptr;
@@ -73,7 +73,7 @@ struct delayed_call: public abstract_delayed_call{
 	T _ftor;
 	
 	delayed_call(T f): _ftor(f){}
-	virtual void invoke(mathematica::driver::ws::connection& link){
+	virtual void invoke(mathematica::driver::io::connection& link){
 		_ftor(link);
 	}
     virtual ~delayed_call(){}
@@ -94,7 +94,7 @@ struct argument<int>{
     typedef int type;
     
     detail::abstract_delayed_call_ptr operator()(const int& arg){
-        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::integer, _1, arg)));
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::integer, _1, arg)));
     }
 };
     
@@ -103,7 +103,7 @@ struct argument<unsigned int>{
     typedef unsigned int type;
     
     detail::abstract_delayed_call_ptr operator()(const unsigned int& arg){
-        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::uinteger, _1, arg)));
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::uinteger, _1, arg)));
     }
 };
 
@@ -112,7 +112,7 @@ struct argument<long>{
     typedef long type;
     
     detail::abstract_delayed_call_ptr operator()(const long& arg){
-        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::long_integer, _1, arg)));
     }
 };
 
@@ -121,7 +121,7 @@ struct argument<long long>{
     typedef long long type;
     
     detail::abstract_delayed_call_ptr operator()(const long long& arg){
-        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::long_integer, _1, arg)));
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::long_integer, _1, arg)));
     }
 };
 
@@ -130,7 +130,7 @@ struct argument<double>{
     typedef double type;
     
     detail::abstract_delayed_call_ptr operator()(const double& arg){
-        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::real, _1, arg)));
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::real, _1, arg)));
     }
 };
 
@@ -139,7 +139,7 @@ struct argument<std::string>{
     typedef std::string type;
     
     detail::abstract_delayed_call_ptr operator()(const std::string& arg){
-        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, arg)));
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::str, _1, arg)));
     }
 };
 
@@ -148,7 +148,7 @@ struct argument<const char*>{
     typedef std::string type;
     
     detail::abstract_delayed_call_ptr operator()(const char*& arg){
-        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, std::string(arg))));
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::str, _1, std::string(arg))));
     }
 };
 
@@ -157,7 +157,7 @@ struct argument<mathematica::symbol>{
     typedef mathematica::symbol type;
     
     detail::abstract_delayed_call_ptr operator()(const mathematica::symbol& arg){
-        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::symbol, _1, boost::bind(&mathematica::symbol::name, arg))));
+        return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::symbol, _1, boost::bind(&mathematica::symbol::name, arg))));
     }
 };
 
@@ -166,10 +166,10 @@ struct argument<std::complex<T>>{
     typedef std::complex<T> type;
     typedef argument<std::complex<T>> self_type;
     
-    static void generate_ftor(mathematica::driver::ws::connection& link, std::complex<T> z){
-        mathematica::driver::ws::impl::function(link, "Complex", 2L);
-        mathematica::driver::ws::impl::put(link, z.real());
-        mathematica::driver::ws::impl::put(link, z.imag());
+    static void generate_ftor(mathematica::driver::io::connection& link, std::complex<T> z){
+        mathematica::driver::io::impl::function(link, "Complex", 2L);
+        mathematica::driver::io::impl::put(link, z.real());
+        mathematica::driver::io::impl::put(link, z.imag());
     }
     
     detail::abstract_delayed_call_ptr operator()(const std::complex<T>& arg){
@@ -199,15 +199,15 @@ struct argument<mathematica::rule<T>>{
     typedef mathematica::rule<T> type;
     typedef argument<mathematica::rule<T>> self_type;
     
-    static void generate_ftor(mathematica::driver::ws::connection& link, mathematica::rule<T> rule){
-        mathematica::driver::ws::impl::function(link, "Rule", 2L);
+    static void generate_ftor(mathematica::driver::io::connection& link, mathematica::rule<T> rule){
+        mathematica::driver::io::impl::function(link, "Rule", 2L);
         std::string key = rule.key();
         if(boost::starts_with(key, "!")){
-            mathematica::driver::ws::impl::put(link, mathematica::symbol(key.substr(1)));
+            mathematica::driver::io::impl::put(link, mathematica::symbol(key.substr(1)));
         }else{
-            mathematica::driver::ws::impl::put(link, key);
+            mathematica::driver::io::impl::put(link, key);
         }
-        mathematica::driver::ws::impl::put(link, rule.value());
+        mathematica::driver::io::impl::put(link, rule.value());
     }
     
     detail::abstract_delayed_call_ptr operator()(const mathematica::rule<T>& arg){
@@ -261,7 +261,7 @@ struct argument_helper<mathematica::rules_helper<T, U>, M_Type>{
     
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const mathematica::rules_helper<T, U>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "List", arg.size())));
         arg.operator()([&](auto r){
             _q.push_back(detail::M_Helper::make_argument(r));
         });
@@ -292,8 +292,8 @@ struct argument_helper<mathematica::rule<M_Type>, M_Type>{
     
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const mathematica::rule<M_Type>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Rule", 2L)));
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, arg.key())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "Rule", 2L)));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::str, _1, arg.key())));
         detail::M_Helper::argument_helper<M_Type, M_Type> helper(_q);
         helper(arg.value());
     }
@@ -306,8 +306,8 @@ struct argument_helper<mathematica::rule<std::vector<T>>, M_Type>{
     
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const mathematica::rule<std::vector<T>>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Rule", 2L)));
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, arg.key())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "Rule", 2L)));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::str, _1, arg.key())));
         detail::M_Helper::argument_helper<std::vector<T>, M_Type> helper(_q);
         helper(arg.value());
     }
@@ -320,8 +320,8 @@ struct argument_helper<mathematica::rule<std::list<T>>, M_Type>{
     
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const mathematica::rule<std::list<T>>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Rule", 2L)));
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, arg.key())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "Rule", 2L)));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::str, _1, arg.key())));
         detail::M_Helper::argument_helper<std::list<T>, M_Type> helper(_q);
         helper(arg.value());
     }
@@ -335,8 +335,8 @@ struct argument_helper<mathematica::rule<mathematica::rules_helper<T, U>>, M_Typ
     
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const mathematica::rule<mathematica::rules_helper<T, U>>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Rule", 2L)));
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::str, _1, arg.key())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "Rule", 2L)));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::str, _1, arg.key())));
         detail::M_Helper::argument_helper<mathematica::rules_helper<T, U>, M_Type> helper(_q);
         helper(arg.value());
     }
@@ -349,7 +349,7 @@ struct argument_helper<std::initializer_list<T>, M_Type>{
     
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const std::initializer_list<T>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "List", arg.size())));
         for(typename std::initializer_list<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
             _q.push_back(detail::M_Helper::make_argument(*i));
         }
@@ -441,7 +441,7 @@ struct array_helper{
     array_helper(queue_type& queue): _q(queue){}
 
     void transfer_chain(const std::vector<T>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "List", arg.size())));
         for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
             detail::M_Helper::argument_helper<T, M_Type> helper(_q);
             helper(*i);
@@ -472,14 +472,14 @@ struct array_helper<T, M_Type, typename boost::enable_if_c<boost::is_arithmetic<
         
         int expected_elements = std::accumulate(dimsv.begin(), dimsv.end(), 1, std::multiplies<int>());
         if(expected_elements == list.size()){
-            typedef void (*callback_type)(mathematica::driver::ws::connection&, std::vector<value_type>, std::vector<int>);
-            _q.push_back(detail::make_deyaled_call(boost::bind(static_cast<callback_type>(&mathematica::driver::ws::impl::put_array), _1, list, dimsv)));
+            typedef void (*callback_type)(mathematica::driver::io::connection&, std::vector<value_type>, std::vector<int>);
+            _q.push_back(detail::make_deyaled_call(boost::bind(static_cast<callback_type>(&mathematica::driver::io::impl::put_array), _1, list, dimsv)));
         }else{
             transfer_chain(arg);
         }
     }
     void transfer_chain(const std::vector<T>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "List", arg.size())));
         for(typename std::vector<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
             detail::M_Helper::argument_helper<T, M_Type> helper(_q);
             helper(*i);
@@ -519,8 +519,8 @@ struct argument_helper<Eigen::Matrix<T, Rows, Cols>, M_Type>{
         std::vector<int> dims = {mrows, mcols};
         std::vector<T> elems(begin, end);
         
-        typedef void (*callback_type)(mathematica::driver::ws::connection&, std::vector<T>, std::vector<int>);
-        _q.push_back(detail::make_deyaled_call(boost::bind(static_cast<callback_type>(&mathematica::driver::ws::impl::put_array), _1, elems, dims)));
+        typedef void (*callback_type)(mathematica::driver::io::connection&, std::vector<T>, std::vector<int>);
+        _q.push_back(detail::make_deyaled_call(boost::bind(static_cast<callback_type>(&mathematica::driver::io::impl::put_array), _1, elems, dims)));
     }
 };
 #endif
@@ -532,7 +532,7 @@ struct argument_helper<std::list<T>, M_Type>{
     
     argument_helper(queue_type& queue): _q(queue){}
     void operator()(const std::list<T>& arg){
-        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "List", arg.size())));
+        _q.push_back(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "List", arg.size())));
         for(typename std::list<T>::const_iterator i = arg.begin(); i != arg.end(); ++i){
             _q.push_back(detail::M_Helper::make_argument(*i));
         }
@@ -575,7 +575,7 @@ struct m{
     }
     template <typename T>
     m& part(const T& index){
-        _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, "Part", 2)));
+        _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, "Part", 2)));
         _queue.push_back(detail::M_Helper::make_argument(index));
         return *this;
     }
@@ -584,7 +584,7 @@ struct m{
         return part<T>(index);
     }
     public:
-        m& invoke(mathematica::driver::ws::connection& conn);
+        m& invoke(mathematica::driver::io::connection& conn);
     public:
         std::string _name;
         std::deque<detail::abstract_delayed_call_ptr> _queue;

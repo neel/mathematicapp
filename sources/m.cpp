@@ -33,12 +33,12 @@ mathematica::m::m(const std::string& name): _name(name), _length(0){}
 mathematica::m::m(const mathematica::m& other): _name(other._name), _queue(other._queue), _length(other._length){}
 
 mathematica::m& mathematica::m::operator()(){
-    _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, _1, _name, _length)));
+    _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, _1, _name, _length)));
     return *this;
 }
 
-mathematica::m& mathematica::m::invoke(mathematica::driver::ws::connection& conn){
-    _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::ws::impl::function, boost::ref(conn), "EvaluatePacket", 1)));
+mathematica::m& mathematica::m::invoke(mathematica::driver::io::connection& conn){
+    _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, boost::ref(conn), "EvaluatePacket", 1)));
     while(!_queue.empty()){
         _queue.front()->invoke(conn);
         _queue.pop_front();
