@@ -36,37 +36,37 @@
 #include <boost/format.hpp>
 #include <iostream>
 
-mathematica::wrapper::wrapper(boost::shared_ptr<mathematica::driver::ws::connection> connection): accessor(connection){
+mathematica::wrapper::wrapper(boost::shared_ptr<mathematica::driver::io::connection> connection): accessor(connection){
 	
 }
 
 mathematica::wrapper& mathematica::wrapper::function(const std::string& name, unsigned int nargs){
-	driver::ws::impl::function(*_connection, name, nargs);
+	driver::io::impl::function(*_connection, name, nargs);
 	return *this;
 }
 
 mathematica::wrapper& mathematica::wrapper::integer(int n){
-	driver::ws::impl::integer(*_connection, n);
+	driver::io::impl::integer(*_connection, n);
 	return *this;
 }
 
 mathematica::wrapper& mathematica::wrapper::real(double n){
-	driver::ws::impl::real(*_connection, n);
+	driver::io::impl::real(*_connection, n);
 	return *this;
 }
 
 mathematica::wrapper& mathematica::wrapper::str(const std::string& s){
-	driver::ws::impl::str(*_connection, s);
+	driver::io::impl::str(*_connection, s);
 	return *this;
 }
 
 mathematica::wrapper& mathematica::wrapper::symbol(const std::string& s){
-	driver::ws::impl::symbol(*_connection, s);
+	driver::io::impl::symbol(*_connection, s);
 	return *this;
 }
 
 mathematica::accessor& mathematica::wrapper::end(){
-	driver::ws::impl::end(*_connection);
+	driver::io::impl::end(*_connection);
 	return *this;
 }
 
@@ -118,7 +118,7 @@ mathematica::wrapper& mathematica::wrapper::put(mathematica::token::ptr token){
     return *this;
 }
 
-mathematica::accessor::accessor(boost::shared_ptr<mathematica::driver::ws::connection> connection): _connection(connection), _transaction_lock_enabled(false){
+mathematica::accessor::accessor(boost::shared_ptr<mathematica::driver::io::connection> connection): _connection(connection), _transaction_lock_enabled(false){
 	
 }
 
@@ -241,7 +241,7 @@ mathematica::accessor& mathematica::accessor::pull(){
 	return *this;
 }
 
-mathematica::driver::ws::connection& mathematica::accessor::connection() const{
+mathematica::driver::io::connection& mathematica::accessor::connection() const{
     return *_connection;
 }
 

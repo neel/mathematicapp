@@ -33,7 +33,7 @@
 
 namespace mathematica{
 namespace driver{
-namespace ws{
+namespace io{
 struct connection;
 }
 }
@@ -42,37 +42,37 @@ struct connection;
 namespace mathematica{
 struct symbol;
 namespace driver{
-namespace ws{
+namespace io{
 
 struct impl{
-    static void function(mathematica::driver::ws::connection& conn, const std::string& name, unsigned int nargs);
-    static void integer(mathematica::driver::ws::connection& conn, int n);
-    static void uinteger(mathematica::driver::ws::connection& conn, unsigned int n);
-    static void long_integer(mathematica::driver::ws::connection& conn, long n);
-    static void real(mathematica::driver::ws::connection& conn, double n);
-    static void str(mathematica::driver::ws::connection& conn, const std::string& s);
-    static void symbol(mathematica::driver::ws::connection& conn, const std::string& s);
-    static void end(mathematica::driver::ws::connection& conn);
-    static void evaluate(mathematica::driver::ws::connection& conn, const std::string& expression);
+    static void function(mathematica::driver::io::connection& conn, const std::string& name, unsigned int nargs);
+    static void integer(mathematica::driver::io::connection& conn, int n);
+    static void uinteger(mathematica::driver::io::connection& conn, unsigned int n);
+    static void long_integer(mathematica::driver::io::connection& conn, long n);
+    static void real(mathematica::driver::io::connection& conn, double n);
+    static void str(mathematica::driver::io::connection& conn, const std::string& s);
+    static void symbol(mathematica::driver::io::connection& conn, const std::string& s);
+    static void end(mathematica::driver::io::connection& conn);
+    static void evaluate(mathematica::driver::io::connection& conn, const std::string& expression);
   
-    static void put(mathematica::driver::ws::connection& conn, int n);
-    static void put(mathematica::driver::ws::connection& conn, unsigned int n);
-    static void put(mathematica::driver::ws::connection& conn, long n);
-    static void put(mathematica::driver::ws::connection& conn, double n);
-    static void put(mathematica::driver::ws::connection& conn, const std::string& s);
-    static void put(mathematica::driver::ws::connection& conn, char s);
-    static void put(mathematica::driver::ws::connection& conn, bool s);
-    static void put(mathematica::driver::ws::connection& conn, const mathematica::symbol& s);
+    static void put(mathematica::driver::io::connection& conn, int n);
+    static void put(mathematica::driver::io::connection& conn, unsigned int n);
+    static void put(mathematica::driver::io::connection& conn, long n);
+    static void put(mathematica::driver::io::connection& conn, double n);
+    static void put(mathematica::driver::io::connection& conn, const std::string& s);
+    static void put(mathematica::driver::io::connection& conn, char s);
+    static void put(mathematica::driver::io::connection& conn, bool s);
+    static void put(mathematica::driver::io::connection& conn, const mathematica::symbol& s);
     
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int8_t>  data, std::vector<int> dims);
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint8_t>  data, std::vector<int> dims);
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int16_t>  data, std::vector<int> dims);
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint16_t>  data, std::vector<int> dims);
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int32_t>  data, std::vector<int> dims);
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::uint32_t>  data, std::vector<int> dims);
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<boost::int64_t>  data, std::vector<int> dims);
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<float>           data, std::vector<int> dims);
-    static void put_array(mathematica::driver::ws::connection& conn, std::vector<double>          data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<boost::int8_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<boost::uint8_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<boost::int16_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<boost::uint16_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<boost::int32_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<boost::uint32_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<boost::int64_t>  data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<float>           data, std::vector<int> dims);
+    static void put_array(mathematica::driver::io::connection& conn, std::vector<double>          data, std::vector<int> dims);
 };
 
 namespace ml{

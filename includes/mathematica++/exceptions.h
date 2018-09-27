@@ -40,7 +40,7 @@
 namespace mathematica{
 
 namespace driver{
-namespace ws{
+namespace io{
 struct connection;
 }
 }
@@ -61,7 +61,7 @@ struct error: public std::runtime_error{
 };
 
 error dispatch(WMK_LINK link, const std::string& context);
-error dispatch(mathematica::driver::ws::connection& conn, const std::string& context);
+error dispatch(mathematica::driver::io::connection& conn, const std::string& context);
 }
 
 }

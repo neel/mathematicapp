@@ -45,7 +45,7 @@ class token;
 struct packet;
 class accessor;
 namespace driver{
-namespace ws{
+namespace io{
 
 /**
  * no header should include this file, this should only be forward declared inside other classes of mathematica++
@@ -120,6 +120,9 @@ struct connection{
 };
 
 }
+
+boost::shared_ptr<io::connection> link(io::connection::link_type native_link);
+
 }
 }
 
