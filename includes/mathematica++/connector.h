@@ -88,6 +88,7 @@ class connector: public mathematica::wrapper{
     };
   public:
     connector();
+    connector(boost::shared_ptr<mathematica::driver::ws::connection> connection);
     connector(int argc, char** argv);
     connector(const std::string& argv);
     std::string name() const;

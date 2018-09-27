@@ -37,9 +37,9 @@
 #include <boost/lexical_cast.hpp>
 #include "mathematica++/scope.h"
 
-// mathematica::connector::connector(boost::shared_ptr<mathematica::driver::ws::connection> connection): wrapper(connection){
-// 	
-// }
+mathematica::connector::connector(boost::shared_ptr<mathematica::driver::ws::connection> connection): wrapper(connection), _root(new detail::scope(*this)), _current(_root){
+
+}
 
 mathematica::connector::connector(): wrapper(boost::shared_ptr<mathematica::driver::ws::connection>(new mathematica::driver::ws::connection())), _root(new detail::scope(*this)), _current(_root){
     initialize();
