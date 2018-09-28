@@ -23,7 +23,7 @@ struct basic_transport{
         _shell << expr;
     }
     template <typename T>
-    void recv(const T& val){
+    void recv(T& val){
         _shell >> val;
     }
     mathematica::value recv();
@@ -43,9 +43,10 @@ struct transport{
         _data->processWSLINK(_io.link());
     }
     template <typename T>
-    void recv(const T& val){
+    void recv(T& val){
         _io.recv(val);
     }
+    void ignore(){_io._shell.ignore();}
 };
     
 struct wtransport: transport{
@@ -77,7 +78,7 @@ transport& operator<<(transport& stream, const T& expr){
 }
 
 template <typename T>
-transport& operator>>(transport& stream, const T& val){
+transport& operator>>(transport& stream, T& val){
     stream.recv(val);
     return stream;
 }
