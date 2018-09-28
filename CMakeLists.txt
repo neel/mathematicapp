@@ -56,6 +56,7 @@ INCLUDE_DIRECTORIES(${MATHEMATICAPP_INCLUDE_DIRS})
 OPTION(WITH_ML          "Use MathLink functions insteadof using WSTP"             OFF)
 OPTION(PRINT_TRACE      "Print low level the WS/ML functions that are being used" OFF)
 OPTION(WITHOUT_EIGEN    "Compile without using eigen even if available"           OFF)
+OPTION(WITHOUT_LIBRARY  "Compile without LibraryLink supports"                    OFF)
 
 IF(WITH_ML)
     MESSAGE("${BoldMagenta} Using MathLink instead of WSTP ${ColourReset}")
@@ -64,6 +65,11 @@ IF(WITH_ML)
 ELSE()
     ADD_COMPILE_DEFINITIONS(USING_WS)
     INCLUDE_DIRECTORIES(${Mathematica_WSTP_INCLUDE_DIR})
+ENDIF()
+
+IF(NOT WITHOUT_LIBRARY)
+    ADD_COMPILE_DEFINITIONS(USING_LL)
+    INCLUDE_DIRECTORIES(${Mathematica_WolframLibrary_INCLUDE_DIR})
 ENDIF()
 
 IF(PRINT_TRACE)
@@ -100,6 +106,12 @@ SET(MATHEMATICAPP_HEADERS
     includes/mathematica++/association.h
 )
 
+IF(NOT WITHOUT_LIBRARY)
+    SET(MATHEMATICAPP_SOURCES ${MATHEMATICAPP_SOURCES}
+        includes/mathematica++/transport.h
+    )
+ENDIF()
+
 SET(MATHEMATICAPP_SOURCES
     sources/scope.cpp
     sources/connector.cpp
@@ -121,6 +133,12 @@ SET(MATHEMATICAPP_SOURCES
     sources/association.cpp
 )
 
+IF(NOT WITHOUT_LIBRARY)
+    SET(MATHEMATICAPP_SOURCES ${MATHEMATICAPP_SOURCES}
+        sources/transport.cpp
+    )
+ENDIF()
+
 IF (DEFINED XCODE_VERSION)
     ADD_LIBRARY(mathematica++ SHARED ${MATHEMATICAPP_SOURCES} ${MATHEMATICAPP_HEADERS})
 ELSE()
@@ -131,7 +149,6 @@ TARGET_INCLUDE_DIRECTORIES(mathematica++ PUBLIC ${MATHEMATICAPP_INCLUDE_DIRS})
 
 TARGET_LINK_LIBRARIES(mathematica++ ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(mathematica++ ${Mathematica_LIBRARIES})
-# TARGET_LINK_LIBRARIES(mathematica++ ${Mathematica_WSTP_LIBRARY})
 
 SET(M_STORAGE_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/storage.m)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/includes/mathematica++/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/mathematica++/config.h)
