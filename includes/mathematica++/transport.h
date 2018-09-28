@@ -58,7 +58,7 @@ struct wtransport: transport{
      */
     template <typename T>
     int operator()(const T& val){
-        _control << val;
+        _control.send(val);
         return LIBRARY_NO_ERROR;
     }
     mathematica::value input() const{return _input;}

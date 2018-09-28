@@ -15,5 +15,5 @@ mathematica::transport::transport(WolframLibraryData data): _data(data), _io(dat
 }
 
 mathematica::wtransport::wtransport(WolframLibraryData data, mathematica::transport::link_type link): transport(data), _control(link){
-    _input = _control.recv();
+    _input = _control._connection->fetch_token(&_control._shell);
 }
