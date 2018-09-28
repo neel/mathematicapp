@@ -38,7 +38,7 @@ mathematica::m& mathematica::m::operator()(){
 }
 
 mathematica::m& mathematica::m::invoke(mathematica::driver::io::connection& conn){
-    _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, boost::ref(conn), "EvaluatePacket", 1)));
+//     _queue.push_front(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::function, boost::ref(conn), "EvaluatePacket", 1)));
     while(!_queue.empty()){
         _queue.front()->invoke(conn);
         _queue.pop_front();
