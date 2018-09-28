@@ -64,6 +64,8 @@ template <>
 mathematica::wrapper& mathematica::operator<<<mathematica::symbol>(mathematica::wrapper& stream, const mathematica::symbol& symbol);
 template <>
 mathematica::wrapper& mathematica::operator<<<mathematica::m>(mathematica::wrapper& stream, const mathematica::m& expr);
+template <>
+mathematica::wrapper& mathematica::operator<<<mathematica::value>(mathematica::wrapper& stream, const mathematica::value& val);
 
 wrapper& operator,(wrapper& stream, const mathematica::m& expr);
 template <typename T>

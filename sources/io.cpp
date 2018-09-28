@@ -47,6 +47,13 @@ mathematica::wrapper& mathematica::operator<<<mathematica::m>(mathematica::wrapp
     return stream;
 }
 
+template <>
+mathematica::wrapper& mathematica::operator<<<mathematica::value>(mathematica::wrapper& stream, const mathematica::value& val){
+    mathematica::m argm = detail::M_Helper::convert(val);
+    stream << argm;
+    return stream;
+}
+
 mathematica::wrapper& mathematica::operator,(mathematica::wrapper& stream, const mathematica::m& expr){
     if(stream.transaction_lock_enabled()){
         stream.lock();
