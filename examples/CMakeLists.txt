@@ -7,4 +7,8 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 ADD_LIBRARY(mod01 SHARED mod01.cpp)
 TARGET_LINK_LIBRARIES(mod01 mathematica++)
+
+ADD_LIBRARY(mod02 SHARED mod02.cpp)
+TARGET_LINK_LIBRARIES(mod02 mathematica++)
+
 # TARGET_LINK_LIBRARIES(mod01 ${Mathematica_WolframLibrary_LIBRARIES})

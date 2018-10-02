@@ -1,6 +1,7 @@
 #include <fstream>
 #include <mathematica++/mathematica++.h>
 #include <mathematica++/transport.h>
+#include <mathematica++/defs.h>
 
 using namespace mathematica;
 
@@ -12,6 +13,21 @@ MATHEMATICA_DECLARE(ReturnPacket);
 MATHEMATICA_DECLARE(MessagePacket);
 MATHEMATICA_DECLARE(TextPacket);
 MATHEMATICA_DECLARE(Permutations);
+
+#define MATHEMATICA_LIBRARY_EXPORT(M, T, C)                                             \
+    EXTERN_C DLLEXPORT int M(WolframLibraryData libData, WMK_LINK native_link){         \
+        wtransport shell(libData, native_link);                                         \
+        value input = shell.input();                                                    \
+        T data = mathematica::cast<T>(input);                                           \
+        auto out = C(data);                                                             \
+        return shell(out);                                                              \
+    }
+
+template <typename T>
+struct point_2d{
+    T x;
+    T y;
+};
 
 EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){
     return WolframLibraryVersion;
@@ -56,6 +72,7 @@ EXTERN_C DLLEXPORT int ArgsListX(WolframLibraryData libData, WMK_LINK native_lin
     
     return shell(output);
 }
+
 
 
 // EXTERN_C DLLEXPORT int ArgsListX(WolframLibraryData libData, WMK_LINK native_link){
