@@ -40,38 +40,38 @@ struct module_overload{
     }
 };
 
-template <typename R, typename T>
-struct module_overload_head{
-    typedef R return_type;
-    typedef T tuple_type;
-    
-    tuple_type _heads;
-    
-    module_overload_head(const tuple_type& head): _heads(head){}
-    
-    bool feasible(boost::shared_ptr<mathematica::tokens::function> args) const{
-        std::vector<std::string> heads;
-        boost::fusion::for_each(heads, [&heads](const std::string head){
-            heads.push_back(head);
-        });
-        std::vector<std::string>::const_iterator it = heads.cbegin();
-        for(mathematica::value v: args->_args){
-            boost::shared_ptr<mathematica::tokens::function> f = boost::dynamic_pointer_cast<mathematica::tokens::function>(v);
-            if(!f || f->name() != *it++){
-                return false;
-            }
-        }
-        return true;
-    }
-    R call(boost::shared_ptr<mathematica::tokens::function> args){
-        arguments_type arguments = cast<arguments_type>(args);
-        // https://www.boost.org/doc/libs/1_68_0/libs/fusion/doc/html/fusion/functional/invocation/functions/invoke.html
-        return boost::fusion::invoke(_function, arguments);
-    }
-    R operator()(boost::shared_ptr<mathematica::tokens::function> args){
-        return call(args);
-    }
-};
+// template <typename R, typename T>
+// struct module_overload_head{
+//     typedef R return_type;
+//     typedef T tuple_type;
+//     
+//     tuple_type _heads;
+//     
+//     module_overload_head(const tuple_type& head): _heads(head){}
+//     
+//     bool feasible(boost::shared_ptr<mathematica::tokens::function> args) const{
+//         std::vector<std::string> heads;
+//         boost::fusion::for_each(heads, [&heads](const std::string head){
+//             heads.push_back(head);
+//         });
+//         std::vector<std::string>::const_iterator it = heads.cbegin();
+//         for(mathematica::value v: args->_args){
+//             boost::shared_ptr<mathematica::tokens::function> f = boost::dynamic_pointer_cast<mathematica::tokens::function>(v);
+//             if(!f || f->name() != *it++){
+//                 return false;
+//             }
+//         }
+//         return true;
+//     }
+//     R call(boost::shared_ptr<mathematica::tokens::function> args){
+//         arguments_type arguments = cast<arguments_type>(args);
+//         // https://www.boost.org/doc/libs/1_68_0/libs/fusion/doc/html/fusion/functional/invocation/functions/invoke.html
+//         return boost::fusion::invoke(_function, arguments);
+//     }
+//     R operator()(boost::shared_ptr<mathematica::tokens::function> args){
+//         return call(args);
+//     }
+// };
 
 
 #define MATHEMATICA_MODULE(N) EXTERN_C DLLEXPORT int N(WolframLibraryData libData, WMK_LINK native_link)
