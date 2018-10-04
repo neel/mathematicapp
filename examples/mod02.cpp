@@ -5,30 +5,35 @@
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/function.hpp>
+#include <boost/fusion/container.hpp>
+#include <boost/fusion/sequence.hpp>
+#include <boost/mpl/int.hpp>
+#include <boost/fusion/tuple.hpp>
 #include <boost/fusion/functional/invocation/invoke.hpp>
 
 using namespace mathematica;
 
 /**
- * module_overload<int, double, double> overload(&callback); // callback is a pointer to function of type int, (double, double)
+ * typedef module_overload<int, double, double> resolver_type;
+ * resolver_type overload(&callback); // callback is a pointer to function of type int, (double, double)
  * if(overload.feasible(args)){                              // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
- *     int ret = overload(args);                             // redirects the call to callback function
+ *     resolver_type::return_type ret = overload(args);                             // redirects the call to callback function
  * }
  */
 template <typename Ret, typename... Args>
 struct module_overload{
     typedef Ret                             return_type;
-    typedef boost::tuple<Args...>           arguments_type;
-    typedef boost::function<Ret, Args...>   function_type;
+    typedef boost::fusion::tuple<Args...>   arguments_type;
+    typedef boost::function<Ret (Args...)>  function_type;
     
-    function_type& _function;
+    function_type _function;
     
-    module_overload(function_type& f): _function(f){}
+    module_overload(function_type f): _function(f){}
     /**
      * check number of arguments supplied on runtime and number of arguments with which this overload has been prepared at compile time.
      */
     bool feasible(boost::shared_ptr<mathematica::tokens::function> args) const{
-        return boost::tuples::length<arguments_type>::value == args->nargs();
+        return boost::fusion::result_of::size<arguments_type>::type::value  == args->nargs();
     }
     Ret call(boost::shared_ptr<mathematica::tokens::function> args){
         arguments_type arguments = cast<arguments_type>(args);
@@ -37,6 +42,9 @@ struct module_overload{
     }
     Ret operator()(boost::shared_ptr<mathematica::tokens::function> args){
         return call(args);
+    }
+    void out(boost::shared_ptr<mathematica::tokens::function> args, mathematica::wtransport& shell){
+        shell(call(args));
     }
 };
 
@@ -90,6 +98,14 @@ namespace mathematica{
     };
 }
 
+int some_function_impl1(double x, double y){
+    return 0;
+}
+int some_function_impl2(double x){
+    return 1;
+}
+
+
 EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){
     return WolframLibraryVersion;
 }
@@ -98,6 +114,32 @@ EXTERN_C DLLEXPORT int WolframLibrary_initialize(WolframLibraryData libData){
 }
 EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){
     return;
+}
+
+EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native_link){
+    mathematica::wtransport shell(libData, native_link);
+    mathematica::value input = shell.input();
+    boost::shared_ptr<mathematica::tokens::function> args = boost::dynamic_pointer_cast<mathematica::tokens::function>(input);
+    
+    {
+        typedef module_overload<int, double, double> resolver_type;
+        resolver_type overload(&some_function_impl1);                        // callback is a pointer to function of type int, (double, double)
+        if(overload.feasible(args)){                                        // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
+            overload.out(args, shell);                                      // redirects the call to callback function and writes the returned output to shell
+            return LIBRARY_NO_ERROR;
+        }
+    }
+    
+    {
+        typedef module_overload<int, double> resolver_type;
+        resolver_type overload(&some_function_impl2);                        // callback is a pointer to function of type int, (double, double)
+        if(overload.feasible(args)){                                        // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
+            overload.out(args, shell);                                      // redirects the call to callback function and writes the returned output to shell
+            return LIBRARY_NO_ERROR;
+        }
+    }
+    
+    return LIBRARY_TYPE_ERROR;
 }
 
 
@@ -119,3 +161,6 @@ EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){
 //         
 //     }
 // }
+
+
+// SomeFunctionX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod02.so", "SomeFunctionX", LinkObject, LinkObject]
