@@ -68,6 +68,14 @@ struct module_overload{
             return true;
         }
     }
+    bool feasible(mathematica::value input) const{
+        boost::shared_ptr<mathematica::tokens::function> args = boost::dynamic_pointer_cast<mathematica::tokens::function>(input);
+        return feasible(args);
+    }
+    return_type call(mathematica::value input){
+        boost::shared_ptr<mathematica::tokens::function> args = boost::dynamic_pointer_cast<mathematica::tokens::function>(input);
+        return call(args);
+    }
     return_type call(boost::shared_ptr<mathematica::tokens::function> args){
         arguments_type arguments = cast<arguments_type>(args);
         // https://www.boost.org/doc/libs/1_68_0/libs/fusion/doc/html/fusion/functional/invocation/functions/invoke.html
@@ -76,14 +84,38 @@ struct module_overload{
     return_type operator()(boost::shared_ptr<mathematica::tokens::function> args){
         return call(args);
     }
+    return_type operator()(mathematica::value input){
+        return call(input);
+    }
     void out(boost::shared_ptr<mathematica::tokens::function> args, mathematica::wtransport& shell){
         shell(call(args));
+    }
+    void out(mathematica::value input, mathematica::wtransport& shell){
+        shell(call(input));
     }
 };
 
 template <typename F>
-module_overload<F> resolve_overload(F ftor){
+module_overload<F> overload(F ftor){
     return module_overload<F>(ftor);
+}
+
+struct resolver{
+    mathematica::wtransport& _shell;
+    bool _returned;
+    
+    resolver(mathematica::wtransport& shell): _shell(shell), _returned(false){}
+};
+
+template <typename T>
+resolver& operator,(resolver& r, T& overload){
+    if(!r._returned){
+        if(overload.feasible(r._shell.input())){           // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
+            overload.out(r._shell.input(), r._shell);      // redirects the call to callback function and writes the returned output to shell
+            r._returned = true;
+        }
+    }
+    return r;
 }
 
 template <typename T>
@@ -100,14 +132,14 @@ namespace mathematica{
     };
 }
 
+int some_function_impl0(point_2d<double> p1, point_2d<double> p2){
+    return 0;
+}
 int some_function_impl1(double x, double y){
     return 1;
 }
 int some_function_impl2(double x){
     return 2;
-}
-int some_function_impl0(point_2d<double> p1, point_2d<double> p2){
-    return 0;
 }
 
 
@@ -123,33 +155,12 @@ EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){
 
 EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native_link){
     mathematica::wtransport shell(libData, native_link);
-    mathematica::value input = shell.input();
-    boost::shared_ptr<mathematica::tokens::function> args = boost::dynamic_pointer_cast<mathematica::tokens::function>(input);
-  
-    {
-        auto resolver = resolve_overload(&some_function_impl0) = {"GeoPosition", "GeoPosition"};
-        if(resolver.feasible(args)){                                        // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
-            resolver.out(args, shell);                                      // redirects the call to callback function and writes the returned output to shell
-            return LIBRARY_NO_ERROR;
-        }
-    }
+    resolver resolve(shell);
     
-    {
-        auto resolver = resolve_overload(&some_function_impl1);
-        if(resolver.feasible(args)){                                        // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
-            resolver.out(args, shell);                                      // redirects the call to callback function and writes the returned output to shell
-            return LIBRARY_NO_ERROR;
-        }
-    }
+    resolve , overload(&some_function_impl0) = {"GeoPosition", "GeoPosition"}
+            , overload(&some_function_impl1)
+            , overload(&some_function_impl2);
 
-    {
-        auto resolver = resolve_overload(&some_function_impl2);
-        if(resolver.feasible(args)){                                        // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
-            resolver.out(args, shell);                                      // redirects the call to callback function and writes the returned output to shell
-            return LIBRARY_NO_ERROR;
-        }
-    }
-       
     return LIBRARY_TYPE_ERROR;
 }
 

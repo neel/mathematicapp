@@ -51,7 +51,7 @@ struct transport{
     
 struct wtransport: transport{
     basic_transport _control;
-    mathematica::value _input;
+    boost::shared_ptr<mathematica::tokens::function> _input;
     
     wtransport(WolframLibraryData data, link_type link);
     /**
@@ -62,7 +62,7 @@ struct wtransport: transport{
         _control.send(val);
         return LIBRARY_NO_ERROR;
     }
-    mathematica::value input() const{return _input;}
+    boost::shared_ptr<mathematica::tokens::function> input() const{return _input;}
     template <typename T>
     T input() const{
         mathematica::value val = input();
