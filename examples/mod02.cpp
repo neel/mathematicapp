@@ -32,56 +32,41 @@ namespace internal{
     };
 }
 
-/**
- * typedef module_overload<int, double, double> resolver_type;
- * resolver_type overload(&callback); // callback is a pointer to function of type int, (double, double)
- * if(overload.feasible(args)){                              // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
- *     resolver_type::return_type ret = overload(args);                             // redirects the call to callback function
- * }
- */
-// template <typename Ret, typename... Args>
-// struct module_overload{
-//     typedef Ret                             return_type;
-//     typedef boost::fusion::tuple<Args...>   arguments_type;
-//     typedef boost::function<Ret (Args...)>  function_type;
-//     
-//     function_type _function;
-//     
-//     module_overload(function_type f): _function(f){}
-//     /**
-//      * check number of arguments supplied on runtime and number of arguments with which this overload has been prepared at compile time.
-//      */
-//     bool feasible(boost::shared_ptr<mathematica::tokens::function> args) const{
-//         return boost::fusion::result_of::size<arguments_type>::type::value  == args->nargs();
-//     }
-//     Ret call(boost::shared_ptr<mathematica::tokens::function> args){
-//         arguments_type arguments = cast<arguments_type>(args);
-//         // https://www.boost.org/doc/libs/1_68_0/libs/fusion/doc/html/fusion/functional/invocation/functions/invoke.html
-//         return boost::fusion::invoke(_function, arguments);
-//     }
-//     Ret operator()(boost::shared_ptr<mathematica::tokens::function> args){
-//         return call(args);
-//     }
-//     void out(boost::shared_ptr<mathematica::tokens::function> args, mathematica::wtransport& shell){
-//         shell(call(args));
-//     }
-// };
-
 template <typename Function>
 struct module_overload{
-    typedef Function function_type;
+    typedef Function                                                           function_type;
+    typedef module_overload<Function>                                          self_type;
     typedef typename internal::function_signature<Function>::return_type       return_type;
     typedef typename internal::function_signature<Function>::tuple_type        tuple_type;
     typedef typename internal::function_signature<Function>::arguments_type    arguments_type;
     
     function_type _function;
+    std::vector<std::string> _heads;
     
     module_overload(function_type f): _function(f){}
+    
+    self_type& operator=(std::initializer_list<std::string> heads){
+        std::copy(heads.begin(), heads.end(), std::back_inserter(_heads));
+        return *this;
+    }
+    
     /**
      * check number of arguments supplied on runtime and number of arguments with which this overload has been prepared at compile time.
      */
     bool feasible(boost::shared_ptr<mathematica::tokens::function> args) const{
-        return boost::fusion::result_of::size<arguments_type>::type::value  == args->nargs();
+        if(_heads.empty()){
+            return boost::fusion::result_of::size<arguments_type>::type::value  == args->nargs();
+        }else{
+            if(_heads.size() != args->nargs()) return false;
+            std::vector<std::string>::const_iterator it = _heads.cbegin();
+            for(mathematica::value v: args->_args){
+                boost::shared_ptr<mathematica::tokens::function> f = boost::dynamic_pointer_cast<mathematica::tokens::function>(v);
+                if(!f || f->name() != *it++){
+                    return false;
+                }
+            }
+            return true;
+        }
     }
     return_type call(boost::shared_ptr<mathematica::tokens::function> args){
         arguments_type arguments = cast<arguments_type>(args);
@@ -101,42 +86,6 @@ module_overload<F> resolve_overload(F ftor){
     return module_overload<F>(ftor);
 }
 
-// template <typename R, typename T>
-// struct module_overload_head{
-//     typedef R return_type;
-//     typedef T tuple_type;
-//     
-//     tuple_type _heads;
-//     
-//     module_overload_head(const tuple_type& head): _heads(head){}
-//     
-//     bool feasible(boost::shared_ptr<mathematica::tokens::function> args) const{
-//         std::vector<std::string> heads;
-//         boost::fusion::for_each(heads, [&heads](const std::string head){
-//             heads.push_back(head);
-//         });
-//         std::vector<std::string>::const_iterator it = heads.cbegin();
-//         for(mathematica::value v: args->_args){
-//             boost::shared_ptr<mathematica::tokens::function> f = boost::dynamic_pointer_cast<mathematica::tokens::function>(v);
-//             if(!f || f->name() != *it++){
-//                 return false;
-//             }
-//         }
-//         return true;
-//     }
-//     R call(boost::shared_ptr<mathematica::tokens::function> args){
-//         arguments_type arguments = cast<arguments_type>(args);
-//         // https://www.boost.org/doc/libs/1_68_0/libs/fusion/doc/html/fusion/functional/invocation/functions/invoke.html
-//         return boost::fusion::invoke(_function, arguments);
-//     }
-//     R operator()(boost::shared_ptr<mathematica::tokens::function> args){
-//         return call(args);
-//     }
-// };
-
-
-#define MATHEMATICA_MODULE(N) EXTERN_C DLLEXPORT int N(WolframLibraryData libData, WMK_LINK native_link)
-
 template <typename T>
 struct point_2d{
     T x;
@@ -152,10 +101,13 @@ namespace mathematica{
 }
 
 int some_function_impl1(double x, double y){
-    return 0;
+    return 1;
 }
 int some_function_impl2(double x){
-    return 1;
+    return 2;
+}
+int some_function_impl0(point_2d<double> p1, point_2d<double> p2){
+    return 0;
 }
 
 
@@ -173,7 +125,14 @@ EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native
     mathematica::wtransport shell(libData, native_link);
     mathematica::value input = shell.input();
     boost::shared_ptr<mathematica::tokens::function> args = boost::dynamic_pointer_cast<mathematica::tokens::function>(input);
-    
+  
+    {
+        auto resolver = resolve_overload(&some_function_impl0) = {"GeoPosition", "GeoPosition"};
+        if(resolver.feasible(args)){                                        // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
+            resolver.out(args, shell);                                      // redirects the call to callback function and writes the returned output to shell
+            return LIBRARY_NO_ERROR;
+        }
+    }
     
     {
         auto resolver = resolve_overload(&some_function_impl1);
@@ -190,25 +149,7 @@ EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native
             return LIBRARY_NO_ERROR;
         }
     }
-    
-//     {
-//         typedef module_overload<int, double, double> resolver_type;
-//         resolver_type overload(&some_function_impl1);                        // callback is a pointer to function of type int, (double, double)
-//         if(overload.feasible(args)){                                        // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
-//             overload.out(args, shell);                                      // redirects the call to callback function and writes the returned output to shell
-//             return LIBRARY_NO_ERROR;
-//         }
-//     }
-//     
-//     {
-//         typedef module_overload<int, double> resolver_type;
-//         resolver_type overload(&some_function_impl2);                        // callback is a pointer to function of type int, (double, double)
-//         if(overload.feasible(args)){                                        // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
-//             overload.out(args, shell);                                      // redirects the call to callback function and writes the returned output to shell
-//             return LIBRARY_NO_ERROR;
-//         }
-//     }
-    
+       
     return LIBRARY_TYPE_ERROR;
 }
 
