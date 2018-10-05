@@ -37,18 +37,20 @@ namespace internal{
     };
     
 
+    // https://stackoverflow.com/a/52667660/256007
     template<std::size_t...Is, class T>
-    auto to_fusion( std::index_sequence<Is...>, T&& in ) {
+    auto to_fusion(std::index_sequence<Is...>, T&& in ) {
         using boost::get;
+        using std::get;
         return boost::fusion::make_tuple( get<Is>(std::forward<T>(in))... );
     }
     template<class...Ts>
-    boost::fusion::tuple<Ts...> to_fusion( boost::tuple<Ts...> in ) {
-        return to_fusion( std::make_index_sequence<sizeof...(Ts)>{}, std::move(in) );
+    auto to_fusion(boost::tuple<Ts...> in ) {
+        return to_fusion(std::make_index_sequence<::boost::tuples::length< boost::tuple<Ts...>>::value>{}, std::move(in) );
     }
     template<class...Ts>
-    boost::fusion::tuple<Ts...> to_fusion( std::tuple<Ts...> in ) {
-        return to_fusion( std::make_index_sequence<sizeof...(Ts)>{}, std::move(in) );
+    boost::fusion::tuple<Ts...> to_fusion(std::tuple<Ts...> in ) {
+        return to_fusion(std::make_index_sequence<sizeof...(Ts)>{}, std::move(in) );
     }
     
 }
@@ -150,11 +152,8 @@ namespace library{
 
 template <typename T>
 mathematica::resolver& operator,(mathematica::resolver& r, T overload){
-    std::clog << "operator, " << __LINE__ << std::endl;
     if(!r._resolved){
-        std::clog << "operator, " << __LINE__ << std::endl;
         if(overload.feasible(r._shell.input())){           // args is a shared pointer to a function token boost::shared_ptr<mathematica::tokens::function>
-            std::clog << "operator, " << __LINE__ << std::endl;
             overload.out(r._shell.input(), r._shell);      // redirects the call to callback function and writes the returned output to shell
             r._resolved = true;
         }
@@ -185,16 +184,13 @@ namespace mathematica{
 }
 
 int some_function_impl0(point_2d<double> p1, point_2d<double> p2){
-    std::clog << "some_function_impl0 " << __LINE__ << std::endl;
     return p1.x+p2.y;
 }
 int some_function_impl1(double x, double y){
-    std::clog << "some_function_impl1 " << __LINE__ << std::endl;
     return 10;
 }
 mathematica::m some_function_impl2(double x){
-    std::clog << "some_function_impl2 " << __LINE__ << std::endl;
-    return List(x+2, x);
+    return Complex(x+2, x);
 }
 
 EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){
