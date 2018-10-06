@@ -38,8 +38,12 @@ struct association<point_2d<T>>: mathematica::typemap<association<point_2d<T>>, 
 };
 }
 
-double some_function_impl_geo(point_2d<double> p1, point_2d<double> p2){
+double some_function_impl_geo(transport& shell, point_2d<double> p1, point_2d<double> p2){
     return p1.x+p2.y;
+}
+
+double some_function_impl_complex(std::complex<double> p1, std::complex<double> p2){
+    return p1.real()+p2.imag();;
 }
 int some_function_impl_binary(double x, double y){
     return 10;
@@ -48,22 +52,17 @@ mathematica::m some_function_impl_unary(double x){
     return Complex(x+2, x);
 }
 
-EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){
-    return WolframLibraryVersion;
-}
-EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){
-    return 0;
-}
-EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){
-    return;
-}
+EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){return WolframLibraryVersion;}
+EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){return 0;}
+EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){return;}
 
 EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native_link){
     mathematica::wtransport shell(libData, native_link);
     mathematica::resolver resolver(shell);
     
     try{
-        resolver, overload(&some_function_impl_geo) = {"GeoPosition", "GeoPosition"}
+        resolver, overload(&some_function_impl_geo, shell) = {"GeoPosition", "GeoPosition"}
+                , overload(&some_function_impl_complex) = {"Complex", "Complex"}
                 , overload(&some_function_impl_binary)
                 , overload(&some_function_impl_unary);
     }catch(const mathematica::library::error& err){

@@ -42,6 +42,9 @@
 namespace mathematica{
 
 namespace internal{
+    /**
+     * extract the function signature
+     */
     template <typename T>
     struct function_signature{};
     
@@ -60,6 +63,7 @@ namespace internal{
     };
     
 
+    // convert boost::tuple to boost::fusion::tuple
     // https://stackoverflow.com/a/52667660/256007
     template<std::size_t...Is, class T>
     auto to_fusion(std::index_sequence<Is...>, T&& in ) {
@@ -132,6 +136,12 @@ struct module_overload{
 template <typename F>
 module_overload<F> overload(F ftor){
     return module_overload<F>(ftor);
+}
+
+template <typename F>
+auto overload(F ftor, mathematica::transport& transport){
+    auto callback = boost::bind(ftor, boost::ref(transport), _1, _2);
+    return overload(callback);
 }
 
 struct resolver: private boost::noncopyable{
