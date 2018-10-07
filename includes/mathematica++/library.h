@@ -80,6 +80,31 @@ namespace internal{
         return to_fusion(std::make_index_sequence<sizeof...(Ts)>{}, std::move(in) );
     }
     
+    
+    template <typename C, typename... Args>
+    struct callable_internal{
+        typedef callable_internal<C, Args...> self_type;
+        typedef C callback_type;
+        
+        C _ftor;
+        mathematica::transport& _shell;
+        
+        callable_internal(C cb, mathematica::transport& shell): _ftor(cb), _shell(shell){}
+        
+        double operator()(Args... args){
+            return _ftor(_shell, args...);
+        }
+    };
+
+    template <typename T, typename... U>
+    struct callable{};
+
+    template <typename R, typename... V>
+    struct callable<R (*)(mathematica::transport&, V...)>: callable_internal<R (*)(mathematica::transport&, V...), V...>{
+        typedef callable_internal<R (*)(mathematica::transport&, V...), V...> base_type;
+        typedef boost::function<R (V...)> function_type;
+        callable(typename base_type::callback_type cb, mathematica::transport& shell): base_type(cb, shell){}
+    };
 }
 
 template <typename Function>
@@ -140,8 +165,10 @@ module_overload<F> overload(F ftor){
 
 template <typename F>
 auto overload(F ftor, mathematica::transport& transport){
-    auto callback = boost::bind(ftor, boost::ref(transport), _1, _2);
-    return overload(callback);
+    typedef internal::callable<F> callable_type;
+    typedef typename callable_type::function_type function_type;
+    function_type function = callable_type(ftor, transport);
+    return overload(function);
 }
 
 struct resolver: private boost::noncopyable{

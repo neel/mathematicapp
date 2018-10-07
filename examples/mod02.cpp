@@ -38,7 +38,7 @@ struct association<point_2d<T>>: mathematica::typemap<association<point_2d<T>>, 
 };
 }
 
-double some_function_impl_geo(transport& shell, point_2d<double> p1, point_2d<double> p2){
+double some_function_impl_geo(mathematica::transport& shell, point_2d<double> p1, point_2d<double> p2){
     return p1.x+p2.y;
 }
 
