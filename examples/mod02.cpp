@@ -59,7 +59,7 @@ EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){
 EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native_link){
     mathematica::wtransport shell(libData, native_link);
     mathematica::resolver resolver(shell);
-    
+
     try{
         resolver, overload(&some_function_impl_geo, shell) = {"GeoPosition", "GeoPosition"}
                 , overload(&some_function_impl_complex) = {"Complex", "Complex"}
@@ -68,9 +68,16 @@ EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native
     }catch(const mathematica::library::error& err){
         return err.code();
     }
-    
-    return LIBRARY_NO_ERROR;
+
+    if(resolver.resolved()){
+        return LIBRARY_NO_ERROR;
+    }
+    return LIBRARY_TYPE_ERROR;
 }
 
 
 // SomeFunctionX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod02.so", "SomeFunctionX", LinkObject, LinkObject]
+// SomeFunctionX[1]
+// SomeFunctionX[1, 2]
+// SomeFunctionX[2 + 2 I, 4 + 5 I]
+// SomeFunctionX[GeoPosition[{1, 2}], GeoPosition[{3, 4}]]
