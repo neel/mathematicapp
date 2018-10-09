@@ -33,8 +33,68 @@
 #include <mathematica++/connector.h>
 #include <mathematica++/io.h>
 #include <mathematica++/m.h>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_integral.hpp>
+#include <cstring>
+#include <complex>
 
 namespace mathematica{
+    
+/**
+ * argument adapter only handles integer, real, complex types and string with some restrictions
+ * conversion from MArgument to std::string or char* is supported
+ * however from std::string is not supported, only from char* is supported
+ * currently MTensor is not supported inside MArgument, user code may use LinkObject to transfer such expressions easily
+ */
+struct argument_adapter{
+    MArgument _source;
+    
+    argument_adapter(MArgument src): _source(src){}
+    
+    template <typename T>
+    typename boost::enable_if<boost::is_integral<T>, argument_adapter&>::type operator=(T val){
+        MArgument_getInteger(_source) = val;
+        return *this;
+    }
+    template <typename T>
+    typename boost::enable_if<boost::is_floating_point<T>, argument_adapter&>::type operator=(T val){
+        MArgument_getReal(_source) = val;
+        return *this;
+    }
+    argument_adapter& operator=(char* val){
+        MArgument_getUTF8String(_source) = val;
+        return *this;
+    }
+    template <typename T>
+    argument_adapter& operator=(const std::complex<T> val){
+        mcomplex& cmplx = MArgument_getComplex(_source);
+        mcreal(cmplx) = val.real();
+        mcimag(cmplx) = val.imag();
+        return *this;
+    }
+    operator char* const(){
+        return MArgument_getUTF8String(_source);
+    }
+    operator std::string() const{
+        const char* str = MArgument_getUTF8String(_source);
+        int len = strlen(str);
+        return std::string(str, len);
+    }
+    template <typename T>
+    operator std::complex<T>() const{
+        mcomplex cmplx = MArgument_getComplex(_source);
+        return std::complex<T>(mcreal(cmplx), mcimag(cmplx));
+    }
+    template <typename T>
+    operator typename boost::enable_if<boost::is_integral<T>, T>::type const(){
+        return MArgument_getInteger(_source);
+    }
+    template <typename T>
+    operator typename boost::enable_if<boost::is_floating_point<T>, T>::type const(){
+        return MArgument_getReal(_source);
+    }
+};
+
 
 struct basic_transport{
     typedef WMK_LINK link_type;
@@ -94,6 +154,41 @@ struct wtransport: transport{
         mathematica::value val = input();
         T ret = cast<T>(val);
         return ret;
+    }
+};
+
+struct mtransport;
+
+namespace internal{
+template <typename U, typename... V>
+struct argument_to_tuple{
+    typedef boost::tuple<U, V...> tuple_type;
+    
+    static void convert(tuple_type& tuple, mtransport& shell){
+        
+    }
+};
+}
+
+struct mtransport: transport{
+    int _argc;
+    MArgument* _argv;
+    MArgument _res;
+    std::vector<argument_adapter*> _arguments;
+    argument_adapter _result;
+    
+    mtransport(WolframLibraryData data, int argc, MArgument* argv, MArgument res);
+    ~mtransport();
+    const argument_adapter& arg(std::size_t index) const;
+    argument_adapter& res();
+    std::size_t nargs() const;
+    
+    template <typename... T>
+    boost::tuple<T...> as() const{
+        typedef boost::tuple<T...> tuple_type;
+        tuple_type tuple;
+        internal::argument_to_tuple<T...>::convert(tuple, *this);
+        return tuple;
     }
 };
 
