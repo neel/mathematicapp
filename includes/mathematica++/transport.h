@@ -190,6 +190,10 @@ struct mtransport: transport{
         internal::argument_to_tuple<boost::tuple<T...>>::convert(tuple, *this);
         return tuple;
     }
+    template <typename... T>
+    operator boost::tuple<T...>() const{
+        return as<T...>();
+    }
 };
 
 template <typename T>
