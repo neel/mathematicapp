@@ -157,16 +157,15 @@ struct wtransport: transport{
     }
 };
 
-struct mtransport;
-
 namespace internal{
-template <int N, typename T>
+template <typename T, int N=0>
 struct argument_to_tuple{
     typedef T tuple_type;
     
-    static void convert(T& tuple, mtransport& shell){
+    template <typename U>
+    static void convert(T& tuple, U& shell){
         boost::get<N>(tuple) = shell.arg(N);
-        argument_to_tuple<N+1, T>::convert(tuple, shell);
+        argument_to_tuple<T, N+1>::convert(tuple, shell);
     }
 };
 }
@@ -188,7 +187,7 @@ struct mtransport: transport{
     boost::tuple<T...> as() const{
         typedef boost::tuple<T...> tuple_type;
         tuple_type tuple;
-        internal::argument_to_tuple<0, boost::tuple<T...>>::convert(tuple, *this);
+        internal::argument_to_tuple<boost::tuple<T...>>::convert(tuple, *this);
         return tuple;
     }
 };
