@@ -43,13 +43,10 @@ struct association<point_2d<T>>: mathematica::typemap<association<point_2d<T>>, 
 
 double some_function_impl_geo(mathematica::transport& shell, point_2d<double> p1, point_2d<double> p2){    
     std::string unit("Kilometers");
-    value res;
+    double res;
     shell << EvaluatePacket(QuantityMagnitude(GeoDistance(p1, p2, Rule("!UnitSystem") = unit)));
     shell >> res;
-    
-    double ret = *res;
-    
-    return ret;
+    return res;
 }
 
 double some_function_impl_complex(std::complex<double> p1, std::complex<double> p2){

@@ -39,7 +39,10 @@ struct symbol;
 namespace detail{
 template <typename T>
 struct stream_helper{
-    static void write(mathematica::accessor& stream, const T& expr){}
+    static void write(mathematica::accessor& stream, T& expr){
+        mathematica::value val = stream.pull().next();
+        expr = cast<T>(val);
+    }
 };
 
 template <>
