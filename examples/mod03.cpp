@@ -13,9 +13,6 @@ EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){re
 EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){return;}
 
 EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, mint argc, MArgument* argv, MArgument res){
-    std::ofstream out("/tmp/log");
-    std::clog.rdbuf(out.rdbuf());
-
     mathematica::mtransport shell(libData, argc, argv, res);
     boost::tuple<double, int> args = shell;
     double d;

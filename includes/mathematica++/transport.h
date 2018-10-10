@@ -180,10 +180,7 @@ struct argument_to_tuple<T, -1>{
     typedef T tuple_type;
     
     template <typename U>
-    static void convert(T& tuple, U& shell){
-//         typedef typename boost::tuples::element<N, T>::type element_type;
-//         boost::get<N>(tuple) = shell.arg(N).template conv<element_type>();
-    }
+    static void convert(T& tuple, U& shell){}
 };
 
 }
