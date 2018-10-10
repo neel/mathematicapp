@@ -72,26 +72,31 @@ struct argument_adapter{
         mcimag(cmplx) = val.imag();
         return *this;
     }
-    operator char* const(){
-        return MArgument_getUTF8String(_source);
-    }
-    operator std::string() const{
+//     char* convert() const{
+//         return MArgument_getUTF8String(_source);
+//     }
+    std::string convert() const{
         const char* str = MArgument_getUTF8String(_source);
         int len = strlen(str);
         return std::string(str, len);
     }
     template <typename T>
-    operator std::complex<T>() const{
+    std::complex<typename T::value_type> convert() const{
         mcomplex cmplx = MArgument_getComplex(_source);
         return std::complex<T>(mcreal(cmplx), mcimag(cmplx));
     }
     template <typename T>
-    operator typename boost::enable_if<boost::is_integral<T>, T>::type const(){
+    typename boost::enable_if<boost::is_integral<T>, T>::type convert() const{
         return MArgument_getInteger(_source);
     }
     template <typename T>
-    operator typename boost::enable_if<boost::is_floating_point<T>, T>::type const(){
+    typename boost::enable_if<boost::is_floating_point<T>, T>::type convert() const{
         return MArgument_getReal(_source);
+    }
+    template <typename T>
+    operator T() const{
+        T val = convert<T>();
+        return val;
     }
 };
 
@@ -158,16 +163,29 @@ struct wtransport: transport{
 };
 
 namespace internal{
-template <typename T, int N=0>
+template <typename T, int N>
 struct argument_to_tuple{
     typedef T tuple_type;
     
     template <typename U>
     static void convert(T& tuple, U& shell){
+        // typedef typename boost::tuples::element<N, T>::type element_type;
         boost::get<N>(tuple) = shell.arg(N);
-        argument_to_tuple<T, N+1>::convert(tuple, shell);
+        argument_to_tuple<T, N-1>::convert(tuple, shell);
     }
 };
+
+template <typename T>
+struct argument_to_tuple<T, -1>{
+    typedef T tuple_type;
+    
+    template <typename U>
+    static void convert(T& tuple, U& shell){
+//         typedef typename boost::tuples::element<N, T>::type element_type;
+//         boost::get<N>(tuple) = shell.arg(N).template conv<element_type>();
+    }
+};
+
 }
 
 struct mtransport: transport{
@@ -187,12 +205,17 @@ struct mtransport: transport{
     boost::tuple<T...> as() const{
         typedef boost::tuple<T...> tuple_type;
         tuple_type tuple;
-        internal::argument_to_tuple<boost::tuple<T...>>::convert(tuple, *this);
+        internal::argument_to_tuple<tuple_type, boost::tuples::length<tuple_type>::value-1>::convert(tuple, *this);
         return tuple;
     }
     template <typename... T>
     operator boost::tuple<T...>() const{
         return as<T...>();
+    }
+    template <typename T>
+    int operator()(T val){
+        res() = val;
+        return LIBRARY_NO_ERROR;
     }
 };
 
