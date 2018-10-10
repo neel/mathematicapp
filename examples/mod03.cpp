@@ -14,13 +14,12 @@ EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){
 
 EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, mint argc, MArgument* argv, MArgument res){
     mathematica::mtransport shell(libData, argc, argv, res);
-    boost::tuple<double, int> args = shell;
-    double d;
-    int i;
-    boost::tie(d, i) = args;
+    boost::tuple<double, std::complex<int>> args = shell;
+    double dbl;
+    std::complex<int> cmplx;
+    boost::tie(dbl, cmplx) = args;
     std::clog << args << std::endl;
-    shell(d+i);
-    
+    shell(std::complex<double>(dbl+cmplx.real(), dbl-cmplx.imag()));
     return LIBRARY_NO_ERROR;
 }
 

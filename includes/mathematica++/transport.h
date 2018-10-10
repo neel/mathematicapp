@@ -81,9 +81,9 @@ struct argument_adapter{
         return std::string(str, len);
     }
     template <typename T>
-    std::complex<typename T::value_type> convert() const{
+    typename boost::enable_if<boost::is_complex<T>, T>::type convert() const{
         mcomplex cmplx = MArgument_getComplex(_source);
-        return std::complex<T>(mcreal(cmplx), mcimag(cmplx));
+        return T(mcreal(cmplx), mcimag(cmplx));
     }
     template <typename T>
     typename boost::enable_if<boost::is_integral<T>, T>::type convert() const{
@@ -169,8 +169,9 @@ struct argument_to_tuple{
     
     template <typename U>
     static void convert(T& tuple, U& shell){
-        // typedef typename boost::tuples::element<N, T>::type element_type;
-        boost::get<N>(tuple) = shell.arg(N);
+        typedef typename boost::tuples::element<N, T>::type element_type;
+        element_type elem = shell.arg(N).template convert<element_type>();
+        boost::get<N>(tuple) = elem;
         argument_to_tuple<T, N-1>::convert(tuple, shell);
     }
 };
