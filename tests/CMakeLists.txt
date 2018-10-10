@@ -48,6 +48,10 @@ IF(NOT WITHOUT_EIGEN)
     ENDIF()
 ENDIF()
 
+ADD_EXECUTABLE(module module.cpp)
+TARGET_LINK_LIBRARIES(module ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(module mathematica++)
+
 ENABLE_TESTING()
 
 ADD_TEST(connection connection --report_level=short --log_level=message --show_progress=true)

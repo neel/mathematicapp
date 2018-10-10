@@ -63,6 +63,13 @@ EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){return WolframLibraryVersion
 EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){return 0;}
 EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){return;}
 
+/**
+ * SomeFunctionWX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod02.so", "SomeFunctionWX", LinkObject, LinkObject]
+ * SomeFunctionWX[1] -> Complex[3, 1]
+ * SomeFunctionWX[1.0, 20.0] -> 10
+ * SomeFunctionWX[1 + 2I, 3 + 4I] -> 5.0
+ * SomeFunctionWX[GeoPosition[{22.5726, 88.3639}], GeoPosition[{28.7041, 77.1025}]] -> 1318.14
+ */
 EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK native_link){ 
     mathematica::wtransport shell(libData, native_link);
     mathematica::resolver resolver(shell);
@@ -81,15 +88,3 @@ EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK nativ
     }
     return LIBRARY_TYPE_ERROR;
 }
-
-
-// SomeFunctionWX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod02.so", "SomeFunctionWX", LinkObject, LinkObject]
-// SomeFunctionWX[1]
-// SomeFunctionWX[1, 2]
-// SomeFunctionWX[2 + 2 I, 4 + 5 I]
-// SomeFunctionWX[GeoPosition[{1, 2}], GeoPosition[{3, 4}]]
-
-
-// GeoDistance[GeoPosition[{22.5726, 88.3639}], GeoPosition[{28.7041, 77.1025}]]
-// SomeFunctionWX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod02.so", "SomeFunctionWX", LinkObject, LinkObject]
-// SomeFunctionWX[GeoPosition[{22.5726, 88.3639}], GeoPosition[{28.7041, 77.1025}]]

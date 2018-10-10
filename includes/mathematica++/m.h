@@ -135,6 +135,9 @@ struct argument<double>{
 };
 
 template <>
+struct argument<float>: argument<double>{};
+
+template <>
 struct argument<std::string>{
     typedef std::string type;
     
