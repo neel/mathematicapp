@@ -1,0 +1,1 @@
+SomeFunctionMX = LibraryFunctionLoad["${CMAKE_CURRENT_BINARY_DIR}/libmod03.so", "SomeFunctionMX", {Real, Complex}, Complex]

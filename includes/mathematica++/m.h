@@ -595,6 +595,8 @@ struct m{
         }
 };
 
+// std::ostream& operator<<(std::ostream& stream, const mathematica::m& expr);
+
 }
 
 #endif // MATHEMATICAPP_SHORTHAND_H

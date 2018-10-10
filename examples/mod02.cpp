@@ -6,8 +6,11 @@
 
 using namespace mathematica;
 
+MATHEMATICA_DECLARE(EvaluatePacket);
 MATHEMATICA_DECLARE(Complex);
 MATHEMATICA_DECLARE(GeoPosition);
+MATHEMATICA_DECLARE(GeoDistance);
+MATHEMATICA_DECLARE(QuantityMagnitude);
 
 template <typename T>
 struct point_2d{
@@ -38,12 +41,19 @@ struct association<point_2d<T>>: mathematica::typemap<association<point_2d<T>>, 
 };
 }
 
-double some_function_impl_geo(mathematica::transport& shell, point_2d<double> p1, point_2d<double> p2){
-    return p1.x+p2.y;
+double some_function_impl_geo(mathematica::transport& shell, point_2d<double> p1, point_2d<double> p2){    
+    std::string unit("Kilometers");
+    value res;
+    shell << EvaluatePacket(QuantityMagnitude(GeoDistance(p1, p2, Rule("!UnitSystem") = unit)));
+    shell >> res;
+    
+    double ret = *res;
+    
+    return ret;
 }
 
 double some_function_impl_complex(std::complex<double> p1, std::complex<double> p2){
-    return p1.real()+p2.imag();;
+    return p1.real()+p2.imag();
 }
 int some_function_impl_binary(double x, double y){
     return 10;
@@ -56,7 +66,7 @@ EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){return WolframLibraryVersion
 EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){return 0;}
 EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){return;}
 
-EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native_link){
+EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK native_link){ 
     mathematica::wtransport shell(libData, native_link);
     mathematica::resolver resolver(shell);
 
@@ -76,8 +86,13 @@ EXTERN_C DLLEXPORT int SomeFunctionX(WolframLibraryData libData, WMK_LINK native
 }
 
 
-// SomeFunctionX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod02.so", "SomeFunctionX", LinkObject, LinkObject]
-// SomeFunctionX[1]
-// SomeFunctionX[1, 2]
-// SomeFunctionX[2 + 2 I, 4 + 5 I]
-// SomeFunctionX[GeoPosition[{1, 2}], GeoPosition[{3, 4}]]
+// SomeFunctionWX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod02.so", "SomeFunctionWX", LinkObject, LinkObject]
+// SomeFunctionWX[1]
+// SomeFunctionWX[1, 2]
+// SomeFunctionWX[2 + 2 I, 4 + 5 I]
+// SomeFunctionWX[GeoPosition[{1, 2}], GeoPosition[{3, 4}]]
+
+
+// GeoDistance[GeoPosition[{22.5726, 88.3639}], GeoPosition[{28.7041, 77.1025}]]
+// SomeFunctionWX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod02.so", "SomeFunctionWX", LinkObject, LinkObject]
+// SomeFunctionWX[GeoPosition[{22.5726, 88.3639}], GeoPosition[{28.7041, 77.1025}]]

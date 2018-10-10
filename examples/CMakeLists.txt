@@ -10,6 +10,8 @@ TARGET_LINK_LIBRARIES(mod01 mathematica++)
 
 ADD_LIBRARY(mod02 SHARED mod02.cpp)
 TARGET_LINK_LIBRARIES(mod02 mathematica++)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mod02.m.in ${CMAKE_CURRENT_SOURCE_DIR}/mod02.m)
 
 ADD_LIBRARY(mod03 SHARED mod03.cpp)
 TARGET_LINK_LIBRARIES(mod03 mathematica++)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mod03.m.in ${CMAKE_CURRENT_SOURCE_DIR}/mod03.m)

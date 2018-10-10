@@ -154,7 +154,8 @@ struct module_overload{
         return call(args);
     }
     void out(mathematica::tokens::function::ptr args, mathematica::wtransport& shell){
-        shell(call(args));
+        return_type ret = operator()(args);
+        shell(ret);
     }
 };
 

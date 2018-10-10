@@ -76,3 +76,8 @@ mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value v
         return mathematica::m("Evaluate")(mathematica::m("ToExpression")(val->stringify()));
     }
 }
+
+// std::ostream& mathematica::operator<<(std::ostream& stream, const mathematica::m& expr){
+//     stream << expr._name;
+//     return stream;
+// }
