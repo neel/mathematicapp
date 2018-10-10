@@ -1,12 +1,14 @@
 # Mathematica++
-[GitLab Repository](https://gitlab.com/neel.basu/mathematicapp) | [GitLab Wiki](https://gitlab.com/neel.basu/mathematicapp/wikis/home) | [Website](http://neelex.com/mathematica++) | FreeBSD License
+[GitLab Repository](https://gitlab.com/neel.basu/mathematicapp) | [GitLab Wiki](https://gitlab.com/neel.basu/mathematicapp/wikis/home) | [Website](http://neelex.com/mathematica++) | [Report Issues](https://gitlab.com/neel.basu/mathematicapp/issues) | [Chat](https://gitter.im/mathematicapp)
 
 * [Build Instructions](build)
+* [Quickstart](quickstart)
 * [Connection](connection)
 * [Types](types)
 * [Mathematica Constructs](mathematica-constructs)
 * [STL Containers](stl)
 * [Local Storage](local-storage)
+* [Association](association)
 
 ```C++
 symbol x("x");
@@ -89,7 +91,7 @@ value result_sum; // declare the variable to hold the result
 
 shell << Total(Table(i, List(i, 1, 10))); // In Mathematica Total[Table[i, {i, 1, 10}]]
 shell >> result_sum;
-````
+```
 
 `result_sum` is the result object that can be converted to `int`, `double`, `std::string` and streamed to `std::ostream`. 
 
@@ -139,3 +141,32 @@ shell >> res_matc;
 shell << Det(res_matc);
 shell >> res_det;
 ```
+## Serialize `struct` to Mathematica `Association`
+
+```cpp
+struct point{
+    std::pair<int, int> location;
+    std::string name;
+    double elevation;
+
+    point(): location(std::make_pair(0, 0)), name(""), elevation (0.0f){}
+    point (std::pair<int, int> loc, const std::string& name_, double elevation_): location(loc), name(name_), elevation(elevation_){}
+};
+value result;
+point pti(std::make_pair(1, 1), "Hallo", 100.0f);
+shell << Evaluate(pti);
+shell >> result;
+point pto = cast<point>(result);
+```
+
+The object `pti` of type struct `point` is the above example will be serialized as `Association[Rule["location", List[1, 1]], Rule["name", "Hallo"], Rule["elevation", 100]]`. The associations need to be declared as following.
+
+```cpp
+MATHEMATICA_ASSOCIATE(point, std::pair<int, int>, std::string, double){
+    MATHEMATICA_PROPERTY(0, location)
+    MATHEMATICA_PROPERTY(1, name)
+    MATHEMATICA_PROPERTY(2, elevation)
+};
+```
+
+more on [Association](association)
