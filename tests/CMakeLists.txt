@@ -48,9 +48,11 @@ IF(NOT WITHOUT_EIGEN)
     ENDIF()
 ENDIF()
 
+IF(WITH_LL)
 ADD_EXECUTABLE(module module.cpp)
 TARGET_LINK_LIBRARIES(module ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(module mathematica++)
+ENDIF()
 
 ENABLE_TESTING()
 
@@ -62,4 +64,6 @@ ADD_TEST(storage storage --report_level=short --log_level=message --show_progres
 ADD_TEST(stl stl --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(integer integer --report_level=short --log_level=message --show_progress=true)
 ADD_TEST(association association --report_level=short --log_level=message --show_progress=true)
+IF(WITH_LL)
 ADD_TEST(module module --report_level=short --log_level=message --show_progress=true)
+ENDIF()

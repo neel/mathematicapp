@@ -59,6 +59,11 @@ OPTION(WITH_WS          "Use WSTP functions insteadof using MathLink"           
 OPTION(PRINT_TRACE      "Print low level the WS/ML functions that are being used" OFF)
 OPTION(WITHOUT_EIGEN    "Compile without using eigen even if available"           OFF)
 
+IF(WITH_WS)
+    set(WITH_ML OFF CACHE INTERNAL "" FORCE)
+    set(WITH_LL OFF CACHE INTERNAL "" FORCE)
+ENDIF()
+
 IF(WITH_ML)
     set(WITH_WS OFF CACHE INTERNAL "" FORCE)
     MESSAGE(">> ${BoldMagenta} Using MathLink instead of WSTP ${ColourReset}")

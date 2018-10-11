@@ -5,6 +5,8 @@ FIND_PACKAGE(Boost COMPONENTS filesystem system date_time REQUIRED)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
+IF(WITH_LL)
+
 ADD_LIBRARY(mod01 SHARED mod01.cpp)
 TARGET_LINK_LIBRARIES(mod01 mathematica++)
 
@@ -15,3 +17,5 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mod02.m.in ${CMAKE_CURRENT_SOURCE_DIR
 ADD_LIBRARY(mod03 SHARED mod03.cpp)
 TARGET_LINK_LIBRARIES(mod03 mathematica++)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mod03.m.in ${CMAKE_CURRENT_SOURCE_DIR}/mod03.m)
+
+ENDIF()
