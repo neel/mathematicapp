@@ -53,21 +53,28 @@ SET(MATHEMATICAPP_INCLUDE_DIRS
 
 INCLUDE_DIRECTORIES(${MATHEMATICAPP_INCLUDE_DIRS})
 
-OPTION(WITH_ML          "Use MathLink functions insteadof using WSTP"             OFF)
+OPTION(WITH_ML          "Use MathLink functions insteadof using WSTP"             ON)
+OPTION(WITH_LL          "Support LibraryLink"                                     ON)
+OPTION(WITH_WS          "Use WSTP functions insteadof using MathLink"             OFF)
 OPTION(PRINT_TRACE      "Print low level the WS/ML functions that are being used" OFF)
 OPTION(WITHOUT_EIGEN    "Compile without using eigen even if available"           OFF)
-OPTION(WITHOUT_LIBRARY  "Compile without LibraryLink supports"                    OFF)
 
 IF(WITH_ML)
-    MESSAGE("${BoldMagenta} Using MathLink instead of WSTP ${ColourReset}")
+    set(WITH_WS OFF CACHE INTERNAL "" FORCE)
+    MESSAGE(">> ${BoldMagenta} Using MathLink instead of WSTP ${ColourReset}")
     ADD_COMPILE_DEFINITIONS(USING_ML)
     INCLUDE_DIRECTORIES(${Mathematica_MathLink_INCLUDE_DIR})
 ELSE()
+    set(WITH_ML OFF CACHE INTERNAL "" FORCE)
+    set(WITH_LL OFF CACHE INTERNAL "" FORCE)
+    MESSAGE(">> ${BoldMagenta} Using WSTP instead of MathLink ${ColourReset}")
     ADD_COMPILE_DEFINITIONS(USING_WS)
     INCLUDE_DIRECTORIES(${Mathematica_WSTP_INCLUDE_DIR})
 ENDIF()
 
-IF(NOT WITHOUT_LIBRARY)
+IF(WITH_LL)
+    set(WITH_WS OFF CACHE INTERNAL "" FORCE)
+    MESSAGE(">> ${BoldMagenta} LibraryLink Support added ${ColourReset}")
     ADD_COMPILE_DEFINITIONS(USING_LL)
     INCLUDE_DIRECTORIES(${Mathematica_WolframLibrary_INCLUDE_DIR})
 ENDIF()
@@ -81,7 +88,7 @@ IF(NOT WITHOUT_EIGEN)
     IF(Eigen3_FOUND)
         INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
         ADD_COMPILE_DEFINITIONS(USING_LIB_EIGEN)
-        MESSAGE("${BoldMagenta} Using Eigen3 library ${ColourReset}")
+        MESSAGE(">> ${BoldMagenta} Using Eigen3 library ${ColourReset}")
     ENDIF()
 ENDIF()
 
@@ -107,9 +114,10 @@ SET(MATHEMATICAPP_HEADERS
     includes/mathematica++/library.h
 )
 
-IF(NOT WITHOUT_LIBRARY)
+IF(WITH_LL)
     SET(MATHEMATICAPP_SOURCES ${MATHEMATICAPP_SOURCES}
         includes/mathematica++/transport.h
+        includes/mathematica++/library.h
     )
 ENDIF()
 
@@ -135,9 +143,10 @@ SET(MATHEMATICAPP_SOURCES
     sources/library.cpp
 )
 
-IF(NOT WITHOUT_LIBRARY)
+IF(WITH_LL)
     SET(MATHEMATICAPP_SOURCES ${MATHEMATICAPP_SOURCES}
         sources/transport.cpp
+        sources/library.cpp
     )
 ENDIF()
 
