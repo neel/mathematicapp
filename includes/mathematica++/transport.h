@@ -34,11 +34,48 @@
 #include <mathematica++/io.h>
 #include <mathematica++/m.h>
 #include <boost/utility/enable_if.hpp>
+#include <boost/variant.hpp>
 #include <boost/type_traits/is_integral.hpp>
+#include <boost/multi_array.hpp>
+#include <boost/array.hpp>
 #include <cstring>
 #include <complex>
 
 namespace mathematica{
+    
+namespace internal{
+template <typename T, int U=0>
+struct is_multiarray{
+    static bool const value = false;
+};
+template <typename T, int U>
+struct is_multiarray<boost::multi_array<T, U>>{
+    static bool const value = true;
+};
+}
+    
+struct mtensor_adapter{
+    typedef boost::variant<long, double, std::complex<double>> variant_type;
+    typedef std::vector<variant_type> collection_type;
+    
+    WolframLibraryData _data;
+    MTensor _tensor;
+    int _rank;
+    int _type; // MType_Integer, MType_Real, or MType_Complex
+    
+    mtensor_adapter(WolframLibraryData data, MTensor tensor);
+    template <typename T, int D>
+    boost::multi_array<T, D> tensor() const{
+        typedef boost::multi_array<T, D> tensor_type;
+        typedef typename tensor_type::index index;
+        
+        boost::extent<boost::array<T, D>> extent = _data->MTensor_getDimensions(_tensor);
+        
+        tensor_type tensor(extent);
+        
+        return tensor;
+    }
+};
     
 /**
  * argument adapter only handles integer, real, complex types and string with some restrictions
@@ -47,9 +84,10 @@ namespace mathematica{
  * currently MTensor is not supported inside MArgument, user code may use LinkObject to transfer such expressions easily
  */
 struct argument_adapter{
+    WolframLibraryData _data;
     MArgument _source;
     
-    argument_adapter(MArgument src): _source(src){}
+    argument_adapter(WolframLibraryData data, MArgument src): _data(data), _source(src){}
     
     template <typename T>
     typename boost::enable_if<boost::is_integral<T>, argument_adapter&>::type operator=(T val){
@@ -72,9 +110,6 @@ struct argument_adapter{
         mcimag(cmplx) = val.imag();
         return *this;
     }
-//     char* convert() const{
-//         return MArgument_getUTF8String(_source);
-//     }
     std::string convert() const{
         const char* str = MArgument_getUTF8String(_source);
         int len = strlen(str);

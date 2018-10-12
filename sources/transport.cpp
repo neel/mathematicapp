@@ -1,5 +1,17 @@
 #include "mathematica++/transport.h"
 
+mathematica::mtensor_adapter::mtensor_adapter(WolframLibraryData data, MTensor tensor): _data(data), _tensor(tensor){
+    _rank = _data->MTensor_getRank(_tensor);
+    _type = _data->MTensor_getType(_tensor);
+}
+
+// mathematica::mtensor_adapter::collection_type mathematica::mtensor_adapter::vector() const{
+//     mathematica::mtensor_adapter::collection_type collection;
+//     mint const* dims = _data->MTensor_getDimensions(_tensor); // _rank number of elements in dims
+//     
+//     return collection;
+// }
+
 mathematica::basic_transport::basic_transport(WMK_LINK link): _link(link), _connection(driver::link(link)), _shell(_connection){
     
 }
@@ -19,9 +31,9 @@ mathematica::wtransport::wtransport(WolframLibraryData data, mathematica::transp
     _input = boost::dynamic_pointer_cast<mathematica::tokens::function>(input);
 }
 
-mathematica::mtransport::mtransport(WolframLibraryData data, int argc, MArgument* argv, MArgument res): transport(data), _result(res){
+mathematica::mtransport::mtransport(WolframLibraryData data, int argc, MArgument* argv, MArgument res): transport(data), _result(data, res){
     for(int i = 0; i < argc; ++i){
-        argument_adapter* adapter = new argument_adapter(argv[i]);
+        argument_adapter* adapter = new argument_adapter(data, argv[i]);
         _arguments.push_back(adapter);
     }
 }
