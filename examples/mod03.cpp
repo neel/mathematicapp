@@ -19,7 +19,7 @@ EXTERN_C DLLEXPORT int SomeFunctionMX(WolframLibraryData libData, mint argc, MAr
     std::complex<int> cmplx;
     boost::tie(dbl, cmplx) = args;
     std::clog << args << std::endl;
-    shell(std::complex<double>(dbl+cmplx.real(), dbl-cmplx.imag()));
+    shell = std::complex<double>(dbl+cmplx.real(), dbl-cmplx.imag());
     return LIBRARY_NO_ERROR;
 }
 

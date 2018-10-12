@@ -211,9 +211,17 @@ struct mtransport: transport{
         return as<T...>();
     }
     template <typename T>
-    int operator()(T val){
+    int ret(T val){
         res() = val;
         return LIBRARY_NO_ERROR;
+    }
+    template <typename T>
+    int operator()(T val){
+        return ret<T>(val);
+    }
+    template <typename T>
+    int operator=(T val){
+        return ret<T>(val);
     }
 };
 
