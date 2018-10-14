@@ -72,7 +72,10 @@ mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value v
         fnc();
         return fnc;
     }else {
-        BOOST_ASSERT_MSG(true, static_cast<std::stringstream&>(std::stringstream() << "Unexpected token received of type " << val->type()).str().c_str());
+        std::stringstream str;
+        str << "Unexpected token received of type " << val->type();
+
+        BOOST_ASSERT_MSG(true, str.str().c_str());
         return mathematica::m("Evaluate")(mathematica::m("ToExpression")(val->stringify()));
     }
 }

@@ -36,14 +36,29 @@
 BOOST_AUTO_TEST_SUITE(connection)
 
 BOOST_AUTO_TEST_CASE(cstring_argv){
-  int argc = 4;
-  char* argv[] = {(char*)"-linkname", (char*)"math -mathlink", (char*)0x0};
+#ifdef _WIN32
+  char* n_argv[] = {(char*)"-linkname", (char*)"math -mathlink"};
+#elif __linux__
+  char* n_argv[] = {(char*)"-linkname", (char*)"math -mathlink"};
+#elif __APPLE__
+  char* n_argv[] = {(char*)"-linkname", (char*)"/Applications/Mathematica.app/Contents/MacOS/MathKernel -mathlink"};
+#endif
+
+  char** argv = n_argv;
+  int argc = 2;
   mathematica::connector connector(argc, argv);
   BOOST_CHECK(connector.connected());
 }
 
 BOOST_AUTO_TEST_CASE(str){
+#ifdef _WIN32
   std::string argv = "-linkname math -mathlink";
+#elif __linux__
+  std::string argv = "-linkname math -mathlink";
+#elif __APPLE__
+  std::string argv = "-linkname /Applications/Mathematica.app/Contents/MacOS/MathKernel -mathlink";
+#endif
+
   mathematica::connector connector(argv);
   BOOST_CHECK(connector.connected());
 }

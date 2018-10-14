@@ -2,6 +2,9 @@
 #define MATHEMATICAPP_COMPATIBILITY_H
 
 #ifdef USING_ML
+
+#define wmk_int64_t mlint64
+
 #define WMK_LINK MLINK
 #define WMK_ENV  MLENV
 #define WMK_MARK MLMARK
@@ -84,6 +87,9 @@
 #define WMK_PutReal32Array    MLPutReal32Array
 #define WMK_PutReal64Array    MLPutReal64Array
 #else
+
+#define wmk_int64_t wsint64
+
 #define WMK_LINK WSLINK
 #define WMK_ENV  WSENV
 #define WMK_MARK WSMARK

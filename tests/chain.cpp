@@ -42,9 +42,7 @@ using namespace mathematica;
 BOOST_AUTO_TEST_SUITE(chain)
 
 BOOST_AUTO_TEST_CASE(scalers){
-  int argc = 4;
-  char* argv[] = {(char*)"-linkname", (char*)"math -mathlink", (char*)0x0};
-  connector shell(argc, argv);
+  connector shell;
   BOOST_CHECK(shell.connected());
   
   {
@@ -77,9 +75,7 @@ BOOST_AUTO_TEST_CASE(scalers){
 }
 
 BOOST_AUTO_TEST_CASE(vectors){
-    int argc = 4;
-    char* argv[] = {(char*)"-linkname", (char*)"math -mathlink", (char*)0x0};
-    connector shell(argc, argv);
+    connector shell;
     BOOST_CHECK(shell.connected());
     
     {
