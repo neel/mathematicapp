@@ -47,9 +47,7 @@ using namespace mathematica;
 BOOST_AUTO_TEST_SUITE(shell)
 
 BOOST_AUTO_TEST_CASE(token_io){
-  int argc = 4;
-  char* argv[] = {(char*)"-linkname", (char*)"math -mathlink", (char*)0x0};
-  mathematica::connector shell(argc, argv);
+  mathematica::connector shell;
   BOOST_CHECK(shell.connected());
   
   {
@@ -68,9 +66,7 @@ BOOST_AUTO_TEST_CASE(token_io){
 }
 
 BOOST_AUTO_TEST_CASE(token_conversion){
-  int argc = 4;
-  char* argv[] = {(char*)"-linkname", (char*)"math -mathlink", (char*)0x0};
-  mathematica::connector shell(argc, argv);
+  mathematica::connector shell;
   BOOST_CHECK(shell.connected());
   
   {
