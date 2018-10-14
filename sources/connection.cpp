@@ -279,7 +279,9 @@ void mathematica::driver::io::connection::put_array_int64(const std::vector<boos
     
     std::clog << boost::format("[%1%]: %2%({%3%}, {%4%}, 0, %5%)") % boost::posix_time::second_clock::local_time() % STR(WMK_PutInteger64Array) % data_str % depth_str % dims.size() << std::endl;
 #endif
-    const boost::int64_t* elems = data.data();
+    std::vector<wmk_int64_t> native_data;
+    std::copy(data.begin(), data.end(), std::back_inserter(native_data));
+    const wmk_int64_t* elems = native_data.data();
     const int* dimsa = dims.data();
     if(!WMK_PutInteger64Array(_link, elems, dimsa, reinterpret_cast<const char **>(0), dims.size())){
         throw exceptions::dispatch(*this, "mathematica::driver::ws::connection::put_array_int64");
