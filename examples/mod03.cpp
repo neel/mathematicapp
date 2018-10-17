@@ -23,4 +23,26 @@ EXTERN_C DLLEXPORT int SomeFunctionMX(WolframLibraryData libData, mint argc, MAr
     return LIBRARY_NO_ERROR;
 }
 
-// SomeFunctionMX = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMX", {Real, Integer}, Real]
+EXTERN_C DLLEXPORT int SomeFunctionMXT(WolframLibraryData libData, mint argc, MArgument* argv, MArgument res){
+//     std::ofstream out("/tmp/log");
+//     std::clog.rdbuf(out.rdbuf());
+    
+    mathematica::mtransport shell(libData, argc, argv, res);
+    typedef std::vector<std::vector<double>> matrix_type;
+    boost::tuple<matrix_type> args = shell;
+    try{
+        matrix_type mat;
+        boost::tie(mat) = args;
+        double sum = 0.0f;
+        for(matrix_type::const_iterator i = mat.begin(); i != mat.end(); ++i){
+            sum += std::accumulate((*i).begin(), (*i).end(), 0.0f);
+        }
+        shell = sum;
+    }catch(const std::exception& ex){
+        libData->Message(ex.what());
+    }
+    return LIBRARY_NO_ERROR;
+}
+
+// SomeFunctionMX  = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMX", {Real, Integer}, Real]
+// SomeFunctionMXT = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMXT", {{Real, 1}}, Real]

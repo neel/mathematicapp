@@ -5,13 +5,6 @@ mathematica::mtensor_adapter::mtensor_adapter(WolframLibraryData data, MTensor t
     _type = _data->MTensor_getType(_tensor);
 }
 
-// mathematica::mtensor_adapter::collection_type mathematica::mtensor_adapter::vector() const{
-//     mathematica::mtensor_adapter::collection_type collection;
-//     mint const* dims = _data->MTensor_getDimensions(_tensor); // _rank number of elements in dims
-//     
-//     return collection;
-// }
-
 mathematica::basic_transport::basic_transport(WMK_LINK link): _link(link), _connection(driver::link(link)), _shell(_connection){
     
 }

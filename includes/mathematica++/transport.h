@@ -35,28 +35,178 @@
 #include <mathematica++/m.h>
 #include <boost/utility/enable_if.hpp>
 #include <boost/variant.hpp>
+#include <boost/array.hpp>
 #include <boost/type_traits/is_integral.hpp>
+#include <boost/type_traits/is_complex.hpp>
+#include <boost/type_traits/is_convertible.hpp>
+#include <boost/type_traits/is_floating_point.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/array.hpp>
 #include <cstring>
 #include <complex>
+#include <stdexcept>
+#include <type_traits>
 
 namespace mathematica{
     
 namespace internal{
-template <typename T, int U=0>
-struct is_multiarray{
+
+template <typename T>
+struct is_vector{
     static bool const value = false;
 };
-template <typename T, int U>
-struct is_multiarray<boost::multi_array<T, U>>{
+template <typename T>
+struct is_vector<std::vector<T>>{
     static bool const value = true;
 };
-}
+
+template <typename T>
+struct value_type{
+    typedef T type;
+};
+
+template <typename T>
+struct value_type<std::vector<T>>: value_type<T>{};
+
+template <typename T>
+struct vector_rank{
+    enum{rank = 0};
+};
+
+template<typename T>
+struct vector_rank<std::vector<T>>{
+    enum{rank = vector_rank<T>::rank +1};
+};
+
+template <typename T, typename U>
+struct vec_clone{
+    typedef U type;
+};
+
+template <typename T, typename U>
+struct vec_clone<std::vector<T>, U>{
+    typedef typename std::vector<typename vec_clone<T, U>::type> type;
+};
+
+template <typename T, typename E=void>
+struct mtensor_value_typeid;
+
+template <typename T>
+struct reserver{
+    static void reserve(T& scalar, std::vector<int>::const_iterator dim){}
+    template <typename M>
+    static void populate(T& scalar, typename std::vector<M>::const_iterator& it){
+        T val = mtensor_value_typeid<T>::to_utype(*it++);
+        scalar = val;
+    }
+};
+
+template <typename T>
+struct reserver<std::vector<T>>{
+    static void reserve(std::vector<T>& vec, std::vector<int>::const_iterator dim){
+        vec.resize(*dim);
+        std::vector<int>::const_iterator ndim = dim+1;
+        for(int i = 0; i < *dim; ++i){
+            reserver<T>::reserve(vec[i], ndim);
+        }
+    }
+    template <typename M>
+    static void populate(std::vector<T>& vec, typename std::vector<M>::const_iterator& it){
+        for(typename std::vector<T>::iterator i = vec.begin(); i != vec.end(); ++i){
+            reserver<T>::template populate<M>(*i, it);
+        }
+    }
+};
+
+template <typename T, typename M>
+typename boost::enable_if<is_vector<T>, T>::type& tensor_to_vector(T& tensor, const std::vector<int> dims, const std::vector<M>& data){
+    typedef T tensor_type;
+    typedef typename value_type<T>::type value_type;
+    typedef typename std::vector<M>::const_iterator data_iterator;
     
+    reserver<T>::reserve(tensor, dims.begin());
+    data_iterator it = data.cbegin();
+    reserver<T>::template populate<M>(tensor, it);
+    return tensor;
+}
+
+template <typename T>
+struct mtensor_value_typeid<T, typename boost::enable_if<boost::is_integral<T>>::type >{
+    typedef mint mtype;
+    
+    static int const id = MType_Integer;
+    static constexpr const char* const name = "Integer";
+    
+    /**
+     * flattened mint data of the tensor
+     */
+    static mint* data(WolframLibraryData data, MTensor tensor){
+        return data->MTensor_getIntegerData(tensor);
+    }
+    static T to_utype(mint mdata){
+        return static_cast<T>(mdata);
+    }
+};
+template <typename T>
+struct mtensor_value_typeid<T, typename boost::enable_if<boost::is_floating_point<T>>::type >{
+    typedef mreal mtype;
+    
+    static int const id = MType_Real;
+    static constexpr const char* const name = "Real";
+    
+    /**
+     * flattened mreal data of the tensor
+     */
+    static double* data(WolframLibraryData data, MTensor tensor){
+        return data->MTensor_getRealData(tensor);
+    }
+    static T to_utype(mreal mdata){
+        return static_cast<T>(mdata);
+    }
+};
+template <>
+struct mtensor_value_typeid<mcomplex>{
+    typedef mcomplex mtype;
+    
+    static int const id = MType_Real;
+    static constexpr const char* const name = "Complex";
+    
+    /**
+     * flattened mcomplex data of the tensor
+     */
+    static mcomplex* data(WolframLibraryData data, MTensor tensor){
+        return data->MTensor_getComplexData(tensor);
+    }
+    static mcomplex to_utype(mcomplex mdata){
+        return mdata;
+    }
+};
+
+template <typename T>
+struct mtensor_value_typeid<std::complex<T>>{
+    typedef mcomplex mtype;
+    
+    static int const id = MType_Real;
+    static constexpr const char* const name = "Complex";
+    
+    /**
+     * flattened mcomplex data of the tensor
+     */
+    static mcomplex* data(WolframLibraryData data, MTensor tensor){
+        return data->MTensor_getComplexData(tensor);
+    }
+    static std::complex<T> to_utype(mcomplex mdata){
+        return std::complex<T>(static_cast<T>(mcreal(mdata)), static_cast<T>(mcimag(mdata)));
+    }
+};
+
+}
+
+
+
 struct mtensor_adapter{
-    typedef boost::variant<long, double, std::complex<double>> variant_type;
-    typedef std::vector<variant_type> collection_type;
+    // typedef boost::variant<long, double, std::complex<double>> variant_type;
+    // typedef std::vector<variant_type> collection_type;
     
     WolframLibraryData _data;
     MTensor _tensor;
@@ -64,30 +214,59 @@ struct mtensor_adapter{
     int _type; // MType_Integer, MType_Real, or MType_Complex
     
     mtensor_adapter(WolframLibraryData data, MTensor tensor);
-    template <typename T, int D>
-    boost::multi_array<T, D> tensor() const{
-        typedef boost::multi_array<T, D> tensor_type;
-        typedef typename tensor_type::index index;
+
+    template <typename T>
+    typename boost::enable_if<internal::is_vector<T>, T>::type vectorify() const{
+        T tensor;// the vector we are supposed to populate and return
+        //{ dimensions
+        const mint* dims = _data->MTensor_getDimensions(_tensor);
+        std::vector<int> dimensions;
+        std::copy(dims, dims+_rank, std::back_inserter(dimensions));
+        //}
         
-        boost::extent<boost::array<T, D>> extent = _data->MTensor_getDimensions(_tensor);
+        //{ flattened data
+        typedef typename internal::value_type<T>::type vtype;
+        typedef typename internal::mtensor_value_typeid<vtype>::mtype mtype;
+        mtype* raw = internal::mtensor_value_typeid<vtype>::data(_data, _tensor);
+        if(!raw){
+            throw std::domain_error("inconsistant type of tensor requested");
+        }
+        mint len = _data->MTensor_getFlattenedLength(_tensor);
+        std::vector<mtype> raw_vec;
+        std::copy(raw, raw+len, std::back_inserter(raw_vec));
+        // raw_vec.assign(raw, raw+len-1);
+        //}
         
-        tensor_type tensor(extent);
+        //{ check rank compatiability
+        int rank = internal::vector_rank<T>::rank;
+        if(rank != _rank){
+            throw std::domain_error((boost::format("expected rank %1% requested %2%") % _rank % rank).str());
+        }
+        //}
+        
+        //{ build the vector from the tensor 
+        internal::tensor_to_vector(tensor, dimensions, raw_vec);
+        //} 
         
         return tensor;
     }
+
 };
     
 /**
- * argument adapter only handles integer, real, complex types and string with some restrictions
- * conversion from MArgument to std::string or char* is supported
- * however from std::string is not supported, only from char* is supported
- * currently MTensor is not supported inside MArgument, user code may use LinkObject to transfer such expressions easily
+ * argument adapter only handles integer, real, complex types and string
  */
 struct argument_adapter{
     WolframLibraryData _data;
     MArgument _source;
     
     argument_adapter(WolframLibraryData data, MArgument src): _data(data), _source(src){}
+    
+    mtensor_adapter tensor() const{
+        MTensor tens = MArgument_getMTensor(_source);
+        mtensor_adapter adapter(_data, tens);
+        return adapter;
+    }
     
     template <typename T>
     typename boost::enable_if<boost::is_integral<T>, argument_adapter&>::type operator=(T val){
@@ -127,6 +306,11 @@ struct argument_adapter{
     template <typename T>
     typename boost::enable_if<boost::is_floating_point<T>, T>::type convert() const{
         return MArgument_getReal(_source);
+    }
+    template <typename T>
+    typename boost::enable_if<internal::is_vector<T>, T>::type convert() const{
+        mtensor_adapter adapter = tensor();
+        return adapter.vectorify<T>();
     }
     template <typename T>
     operator T() const{
