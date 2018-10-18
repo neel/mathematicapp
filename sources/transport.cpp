@@ -1,9 +1,6 @@
 #include "mathematica++/transport.h"
 
-mathematica::mtensor_adapter::mtensor_adapter(WolframLibraryData data, MTensor tensor): _data(data), _tensor(tensor){
-    _rank = _data->MTensor_getRank(_tensor);
-    _type = _data->MTensor_getType(_tensor);
-}
+mathematica::mtensor_adapter::mtensor_adapter(WolframLibraryData data): _data(data){}
 
 mathematica::basic_transport::basic_transport(WMK_LINK link): _link(link), _connection(driver::link(link)), _shell(_connection){
     

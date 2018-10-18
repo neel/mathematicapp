@@ -71,11 +71,19 @@ struct value_type<std::vector<T>>: value_type<T>{};
 template <typename T>
 struct vector_rank{
     enum{rank = 0};
+    
+    static void dimensions(const T& scalar, mint* dim_it){}
 };
 
 template<typename T>
 struct vector_rank<std::vector<T>>{
     enum{rank = vector_rank<T>::rank +1};
+    typedef boost::array<mint, rank> dimensions_type;
+    
+    static void dimensions(const std::vector<T>& vector, mint* dim_it){
+        *dim_it = vector.size();
+        vector_rank<T>::dimensions(vector[0], dim_it+1);
+    }
 };
 
 template <typename T, typename U>
@@ -90,6 +98,31 @@ struct vec_clone<std::vector<T>, U>{
 
 template <typename T, typename E=void>
 struct mtensor_value_typeid;
+
+template <typename T>
+struct vector_flatten{
+    typedef T value_type;
+    typedef std::vector<typename mtensor_value_typeid<value_type>::mtype> flattened_type;
+    
+    static void flatten(const T& scalar, typename flattened_type::iterator& flattened_it){
+        *flattened_it = mtensor_value_typeid<T>::to_mtype(scalar);
+        ++flattened_it;
+    }
+};
+
+template <typename T>
+struct vector_flatten<std::vector<T>>{
+    typedef std::vector<T> vector_type;
+    typedef typename value_type<T>::type value_type;
+    typedef std::vector<value_type> flattened_type;
+    
+    static void flatten(const std::vector<T>& vector, typename flattened_type::iterator& flattened_it){
+        for(typename vector_type::const_iterator it = vector.begin(); it != vector.end(); ++it){
+            const T& one_dim_down = *it;
+            vector_flatten<T>::flatten(one_dim_down, flattened_it);
+        }
+    }
+};
 
 template <typename T>
 struct reserver{
@@ -131,6 +164,32 @@ typename boost::enable_if<is_vector<T>, T>::type& tensor_to_vector(T& tensor, co
 }
 
 template <typename T>
+void dimensions(const T& vec, typename vector_rank<T>::dimensions_type& dims){
+    typedef typename vector_rank<T>::dimensions_type dimensions_type;
+    typedef typename dimensions_type::iterator iterator;
+    
+    iterator it = dims.begin();
+    vector_rank<T>::dimensions(vec, it);
+}
+
+template <typename T>
+typename vector_flatten<T>::flattened_type flatten(const T& vec){
+    typedef typename vector_rank<T>::dimensions_type dimensions_type;
+    typename vector_flatten<T>::flattened_type flattened;
+    
+    dimensions_type dims;
+    dimensions(vec, dims);
+    
+    int flattened_length = std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<int>());
+    flattened.resize(flattened_length);
+    
+    typename vector_flatten<T>::flattened_type::iterator it = flattened.begin();
+    vector_flatten<T>::flatten(vec, it);
+    
+    return flattened;
+}
+
+template <typename T>
 struct mtensor_value_typeid<T, typename boost::enable_if<boost::is_integral<T>>::type >{
     typedef mint mtype;
     
@@ -145,6 +204,9 @@ struct mtensor_value_typeid<T, typename boost::enable_if<boost::is_integral<T>>:
     }
     static T to_utype(mint mdata){
         return static_cast<T>(mdata);
+    }
+    static mint to_mtype(T data){
+        return static_cast<mint>(data);
     }
 };
 template <typename T>
@@ -163,6 +225,9 @@ struct mtensor_value_typeid<T, typename boost::enable_if<boost::is_floating_poin
     static T to_utype(mreal mdata){
         return static_cast<T>(mdata);
     }
+    static mreal to_mtype(T data){
+        return static_cast<mreal>(data);
+    }
 };
 template <>
 struct mtensor_value_typeid<mcomplex>{
@@ -179,6 +244,9 @@ struct mtensor_value_typeid<mcomplex>{
     }
     static mcomplex to_utype(mcomplex mdata){
         return mdata;
+    }
+    static mcomplex to_mtype(mcomplex data){
+        return data;
     }
 };
 
@@ -198,6 +266,12 @@ struct mtensor_value_typeid<std::complex<T>>{
     static std::complex<T> to_utype(mcomplex mdata){
         return std::complex<T>(static_cast<T>(mcreal(mdata)), static_cast<T>(mcimag(mdata)));
     }
+    static mcomplex to_mtype(const std::complex<T> data){
+        mcomplex cplx;
+        mcreal(cplx) = data.re();
+        mcimag(cplx) = data.imag();
+        return cplx;
+    }
 };
 
 }
@@ -205,33 +279,31 @@ struct mtensor_value_typeid<std::complex<T>>{
 
 
 struct mtensor_adapter{
-    // typedef boost::variant<long, double, std::complex<double>> variant_type;
-    // typedef std::vector<variant_type> collection_type;
-    
     WolframLibraryData _data;
-    MTensor _tensor;
-    int _rank;
-    int _type; // MType_Integer, MType_Real, or MType_Complex
-    
-    mtensor_adapter(WolframLibraryData data, MTensor tensor);
+   
+    mtensor_adapter(WolframLibraryData data);
 
     template <typename T>
-    typename boost::enable_if<internal::is_vector<T>, T>::type vectorify() const{
+    typename boost::enable_if<internal::is_vector<T>, T>::type vectorify(MTensor tens) const{
         T tensor;// the vector we are supposed to populate and return
+        
+        int trank = _data->MTensor_getRank(tens);
+//         int type = _data->MTensor_getType(tens);
+        
         //{ dimensions
-        const mint* dims = _data->MTensor_getDimensions(_tensor);
+        const mint* dims = _data->MTensor_getDimensions(tens);
         std::vector<int> dimensions;
-        std::copy(dims, dims+_rank, std::back_inserter(dimensions));
+        std::copy(dims, dims+trank, std::back_inserter(dimensions));
         //}
         
         //{ flattened data
         typedef typename internal::value_type<T>::type vtype;
         typedef typename internal::mtensor_value_typeid<vtype>::mtype mtype;
-        mtype* raw = internal::mtensor_value_typeid<vtype>::data(_data, _tensor);
+        mtype* raw = internal::mtensor_value_typeid<vtype>::data(_data, tens);
         if(!raw){
             throw std::domain_error("inconsistant type of tensor requested");
         }
-        mint len = _data->MTensor_getFlattenedLength(_tensor);
+        mint len = _data->MTensor_getFlattenedLength(tens);
         std::vector<mtype> raw_vec;
         std::copy(raw, raw+len, std::back_inserter(raw_vec));
         // raw_vec.assign(raw, raw+len-1);
@@ -239,14 +311,42 @@ struct mtensor_adapter{
         
         //{ check rank compatiability
         int rank = internal::vector_rank<T>::rank;
-        if(rank != _rank){
-            throw std::domain_error((boost::format("expected rank %1% requested %2%") % _rank % rank).str());
+        if(rank != trank){
+            throw std::domain_error((boost::format("expected rank %1% requested %2%") % trank % rank).str());
         }
         //}
         
         //{ build the vector from the tensor 
         internal::tensor_to_vector(tensor, dimensions, raw_vec);
         //} 
+        
+        return tensor;
+    }
+    
+    template <typename T>
+    MTensor tensorify(const std::vector<T>& vec){
+        MTensor tensor;
+        
+        typedef std::vector<T> vector_type;
+        typedef typename internal::vector_rank<vector_type>::dimensions_type dimensions_type;
+        typedef typename internal::value_type<vector_type>::type vtype;
+        typedef typename internal::mtensor_value_typeid<vtype>::mtype mtype;
+        
+        int mtype_id = internal::mtensor_value_typeid<vtype>::id;
+        int rank = internal::vector_rank<vector_type>::rank;
+        
+        dimensions_type dims;
+        internal::dimensions(vec, dims);
+        
+        _data->MTensor_new(mtype_id, rank, dims.data(), &tensor);
+        
+        mtype* raw = internal::mtensor_value_typeid<vtype>::data(_data, tensor);
+        std::vector<mtype> data = internal::flatten(vec);
+        
+        for(typename std::vector<mtype>::const_iterator it = data.begin(); it != data.end(); ++it){
+            *raw = *it;
+            raw++;
+        }
         
         return tensor;
     }
@@ -261,12 +361,6 @@ struct argument_adapter{
     MArgument _source;
     
     argument_adapter(WolframLibraryData data, MArgument src): _data(data), _source(src){}
-    
-    mtensor_adapter tensor() const{
-        MTensor tens = MArgument_getMTensor(_source);
-        mtensor_adapter adapter(_data, tens);
-        return adapter;
-    }
     
     template <typename T>
     typename boost::enable_if<boost::is_integral<T>, argument_adapter&>::type operator=(T val){
@@ -309,8 +403,16 @@ struct argument_adapter{
     }
     template <typename T>
     typename boost::enable_if<internal::is_vector<T>, T>::type convert() const{
-        mtensor_adapter adapter = tensor();
-        return adapter.vectorify<T>();
+        MTensor tens = MArgument_getMTensor(_source);
+        mtensor_adapter adapter(_data);
+        return adapter.vectorify<T>(tens);
+    }
+    template <typename T>
+    argument_adapter& operator=(const std::vector<T>& val){
+        mtensor_adapter adapter(_data);
+        MTensor tensor = adapter.tensorify(val);
+        MArgument_setMTensor(_source, tensor);
+        return *this;
     }
     template <typename T>
     operator T() const{

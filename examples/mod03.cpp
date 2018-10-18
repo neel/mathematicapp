@@ -8,6 +8,9 @@
 using namespace mathematica;
 using namespace library;
 
+MATHEMATICA_DECLARE(Dot);
+MATHEMATICA_DECLARE(EvaluatePacket);
+
 EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){return WolframLibraryVersion;}
 EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){return 0;}
 EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){return;}
@@ -29,15 +32,15 @@ EXTERN_C DLLEXPORT int SomeFunctionMXT(WolframLibraryData libData, mint argc, MA
     
     mathematica::mtransport shell(libData, argc, argv, res);
     typedef std::vector<std::vector<double>> matrix_type;
-    boost::tuple<matrix_type> args = shell;
+    boost::tuple<matrix_type, matrix_type> args = shell;
     try{
-        matrix_type mat;
-        boost::tie(mat) = args;
-        double sum = 0.0f;
-        for(matrix_type::const_iterator i = mat.begin(); i != mat.end(); ++i){
-            sum += std::accumulate((*i).begin(), (*i).end(), 0.0f);
-        }
-        shell = sum;
+        matrix_type matl, matr, mato;
+        boost::tie(matl, matr) = args;
+        shell << EvaluatePacket(Dot(matl, matr));
+        value val;
+        shell >> val;
+        mato = cast<matrix_type>(val);
+        shell = mato;
     }catch(const std::exception& ex){
         libData->Message(ex.what());
     }
@@ -45,4 +48,4 @@ EXTERN_C DLLEXPORT int SomeFunctionMXT(WolframLibraryData libData, mint argc, MA
 }
 
 // SomeFunctionMX  = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMX", {Real, Integer}, Real]
-// SomeFunctionMXT = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMXT", {{Real, 1}}, Real]
+// SomeFunctionMXT = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMXT", {{Real, 2}, {Real, 2}}, {Real, 2}]
