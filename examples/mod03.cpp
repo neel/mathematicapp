@@ -37,9 +37,7 @@ EXTERN_C DLLEXPORT int SomeFunctionMXT(WolframLibraryData libData, mint argc, MA
         matrix_type matl, matr, mato;
         boost::tie(matl, matr) = args;
         shell << EvaluatePacket(Dot(matl, matr));
-        value val;
-        shell >> val;
-        mato = cast<matrix_type>(val);
+        shell >> mato;
         shell = mato;
     }catch(const std::exception& ex){
         libData->Message(ex.what());
