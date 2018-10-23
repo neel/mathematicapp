@@ -30,6 +30,44 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mathematica++/connection.h"
+#include "mathematica++/transport.h"
+
+const char* mathematica::exceptions::error::what() const noexcept {
+    std::string err_msg = (boost::format("<%1%> error: %2% with return code (%3%)") % _context % _message % _code).str();
+    return err_msg.c_str();
+}
+
+mathematica::basic_message::basic_message(const mathematica::basic_message& other): _tag(other._tag), _args(other._args){}
+
+mathematica::basic_message::basic_message(const std::string& tag): _tag(tag), _args(m("List")()){}
+
+mathematica::basic_message::~basic_message(){}
+
+mathematica::message::message(const mathematica::message& other): basic_message(other){}
+
+mathematica::message::message(const std::string& tag): basic_message(tag){}
+
+mathematica::message::~message(){}
+
+void mathematica::basic_message::pass(mathematica::transport& shell, std::string library_name){
+    shell << Apply(
+        Function(Message(MessageName(Slot(1), Slot(2)), SlotSequence(3))),
+        Flatten(List(symbol(library_name), _tag, _args))
+    );
+    shell.ignore();
+}
+
+void mathematica::library::exceptions::internal_error::pass(mathematica::transport& shell, std::string library_name){
+    shell << mathematica::m("Echo")(what(), library_name+"Exception");
+    shell.ignore();
+}
+
+void mathematica::library::exceptions::library_error::pass(mathematica::transport& shell, std::string library_name){
+    basic_message::pass(shell, library_name);
+    if(!_errmsg.empty()){
+        internal_error::pass(shell, library_name);
+    }
+}
 
 mathematica::exceptions::error::error(int ec, const std::string& context, const std::string& message): runtime_error((boost::format("WSTP Error (%1%) in <%2%> \"%3%\"") % ec % context % message).str()), _code(ec), _context(context), _message(message){
 

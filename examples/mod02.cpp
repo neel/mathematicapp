@@ -3,6 +3,7 @@
 #include <mathematica++/transport.h>
 #include <mathematica++/defs.h>
 #include <mathematica++/library.h>
+#include <mathematica++/exceptions.h>
 
 using namespace mathematica;
 
@@ -79,8 +80,8 @@ EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK nativ
                 , overload(&some_function_impl_complex) = {"Complex", "Complex"}
                 , overload(&some_function_impl_binary)
                 , overload(&some_function_impl_unary);
-    }catch(const mathematica::library::error& err){
-        return err.code();
+    }catch(...){
+        return shell.pass();
     }
 
     if(resolver.resolved()){

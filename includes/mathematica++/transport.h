@@ -33,6 +33,7 @@
 #include <mathematica++/connector.h>
 #include <mathematica++/io.h>
 #include <mathematica++/m.h>
+#include <mathematica++/declares.h>
 #include <boost/utility/enable_if.hpp>
 #include <boost/variant.hpp>
 #include <boost/array.hpp>
@@ -46,6 +47,7 @@
 #include <complex>
 #include <stdexcept>
 #include <type_traits>
+#include <mathematica++/exceptions.h>
 
 namespace mathematica{
     
@@ -301,7 +303,7 @@ struct mtensor_adapter{
         typedef typename internal::mtensor_value_typeid<vtype>::mtype mtype;
         mtype* raw = internal::mtensor_value_typeid<vtype>::data(_data, tens);
         if(!raw){
-            throw std::domain_error("inconsistant type of tensor requested");
+            throw library::exceptions::library_error(LIBRARY_TYPE_ERROR, messages::tensortype() % std::string(internal::mtensor_value_typeid<vtype>::name), "Failed to vectorify tensor");
         }
         mint len = _data->MTensor_getFlattenedLength(tens);
         std::vector<mtype> raw_vec;
@@ -312,7 +314,7 @@ struct mtensor_adapter{
         //{ check rank compatiability
         int rank = internal::vector_rank<T>::rank;
         if(rank != trank){
-            throw std::domain_error((boost::format("expected rank %1% requested %2%") % trank % rank).str());
+            throw library::exceptions::library_error(LIBRARY_RANK_ERROR, messages::rankerror() % trank % rank, "Failed to vectorify tensor");
         }
         //}
         
@@ -445,13 +447,14 @@ struct basic_transport{
 struct transport{
     typedef basic_transport::link_type link_type;
     
+    std::string _libname;
     WolframLibraryData _data;
     basic_transport _io;
     
     transport(WolframLibraryData data);
     template <typename T>
     void send(const T& expr){
-        _io.send(expr);
+        _io.send(mathematica::m("EvaluatePacket")(expr));
         _data->processWSLINK(_io.link());
     }
     template <typename T>
@@ -459,6 +462,17 @@ struct transport{
         _io.recv(val);
     }
     void ignore(){_io._shell.ignore();}
+    
+    void set_name(const std::string& name);
+    
+    mint pass(bool abort=true);
+};
+
+struct initializer: transport{
+    std::string _library_name;
+    
+    initializer(WolframLibraryData data, std::string library_name="");
+    initializer& declare(const mathematica::user_message& msg);
 };
     
 struct wtransport: transport{
@@ -523,6 +537,11 @@ struct mtransport: transport{
     template <typename... T>
     boost::tuple<T...> as() const{
         typedef boost::tuple<T...> tuple_type;
+        int input_args = nargs();
+        int requested_args = boost::tuples::length<tuple_type>::value;
+        if(requested_args != input_args){
+            throw library::exceptions::library_error(LIBRARY_TYPE_ERROR, messages::argx() % input_args % requested_args, "Failed to parse arguments");
+        }
         tuple_type tuple;
         internal::argument_to_tuple<tuple_type, boost::tuples::length<tuple_type>::value-1>::convert(tuple, *this);
         return tuple;
@@ -557,6 +576,8 @@ transport& operator>>(transport& stream, T& val){
     stream.recv(val);
     return stream;
 }
+
+mathematica::initializer& operator<<(mathematica::initializer& shell, const mathematica::user_message& msg);
 
 }
 

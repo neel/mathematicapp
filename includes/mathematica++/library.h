@@ -180,18 +180,6 @@ struct resolver: private boost::noncopyable{
     bool resolved() const{return _resolved;}
 };
 
-namespace library{
-    struct error: public std::exception{
-        int _err;
-        
-        explicit error(int err): _err(err){}
-        virtual const char* what() const noexcept{
-            return (boost::format("mathematica::library::error: internal library implementation returned (%1%)") % _err).str().c_str();
-        }
-        int code() const{return _err;}
-    };
-};
-
 template <typename T>
 mathematica::resolver& operator,(mathematica::resolver& r, T overload){
     if(!r._resolved){

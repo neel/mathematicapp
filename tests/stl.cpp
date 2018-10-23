@@ -49,7 +49,6 @@
 using namespace mathematica;
 
 // MATHEMATICA_DECLARE(FactorInteger)
-MATHEMATICA_DECLARE(Flatten)
 
 BOOST_AUTO_TEST_SUITE(stl)
 

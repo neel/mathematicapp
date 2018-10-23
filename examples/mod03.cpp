@@ -4,15 +4,18 @@
 #include <mathematica++/defs.h>
 #include <mathematica++/library.h>
 #include <boost/tuple/tuple_io.hpp>
+#include <mathematica++/exceptions.h>
 
 using namespace mathematica;
 using namespace library;
 
 MATHEMATICA_DECLARE(Dot);
-MATHEMATICA_DECLARE(EvaluatePacket);
 
 EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){return WolframLibraryVersion;}
-EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){return 0;}
+EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){
+    mathematica::initializer init(libData);
+    return 0;
+}
 EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){return;}
 
 EXTERN_C DLLEXPORT int SomeFunctionMX(WolframLibraryData libData, mint argc, MArgument* argv, MArgument res){
@@ -29,21 +32,24 @@ EXTERN_C DLLEXPORT int SomeFunctionMX(WolframLibraryData libData, mint argc, MAr
 EXTERN_C DLLEXPORT int SomeFunctionMXT(WolframLibraryData libData, mint argc, MArgument* argv, MArgument res){
 //     std::ofstream out("/tmp/log");
 //     std::clog.rdbuf(out.rdbuf());
-    
+//     
     mathematica::mtransport shell(libData, argc, argv, res);
     typedef std::vector<std::vector<double>> matrix_type;
-    boost::tuple<matrix_type, matrix_type> args = shell;
     try{
+        boost::tuple<matrix_type, matrix_type> args = shell;
         matrix_type matl, matr, mato;
         boost::tie(matl, matr) = args;
-        shell << EvaluatePacket(Dot(matl, matr));
+        shell << Dot(matl, matr);
         shell >> mato;
         shell = mato;
-    }catch(const std::exception& ex){
-        libData->Message(ex.what());
+    }catch(...){
+        return shell.pass();
     }
     return LIBRARY_NO_ERROR;
 }
 
 // SomeFunctionMX  = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMX", {Real, Integer}, Real]
-// SomeFunctionMXT = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMXT", {{Real, 2}, {Real, 2}}, {Real, 2}]
+// SomeFunctionMXT = LibraryFunctionLoad["/home/neel/Projects/mathematicapp/build/examples/libmod03.so", "SomeFunctionMXT", {{_, _}, {_, _}}, {_, _}]
+// SomeFunctionMXT[{{0, 1}, {0, 0}}, {{0, 0}, {1, 0}}]
+// SomeFunctionMXT[{{0.0, 1.0}, {0.0, 0.0}}, {{0.0, 0.0}, {1.0, 0.0}}]
+// SomeFunctionMXT[{0.0, 1.0}, {0.0, 0.0}]
