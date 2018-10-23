@@ -61,7 +61,10 @@ mathematica::m some_function_impl_unary(double x){
 }
 
 EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){return WolframLibraryVersion;}
-EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){return 0;}
+EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){
+    mathematica::initializer init(libData);
+    return 0;
+}
 EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){return;}
 
 /**
@@ -71,7 +74,10 @@ EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){
  * SomeFunctionWX[1 + 2I, 3 + 4I] -> 5.0
  * SomeFunctionWX[GeoPosition[{22.5726, 88.3639}], GeoPosition[{28.7041, 77.1025}]] -> 1318.14
  */
-EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK native_link){ 
+EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK native_link){
+//     std::ofstream out("/tmp/log");
+//     std::clog.rdbuf(out.rdbuf());
+    
     mathematica::wtransport shell(libData, native_link);
     mathematica::resolver resolver(shell);
 
@@ -80,12 +86,10 @@ EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK nativ
                 , overload(&some_function_impl_complex) = {"Complex", "Complex"}
                 , overload(&some_function_impl_binary)
                 , overload(&some_function_impl_unary);
+        return resolver.resolve();
     }catch(...){
         return shell.pass();
     }
 
-    if(resolver.resolved()){
-        return LIBRARY_NO_ERROR;
-    }
-    return LIBRARY_TYPE_ERROR;
+    return 0;
 }

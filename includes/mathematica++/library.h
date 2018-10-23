@@ -30,6 +30,7 @@
 #include <mathematica++/mathematica++.h>
 #include <mathematica++/transport.h>
 #include <mathematica++/defs.h>
+#include <mathematica++/exceptions.h>
 #include <boost/noncopyable.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/function.hpp>
@@ -178,6 +179,14 @@ struct resolver: private boost::noncopyable{
     
     resolver(mathematica::wtransport& shell): _shell(shell), _resolved(false){}
     bool resolved() const{return _resolved;}
+    int resolve(){
+        if(!_resolved){
+            mathematica::tokens::function::ptr args = _shell._input;
+            mathematica::value args_val = args;
+            throw library::exceptions::library_error(messages::overload() % args_val->stringify());
+        }
+        return LIBRARY_NO_ERROR;
+    }
 };
 
 template <typename T>

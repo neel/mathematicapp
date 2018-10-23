@@ -196,8 +196,8 @@ struct internal_error: public std::exception{
 struct library_error: public mathematica::basic_message, public internal_error {
     std::string _errmsg;
     
-    library_error(basic_message& msg, int err, std::string errmsg=""): mathematica::basic_message(msg), internal_error(err), _errmsg(errmsg){}
-    library_error(int err, basic_message& msg, std::string errmsg=""): mathematica::basic_message(msg), internal_error(err), _errmsg(errmsg){}
+    library_error(const basic_message& msg, int err=LIBRARY_NO_ERROR, std::string errmsg=""): mathematica::basic_message(msg), internal_error(err), _errmsg(errmsg){}
+    library_error(int err, const basic_message& msg, std::string errmsg=""): mathematica::basic_message(msg), internal_error(err), _errmsg(errmsg){}
     
     virtual const char* what() const noexcept{
         if(_errmsg.empty()){

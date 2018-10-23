@@ -92,5 +92,12 @@ mint mathematica::transport::pass(bool abort){
             _data->AbortQ();
         }
         return LIBRARY_FUNCTION_ERROR;
+    }catch(...){
+        *this << mathematica::m("Echo")("Unknown uncaught exception thrown", _libname+"Exception");
+        ignore();
+        if(abort){
+            _data->AbortQ();
+        }
+        return LIBRARY_FUNCTION_ERROR;
     }
 }
