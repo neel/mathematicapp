@@ -1,8 +1,23 @@
 #include "mathematica++/transport.h"
+#include <cstdlib>
+#include <boost/filesystem.hpp>
 
 mathematica::mtensor_adapter::mtensor_adapter(WolframLibraryData data): _data(data){}
 
-mathematica::basic_transport::basic_transport(WMK_LINK link): _link(link), _connection(driver::link(link)), _shell(_connection){}
+mathematica::basic_transport::basic_transport(WMK_LINK link): _link(link), _connection(driver::link(link)), _shell(_connection){
+//     const char* env_clog_path = std::getenv("MATHEMATICAPP_CLOG_PATH");
+//     if(env_clog_path){
+//         std::ofstream log;
+//         if(!boost::filesystem::exists(env_clog_path)){
+//             log.open("/tmp/log", std::ofstream::out);
+//         }else{
+//             log.open("/tmp/log", std::ofstream::app);
+//         }
+//         if(log.is_open()){
+//             std::clog.rdbuf(log.rdbuf());
+//         }
+//     }
+}
 
 mathematica::value mathematica::basic_transport::recv(){
     mathematica::value val;
@@ -10,19 +25,19 @@ mathematica::value mathematica::basic_transport::recv(){
     return val;
 }
 
-mathematica::transport::transport(WolframLibraryData data): _data(data), _io(data->getWSLINK(data)), _libname("LibraryFunction"){}
+mathematica::transport::transport(WolframLibraryData data, std::string lib_name): _data(data), _io(data->getWSLINK(data)), _libname(lib_name.empty() ? std::string("LibraryFunction") : lib_name){}
 
 void mathematica::transport::set_name(const std::string& name){
     _libname = name;
 }
 
 
-mathematica::wtransport::wtransport(WolframLibraryData data, mathematica::transport::link_type link): transport(data), _control(link){
+mathematica::wtransport::wtransport(WolframLibraryData data, mathematica::transport::link_type link, std::string lib_name): transport(data, lib_name), _control(link){
     mathematica::value input = _control._connection->fetch_token(&_control._shell);
     _input = boost::dynamic_pointer_cast<mathematica::tokens::function>(input);
 }
 
-mathematica::mtransport::mtransport(WolframLibraryData data, int argc, MArgument* argv, MArgument res): transport(data), _result(data, res){
+mathematica::mtransport::mtransport(WolframLibraryData data, int argc, MArgument* argv, MArgument res, std::string lib_name): transport(data, lib_name), _result(data, res){
     for(int i = 0; i < argc; ++i){
         argument_adapter* adapter = new argument_adapter(data, argv[i]);
         _arguments.push_back(adapter);
@@ -60,8 +75,10 @@ mathematica::initializer::initializer(WolframLibraryData data, std::string libra
 
 mathematica::initializer& mathematica::initializer::declare(const mathematica::user_message& msg){
     mathematica::m reg = msg.registration(_library_name);
+    value val;
     *this << reg;
-    ignore();
+//     ignore();
+    *this >> val;
     return *this;
 }
 
@@ -69,7 +86,7 @@ mathematica::initializer& mathematica::operator<<(mathematica::initializer& shel
     return shell.declare(msg);
 }
 
-mint mathematica::transport::pass(bool abort){
+int mathematica::transport::pass(bool abort){
     try{
         throw;
     }catch(library::exceptions::internal_error& ex){
@@ -100,4 +117,14 @@ mint mathematica::transport::pass(bool abort){
         }
         return LIBRARY_FUNCTION_ERROR;
     }
+}
+
+int mathematica::wtransport::pass(bool abort){
+    *this = symbol("Null");
+    return transport::pass(abort);
+}
+
+int mathematica::mtransport::pass(bool abort){
+    *this = 0;
+    return transport::pass(abort);
 }

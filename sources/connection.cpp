@@ -662,6 +662,7 @@ int mathematica::driver::io::connection::head(std::string& type, int& nargs){
 
 std::string mathematica::driver::io::connection::error(int& code){
 	int ec = WMK_Error(_link);
+    code = ec;
 	if(ec){
 		return std::string(WMK_ErrorMessage(_link));
 	}

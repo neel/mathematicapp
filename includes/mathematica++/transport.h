@@ -451,21 +451,25 @@ struct transport{
     WolframLibraryData _data;
     basic_transport _io;
     
-    transport(WolframLibraryData data);
+    transport(WolframLibraryData data, std::string lib_name="");
     template <typename T>
     void send(const T& expr){
         _io.send(mathematica::m("EvaluatePacket")(expr));
+//         _io.send(expr);
         _data->processWSLINK(_io.link());
     }
     template <typename T>
     void recv(T& val){
         _io.recv(val);
     }
-    void ignore(){_io._shell.ignore();}
+    void ignore(){
+        _io._shell.ignore();
+        _data->processWSLINK(_io.link());
+    }
     
     void set_name(const std::string& name);
     
-    mint pass(bool abort=true);
+    virtual int pass(bool abort=true);
 };
 
 struct initializer: transport{
@@ -479,13 +483,23 @@ struct wtransport: transport{
     basic_transport _control;
     boost::shared_ptr<mathematica::tokens::function> _input;
     
-    wtransport(WolframLibraryData data, link_type link);
+    wtransport(WolframLibraryData data, link_type link, std::string lib_name="");
     /**
      * return a value from the library function
      */
     template <typename T>
     int operator()(const T& val){
         _control.send(val);
+        return LIBRARY_NO_ERROR;
+    }
+    template <typename T>
+    int operator=(const T& val){
+        _control.send(val);
+        return LIBRARY_NO_ERROR;
+    }
+    template <typename T>
+    int ret(T val){
+        *this = val;
         return LIBRARY_NO_ERROR;
     }
     boost::shared_ptr<mathematica::tokens::function> input() const{return _input;}
@@ -495,6 +509,7 @@ struct wtransport: transport{
         T ret = cast<T>(val);
         return ret;
     }
+    virtual int pass(bool abort=true);
 };
 
 namespace internal{
@@ -528,7 +543,7 @@ struct mtransport: transport{
     std::vector<argument_adapter*> _arguments;
     argument_adapter _result;
     
-    mtransport(WolframLibraryData data, int argc, MArgument* argv, MArgument res);
+    mtransport(WolframLibraryData data, int argc, MArgument* argv, MArgument res, std::string lib_name="");
     ~mtransport();
     const argument_adapter& arg(std::size_t index) const;
     argument_adapter& res();
@@ -563,6 +578,7 @@ struct mtransport: transport{
     int operator=(T val){
         return ret<T>(val);
     }
+    virtual int pass(bool abort=true);
 };
 
 template <typename T>

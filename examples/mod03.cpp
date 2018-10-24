@@ -13,13 +13,13 @@ MATHEMATICA_DECLARE(Dot);
 
 EXTERN_C DLLEXPORT mint WolframLibrary_getVersion(){return WolframLibraryVersion;}
 EXTERN_C DLLEXPORT mint WolframLibrary_initialize(WolframLibraryData libData){
-    mathematica::initializer init(libData);
+    mathematica::initializer init(libData, "SomeFunctionMX");
     return 0;
 }
 EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){return;}
 
 EXTERN_C DLLEXPORT int SomeFunctionMX(WolframLibraryData libData, mint argc, MArgument* argv, MArgument res){
-    mathematica::mtransport shell(libData, argc, argv, res);
+    mathematica::mtransport shell(libData, argc, argv, res, "SomeFunctionMX");
     boost::tuple<double, std::complex<int>> args = shell;
     double dbl;
     std::complex<int> cmplx;
@@ -30,10 +30,7 @@ EXTERN_C DLLEXPORT int SomeFunctionMX(WolframLibraryData libData, mint argc, MAr
 }
 
 EXTERN_C DLLEXPORT int SomeFunctionMXT(WolframLibraryData libData, mint argc, MArgument* argv, MArgument res){
-//     std::ofstream out("/tmp/log");
-//     std::clog.rdbuf(out.rdbuf());
-//     
-    mathematica::mtransport shell(libData, argc, argv, res);
+    mathematica::mtransport shell(libData, argc, argv, res, "SomeFunctionMX");
     typedef std::vector<std::vector<double>> matrix_type;
     try{
         boost::tuple<matrix_type, matrix_type> args = shell;

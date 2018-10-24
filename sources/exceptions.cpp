@@ -39,7 +39,7 @@ const char* mathematica::exceptions::error::what() const noexcept {
 
 mathematica::basic_message::basic_message(const mathematica::basic_message& other): _tag(other._tag), _args(other._args){}
 
-mathematica::basic_message::basic_message(const std::string& tag): _tag(tag), _args(m("List")()){}
+mathematica::basic_message::basic_message(const std::string& tag): _tag(tag), _args("Sequence"){}
 
 mathematica::basic_message::~basic_message(){}
 
@@ -50,16 +50,21 @@ mathematica::message::message(const std::string& tag): basic_message(tag){}
 mathematica::message::~message(){}
 
 void mathematica::basic_message::pass(mathematica::transport& shell, std::string library_name){
-    shell << Apply(
-        Function(Message(MessageName(Slot(1), Slot(2)), SlotSequence(3))),
-        Flatten(List(symbol(library_name), _tag, _args))
-    );
-    shell.ignore();
+//     shell << Apply(
+//         Function(Message(MessageName(Slot(1), Slot(2)), SlotSequence(3))),
+//         Flatten(List(symbol(library_name), _tag, _args))
+//     );
+    _args();
+    value val;
+    shell << Message(MessageName(symbol(library_name), _tag), _args);
+//     shell.ignore();
+    shell >> val;
 }
 
 void mathematica::library::exceptions::internal_error::pass(mathematica::transport& shell, std::string library_name){
+    value val;
     shell << mathematica::m("Echo")(what(), library_name+"Exception");
-    shell.ignore();
+    shell >> val;
 }
 
 void mathematica::library::exceptions::library_error::pass(mathematica::transport& shell, std::string library_name){

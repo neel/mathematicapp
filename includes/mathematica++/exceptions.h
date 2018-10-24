@@ -74,8 +74,9 @@ struct basic_message{
     basic_message& operator=(basic_message&&) = delete;
     void pass(mathematica::transport& shell, std::string library_name="");
     template <typename T>
-    basic_message& operator%(const T& arg){
-        _args = m("Append")(_args, arg);
+    basic_message& operator%(const T& e){
+        // _args = m("Append")(_args, e);
+        _args.arg(e);
         return *this;
     }
     virtual ~basic_message() = 0;
