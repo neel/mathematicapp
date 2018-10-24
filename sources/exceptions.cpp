@@ -26,11 +26,15 @@
 
 #include "mathematica++/compatibility.h"
 #include "mathematica++/exceptions.h"
+#include "mathematica++/declares.h"
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mathematica++/connection.h"
+#include "mathematica++/io.h"
+#ifdef USING_LL
 #include "mathematica++/transport.h"
+#endif
 
 const char* mathematica::exceptions::error::what() const noexcept {
     std::string err_msg = (boost::format("<%1%> error: %2% with return code (%3%)") % _context % _message % _code).str();
@@ -49,18 +53,21 @@ mathematica::message::message(const std::string& tag): basic_message(tag){}
 
 mathematica::message::~message(){}
 
-void mathematica::basic_message::pass(mathematica::transport& shell, std::string library_name){
-//     shell << Apply(
-//         Function(Message(MessageName(Slot(1), Slot(2)), SlotSequence(3))),
-//         Flatten(List(symbol(library_name), _tag, _args))
-//     );
+void mathematica::basic_message::pass(mathematica::wrapper& shell, std::string library_name){
     _args();
     value val;
     shell << Message(MessageName(symbol(library_name), _tag), _args);
 //     shell.ignore();
     shell >> val;
 }
-
+#ifdef USING_LL
+void mathematica::basic_message::pass(mathematica::transport& shell, std::string library_name){
+    _args();
+    value val;
+    shell << Message(MessageName(symbol(library_name), _tag), _args);
+//     shell.ignore();
+    shell >> val;
+}
 void mathematica::library::exceptions::internal_error::pass(mathematica::transport& shell, std::string library_name){
     value val;
     shell << mathematica::m("Echo")(what(), library_name+"Exception");
@@ -73,6 +80,7 @@ void mathematica::library::exceptions::library_error::pass(mathematica::transpor
         internal_error::pass(shell, library_name);
     }
 }
+#endif
 
 mathematica::exceptions::error::error(int ec, const std::string& context, const std::string& message): runtime_error((boost::format("WSTP Error (%1%) in <%2%> \"%3%\"") % ec % context % message).str()), _code(ec), _context(context), _message(message){
 

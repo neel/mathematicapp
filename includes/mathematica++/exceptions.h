@@ -45,8 +45,10 @@
 #include <boost/core/noncopyable.hpp>
 
 namespace mathematica{
-
+#ifdef USING_LL
 struct transport;
+#endif
+class wrapper;
 namespace library{
 namespace exceptions{
 struct library_error;
@@ -63,8 +65,9 @@ struct connection;
  * not to be used directly, either use builtin_message or message<T> derived T instead
  */
 struct basic_message{
-    friend class library::exceptions::library_error;
-    
+#ifdef USING_LL
+    friend struct library::exceptions::library_error;
+#endif
     std::string _tag;
     mathematica::m _args;
     
@@ -72,7 +75,10 @@ struct basic_message{
     basic_message(basic_message &&) = delete;
     basic_message& operator=(const basic_message&) = delete;
     basic_message& operator=(basic_message&&) = delete;
+    void pass(mathematica::wrapper& shell, std::string library_name="");
+#ifdef USING_LL
     void pass(mathematica::transport& shell, std::string library_name="");
+#endif
     template <typename T>
     basic_message& operator%(const T& e){
         // _args = m("Append")(_args, e);
