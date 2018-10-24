@@ -135,6 +135,9 @@ struct argument<double>{
 };
 
 template <>
+struct argument<float>: argument<double>{};
+
+template <>
 struct argument<std::string>{
     typedef std::string type;
     
@@ -147,7 +150,7 @@ template <>
 struct argument<const char*>{
     typedef std::string type;
     
-    detail::abstract_delayed_call_ptr operator()(const char*& arg){
+    detail::abstract_delayed_call_ptr operator()(const char* const& arg){
         return detail::abstract_delayed_call_ptr(detail::make_deyaled_call(boost::bind(&mathematica::driver::io::impl::str, _1, std::string(arg))));
     }
 };
@@ -594,6 +597,8 @@ struct m{
             return mathematica::symbol(_name);
         }
 };
+
+// std::ostream& operator<<(std::ostream& stream, const mathematica::m& expr);
 
 }
 

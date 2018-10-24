@@ -26,10 +26,61 @@
 
 #include "mathematica++/compatibility.h"
 #include "mathematica++/exceptions.h"
+#include "mathematica++/declares.h"
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mathematica++/connection.h"
+#include "mathematica++/io.h"
+#ifdef USING_LL
+#include "mathematica++/transport.h"
+#endif
+
+const char* mathematica::exceptions::error::what() const noexcept {
+    std::string err_msg = (boost::format("<%1%> error: %2% with return code (%3%)") % _context % _message % _code).str();
+    return err_msg.c_str();
+}
+
+mathematica::basic_message::basic_message(const mathematica::basic_message& other): _tag(other._tag), _args(other._args){}
+
+mathematica::basic_message::basic_message(const std::string& tag): _tag(tag), _args("Sequence"){}
+
+mathematica::basic_message::~basic_message(){}
+
+mathematica::message::message(const mathematica::message& other): basic_message(other){}
+
+mathematica::message::message(const std::string& tag): basic_message(tag){}
+
+mathematica::message::~message(){}
+
+void mathematica::basic_message::pass(mathematica::wrapper& shell, std::string library_name){
+    _args();
+    value val;
+    shell << Message(MessageName(symbol(library_name), _tag), _args);
+//     shell.ignore();
+    shell >> val;
+}
+#ifdef USING_LL
+void mathematica::basic_message::pass(mathematica::transport& shell, std::string library_name){
+    _args();
+    value val;
+    shell << Message(MessageName(symbol(library_name), _tag), _args);
+//     shell.ignore();
+    shell >> val;
+}
+void mathematica::library::exceptions::internal_error::pass(mathematica::transport& shell, std::string library_name){
+    value val;
+    shell << mathematica::m("Echo")(what(), library_name+"Exception");
+    shell >> val;
+}
+
+void mathematica::library::exceptions::library_error::pass(mathematica::transport& shell, std::string library_name){
+    basic_message::pass(shell, library_name);
+    if(!_errmsg.empty()){
+        internal_error::pass(shell, library_name);
+    }
+}
+#endif
 
 mathematica::exceptions::error::error(int ec, const std::string& context, const std::string& message): runtime_error((boost::format("WSTP Error (%1%) in <%2%> \"%3%\"") % ec % context % message).str()), _code(ec), _context(context), _message(message){
 

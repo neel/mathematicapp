@@ -49,8 +49,6 @@
 
 using namespace mathematica;
 
-MATHEMATICA_DECLARE(Flatten)
-MATHEMATICA_DECLARE(Map)
 MATHEMATICA_DECLARE(Dimensions)
 
 BOOST_AUTO_TEST_SUITE(eigen)
