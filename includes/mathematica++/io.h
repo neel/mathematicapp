@@ -35,6 +35,7 @@
 namespace mathematica{
 struct m;
 struct symbol;
+struct basic_message;
 
 namespace detail{
 template <typename T>
@@ -82,6 +83,7 @@ wrapper& operator>>(wrapper& stream, T& expr){
 
 wrapper& operator<<(mathematica::connector::storage storage, const mathematica::m& expr);
 //wrapper& operator<<(mathematica::connector::storage storage, const mathematica::value& val);
+// mathematica::wrapper& operator<<(mathematica::wrapper& shell, mathematica::basic_message& msg);
 }
 
 #endif // MATHEMATICAPP_IO_H

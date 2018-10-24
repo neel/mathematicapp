@@ -120,6 +120,11 @@ struct library_message: basic_message, user_message{
 
 namespace messages{
     
+struct libmsg: library_message<libmsg>{
+    static constexpr const char* tag = "libmsg";
+    static constexpr const char* detail = "`1`";
+};
+    
 struct argx: library_message<argx>{
     static constexpr const char* tag = "argx";
     static constexpr const char* detail = "called with `1` argument(s) `2` argument(s) is expected.";
@@ -140,11 +145,12 @@ struct rankerror: library_message<rankerror>{
     static constexpr const char* detail = "unexpected rank `1`; expecting rank `2`";
 };
 
-
 struct tensortype: library_message<tensortype>{
     static constexpr const char* tag = "tensortype";
     static constexpr const char* detail = "unexpected type of tensor encountered; expecting tensor of type `1`";
 };
+
+
 
 }
 

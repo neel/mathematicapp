@@ -27,7 +27,7 @@ EXTERN_C DLLEXPORT void WolframLibrary_uninitialize( WolframLibraryData libData)
 EXTERN_C DLLEXPORT int EchoX(WolframLibraryData libData, WMK_LINK native_link){
     wtransport shell(libData, native_link);
     value input = shell.input();
-    return shell(input->stringify());
+    return shell = input->stringify();
 }
 
 // EXTERN_C DLLEXPORT int EchoX(WolframLibraryData libData, WMK_LINK native_link){
@@ -47,15 +47,15 @@ EXTERN_C DLLEXPORT int ArgsListX(WolframLibraryData libData, WMK_LINK native_lin
     
     value output;
     
-    shell << EvaluatePacket(Length(input));
+    shell << Length(input);
     shell >> output;
     
     int nargs = *output;
     
-    shell << EvaluatePacket(Permutations(Append(input, nargs)));
+    shell << Permutations(Append(input, nargs));
     shell >> output;
     
-    return shell(output);
+    return shell = output;
 }
 
 

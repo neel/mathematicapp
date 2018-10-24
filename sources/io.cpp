@@ -26,6 +26,7 @@
 
 #include "mathematica++/io.h"
 #include "mathematica++/m.h"
+#include "mathematica++/exceptions.h"
 
 template <>
 mathematica::wrapper& mathematica::operator<<<mathematica::symbol>(mathematica::wrapper& stream, const mathematica::symbol& symbol){
@@ -87,4 +88,9 @@ mathematica::wrapper& mathematica::operator<<(mathematica::connector::storage st
 //    storage.set_key(key->stringify());
 //    return storage.conn();
 //}
+
+// mathematica::wrapper & mathematica::operator<<(mathematica::wrapper& shell, mathematica::basic_message& msg){
+//     msg.pass(shell);
+//     return shell;
+// }
 

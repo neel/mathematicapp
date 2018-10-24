@@ -468,7 +468,7 @@ struct transport{
     }
     
     void set_name(const std::string& name);
-    
+    std::string name() const;
     virtual int pass(bool abort=true);
 };
 
@@ -594,7 +594,8 @@ transport& operator>>(transport& stream, T& val){
 }
 
 mathematica::initializer& operator<<(mathematica::initializer& shell, const mathematica::user_message& msg);
-
+mathematica::transport& operator<<(mathematica::transport& shell, const mathematica::basic_message& msg);
+mathematica::transport& operator<<(mathematica::transport& shell, const mathematica::message& msg);
 }
 
 #endif // TRANSPORT_H

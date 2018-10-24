@@ -31,6 +31,9 @@ void mathematica::transport::set_name(const std::string& name){
     _libname = name;
 }
 
+std::string mathematica::transport::name() const{
+    return _libname;
+}
 
 mathematica::wtransport::wtransport(WolframLibraryData data, mathematica::transport::link_type link, std::string lib_name): transport(data, lib_name), _control(link){
     mathematica::value input = _control._connection->fetch_token(&_control._shell);
@@ -66,6 +69,7 @@ std::size_t mathematica::mtransport::nargs() const{
 
 
 mathematica::initializer::initializer(WolframLibraryData data, std::string library_name): transport(data), _library_name(library_name.empty() ? std::string("LibraryFunction") : library_name){
+    declare(messages::libmsg());
     declare(messages::argx());
     declare(messages::type());
     declare(messages::overload());
@@ -84,6 +88,16 @@ mathematica::initializer& mathematica::initializer::declare(const mathematica::u
 
 mathematica::initializer& mathematica::operator<<(mathematica::initializer& shell, const mathematica::user_message& msg){
     return shell.declare(msg);
+}
+
+mathematica::transport & mathematica::operator<<(mathematica::transport& shell, const mathematica::basic_message& msg){
+    const_cast<mathematica::basic_message&>(msg).pass(shell, shell.name());
+    return shell;
+}
+
+mathematica::transport & mathematica::operator<<(mathematica::transport& shell, const mathematica::message& msg){
+    const mathematica::basic_message& bmsg = msg;
+    return operator<<(shell, bmsg);
 }
 
 int mathematica::transport::pass(bool abort){

@@ -39,6 +39,8 @@ EXTERN_C DLLEXPORT int SomeFunctionMXT(WolframLibraryData libData, mint argc, MA
         boost::tie(matl, matr) = args;
         shell << Dot(matl, matr);
         shell >> mato;
+        shell << message("libmsg") % std::string("Hallo World");
+        shell << messages::libmsg() % std::string("Hallo Jupiter");
         shell = mato;
     }catch(...){
         return shell.pass();
