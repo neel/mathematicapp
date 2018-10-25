@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(module)
 BOOST_AUTO_TEST_CASE(module_library){
     connector shell;
     BOOST_CHECK(shell.connected());
-    shell.import("../../examples/mod02.m");
+	shell.import(LIBRARYLINK_MOD02_PATH);
     
     {
         std::complex<double> res;
