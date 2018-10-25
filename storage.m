@@ -3,6 +3,7 @@
 BeginPackage["Storage`"]
 StoreSymbol::usage = "Stores something in the table";
 LoadSymbol::usage = "Loads something from the table";
+RemoveSymbol::usage = "Removes a symbol from the table";
 Begin["`Private`"]
 SymbolTable = <||>;
 StoreSymbol[symbol_, key_: 0] := Block[{k},
