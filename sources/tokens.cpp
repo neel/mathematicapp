@@ -37,6 +37,10 @@ mathematica::token::token(mathematica::accessor* accessor, int t, token_type typ
 
 }
 
+mathematica::token::~token(){
+	
+}
+
 int mathematica::token::mathematica_type() const{
 	return _token;
 }

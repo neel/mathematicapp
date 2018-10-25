@@ -1,2 +1,2 @@
-SomeFunctionMX  = LibraryFunctionLoad["${CMAKE_CURRENT_BINARY_DIR}/libmod03.so", "SomeFunctionMX",  {Real, Integer}, Real]
-SomeFunctionMXT = LibraryFunctionLoad["${CMAKE_CURRENT_BINARY_DIR}/libmod03.so", "SomeFunctionMXT", {{_, _}, {_, _}}, {_, _}]
+SomeFunctionMX  = LibraryFunctionLoad["${CMAKE_CURRENT_BINARY_DIR}/libmod03", "SomeFunctionMX",  {Real, Integer}, Real]
+SomeFunctionMXT = LibraryFunctionLoad["${CMAKE_CURRENT_BINARY_DIR}/libmod03", "SomeFunctionMXT", {{_, _}, {_, _}}, {_, _}]

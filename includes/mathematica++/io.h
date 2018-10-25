@@ -65,11 +65,11 @@ wrapper& operator<<(wrapper& stream, const T& value){
 }
 
 template <>
-mathematica::wrapper& mathematica::operator<<<mathematica::symbol>(mathematica::wrapper& stream, const mathematica::symbol& symbol);
+mathematica::wrapper& operator<<<mathematica::symbol>(mathematica::wrapper& stream, const mathematica::symbol& symbol);
 template <>
-mathematica::wrapper& mathematica::operator<<<mathematica::m>(mathematica::wrapper& stream, const mathematica::m& expr);
+mathematica::wrapper& operator<<<mathematica::m>(mathematica::wrapper& stream, const mathematica::m& expr);
 template <>
-mathematica::wrapper& mathematica::operator<<<mathematica::value>(mathematica::wrapper& stream, const mathematica::value& val);
+mathematica::wrapper& operator<<<mathematica::value>(mathematica::wrapper& stream, const mathematica::value& val);
 
 wrapper& operator,(wrapper& stream, const mathematica::m& expr);
 template <typename T>

@@ -59,6 +59,7 @@ class token{
 	public:
 		int mathematica_type() const;
         token_type type() const;
+		virtual ~token();
 		virtual void fetch() = 0;
 		virtual std::string stringify() const = 0;
 		virtual mathematica::variant serialize() const = 0;
