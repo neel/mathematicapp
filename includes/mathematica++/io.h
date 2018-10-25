@@ -82,7 +82,7 @@ wrapper& operator>>(wrapper& stream, T& expr){
 }
 
 wrapper& operator<<(mathematica::connector::storage storage, const mathematica::m& expr);
-//wrapper& operator<<(mathematica::connector::storage storage, const mathematica::value& val);
+wrapper& operator<<(mathematica::connector::storage storage, const mathematica::value& val);
 // mathematica::wrapper& operator<<(mathematica::wrapper& shell, mathematica::basic_message& msg);
 }
 

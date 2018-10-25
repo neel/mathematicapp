@@ -66,7 +66,7 @@ class connector: public mathematica::wrapper{
   public:
     struct storage{
         friend wrapper& operator<<(mathematica::connector::storage storage, const mathematica::m& expr);
-//        friend wrapper& operator<<(mathematica::connector::storage storage, const mathematica::value& val);
+        friend wrapper& operator<<(mathematica::connector::storage storage, const mathematica::value& val);
         
         connector& _conn;
         std::string _name;

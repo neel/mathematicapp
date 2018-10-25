@@ -79,15 +79,19 @@ mathematica::wrapper& mathematica::operator<<(mathematica::connector::storage st
     return storage.conn();
 }
 
-//mathematica::wrapper& mathematica::operator<<(mathematica::connector::storage storage, const mathematica::value& val){
-//    mathematica::m expression("StoreSymbol");
-//    expression(val);
-//    storage.conn() << expression;
-//    mathematica::value key;
-//    storage.conn() >> key;
-//    storage.set_key(key->stringify());
-//    return storage.conn();
-//}
+mathematica::wrapper& mathematica::operator<<(mathematica::connector::storage storage, const mathematica::value& val){
+    mathematica::m expression("StoreSymbol");
+    if(storage._name.empty()){
+        expression(val);
+    }else{
+        expression(val, storage._name);
+    }
+    storage.conn() << expression;
+    mathematica::value key;
+    storage.conn() >> key;
+    storage.set_key(key->stringify());
+    return storage.conn();
+}
 
 // mathematica::wrapper & mathematica::operator<<(mathematica::wrapper& shell, mathematica::basic_message& msg){
 //     msg.pass(shell);

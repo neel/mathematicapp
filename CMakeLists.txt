@@ -137,7 +137,8 @@ SET(MATHEMATICAPP_HEADERS
         includes/mathematica++/history.h
         includes/mathematica++/mhelper.h
         includes/mathematica++/association.h
-        )
+        includes/mathematica++/lambda.h
+    )
 
 IF(WITH_LL)
     SET(MATHEMATICAPP_HEADERS ${MATHEMATICAPP_HEADERS}
@@ -165,7 +166,8 @@ SET(MATHEMATICAPP_SOURCES
         sources/history.cpp
         sources/mhelper.cpp
         sources/association.cpp
-        )
+        sources/lambda.cpp
+    )
 
 IF(WITH_LL)
     SET(MATHEMATICAPP_SOURCES ${MATHEMATICAPP_SOURCES}
