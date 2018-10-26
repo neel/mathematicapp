@@ -8,3 +8,4 @@
 #include "mathematica++/operators.h"
 #include "mathematica++/declares.h"
 #include "mathematica++/association.h"
+#include "mathematica++/lambda.h"

@@ -92,7 +92,7 @@ namespace internal{
         
         callable_internal(C cb, mathematica::transport& shell): _ftor(cb), _shell(shell){}
         
-        double operator()(Args... args){
+        typename function_signature<C>::return_type operator()(Args... args){
             return _ftor(_shell, args...);
         }
     };
