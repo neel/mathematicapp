@@ -42,6 +42,11 @@ struct association<point_2d<T>>: mathematica::typemap<association<point_2d<T>>, 
 };
 }
 
+std::string some_function_impl_cb(mathematica::transport& shell, mathematica::lambda ftor, std::vector<double> data){
+    shell << ftor(data);
+    return ftor._expr->stringify();
+}
+
 double some_function_impl_geo(mathematica::transport& shell, point_2d<double> p1, point_2d<double> p2){    
     std::string unit("Kilometers");
     double res;
@@ -79,7 +84,8 @@ EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK nativ
 
     try{
         mathematica::resolver resolver(shell);
-        resolver, overload(&some_function_impl_geo, shell) = {"GeoPosition", "GeoPosition"}
+        resolver, overload(&some_function_impl_cb, shell) = {"Function", "List"}
+                , overload(&some_function_impl_geo, shell) = {"GeoPosition", "GeoPosition"}
                 , overload(&some_function_impl_complex) = {"Complex", "Complex"}
                 , overload(&some_function_impl_binary)
                 , overload(&some_function_impl_unary);

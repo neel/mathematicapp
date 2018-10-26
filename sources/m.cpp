@@ -46,39 +46,93 @@ mathematica::m& mathematica::m::invoke(mathematica::driver::io::connection& conn
     return *this;
 }
 
-mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value val){
-    if(val->type() == mathematica::token::token_integer){
-        auto token_int = boost::dynamic_pointer_cast<mathematica::tokens::integer>(val);
-        if(token_int->storage() == mathematica::tokens::integer::multiprecision){
-            std::string valstr = token_int->value_str();
-            valstr.erase(0, 1);
-            return mathematica::m("Evaluate")(mathematica::m("ToExpression")(valstr));
-        }else{
-            return mathematica::m("Evaluate")((long long)*token_int);
-        }
-    }else if(val->type() == mathematica::token::token_real){
-        return mathematica::m("Evaluate")((double)*val);
-    }else if(val->type() == mathematica::token::token_str){
-        return mathematica::m("Evaluate")(val->stringify());
-    }else if(val->type() == mathematica::token::token_symbol){
-        return mathematica::m("Evaluate")(mathematica::symbol(val->stringify()));
-    }else if(val->type() == mathematica::token::token_function){
+void mathematica::detail::M_Helper::convert(mathematica::m& root, mathematica::token::ptr val){
+    if(val->type() == mathematica::token::token_function){
         boost::shared_ptr<mathematica::tokens::function> token_fnc = boost::dynamic_pointer_cast<mathematica::tokens::function>(val);
-        mathematica::m fnc(token_fnc->name());
+        root._name = token_fnc->name();
         for(const mathematica::value& arg: token_fnc->_args){
-            mathematica::m argm = convert(arg);
-            fnc.arg(argm);
+            if(arg->type() == mathematica::token::token_integer){
+                auto token_int = boost::dynamic_pointer_cast<mathematica::tokens::integer>(arg);
+                if(token_int->storage() == mathematica::tokens::integer::multiprecision){
+                    std::string valstr = token_int->value_str();
+                    valstr.erase(0, 1);
+                    root.arg(mathematica::m("ToExpression")(valstr));
+                }else{
+                    root.arg((long long)*token_int);
+                }
+            }else if(arg->type() == mathematica::token::token_real){
+                root.arg((double)*arg);
+            }else if(arg->type() == mathematica::token::token_str){
+                root.arg(arg->stringify());
+            }else if(arg->type() == mathematica::token::token_symbol){
+                root.arg(mathematica::symbol(arg->stringify()));
+            }else if(arg->type() == mathematica::token::token_function){
+                mathematica::m childf("Evaluate");
+                convert(childf, arg);
+                root.arg(childf);
+            }
         }
-        fnc();
-        return fnc;
-    }else {
-        std::stringstream str;
-        str << "Unexpected token received of type " << val->type();
-
-        BOOST_ASSERT_MSG(true, str.str().c_str());
-        return mathematica::m("Evaluate")(mathematica::m("ToExpression")(val->stringify()));
+    }else{
+        root._name = "Evaluate";
+        if(val->type() == mathematica::token::token_integer){
+            auto token_int = boost::dynamic_pointer_cast<mathematica::tokens::integer>(val);
+            if(token_int->storage() == mathematica::tokens::integer::multiprecision){
+                std::string valstr = token_int->value_str();
+                valstr.erase(0, 1);
+                root.arg(mathematica::m("ToExpression")(valstr));
+            }else{
+                root.arg((long long)*token_int);
+            }
+        }else if(val->type() == mathematica::token::token_real){
+            root.arg((double)*val);
+        }else if(val->type() == mathematica::token::token_str){
+            root.arg(val->stringify());
+        }else if(val->type() == mathematica::token::token_symbol){
+            root.arg(mathematica::symbol(val->stringify()));
+        }
     }
+    root();
 }
+
+mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value val){
+    mathematica::m root("Evaluate");
+    convert(root, val);
+    return root;
+}
+
+// mathematica::m mathematica::detail::M_Helper::convert(const mathematica::value val){
+//     if(val->type() == mathematica::token::token_integer){
+//         auto token_int = boost::dynamic_pointer_cast<mathematica::tokens::integer>(val);
+//         if(token_int->storage() == mathematica::tokens::integer::multiprecision){
+//             std::string valstr = token_int->value_str();
+//             valstr.erase(0, 1);
+//             return mathematica::m("Evaluate")(mathematica::m("ToExpression")(valstr));
+//         }else{
+//             return mathematica::m("Evaluate")((long long)*token_int);
+//         }
+//     }else if(val->type() == mathematica::token::token_real){
+//         return mathematica::m("Evaluate")((double)*val);
+//     }else if(val->type() == mathematica::token::token_str){
+//         return mathematica::m("Evaluate")(val->stringify());
+//     }else if(val->type() == mathematica::token::token_symbol){
+//         return mathematica::m("Evaluate")(mathematica::symbol(val->stringify()));
+//     }else if(val->type() == mathematica::token::token_function){
+//         boost::shared_ptr<mathematica::tokens::function> token_fnc = boost::dynamic_pointer_cast<mathematica::tokens::function>(val);
+//         mathematica::m fnc(token_fnc->name());
+//         for(const mathematica::value& arg: token_fnc->_args){
+//             mathematica::m argm = convert(arg);
+//             fnc.arg(argm);
+//         }
+//         fnc();
+//         return fnc;
+//     }else {
+//         std::stringstream str;
+//         str << "Unexpected token received of type " << val->type();
+// 
+//         BOOST_ASSERT_MSG(true, str.str().c_str());
+//         return mathematica::m("Evaluate")(mathematica::m("ToExpression")(val->stringify()));
+//     }
+// }
 
 // std::ostream& mathematica::operator<<(std::ostream& stream, const mathematica::m& expr){
 //     stream << expr._name;

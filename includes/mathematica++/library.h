@@ -106,6 +106,50 @@ namespace internal{
         typedef boost::function<R (V...)> function_type;
         callable(typename base_type::callback_type cb, mathematica::transport& shell): base_type(cb, shell){}
     };
+    
+    template <typename T, int Index>
+    struct cast_optionally{
+        static T cast(mathematica::tokens::function::ptr args){
+            return mathematica::cast<T>(args->_args[Index]);
+        }
+    };
+    
+    template <int Index>
+    struct cast_optionally<mathematica::value, Index>{
+        static mathematica::value cast(mathematica::tokens::function::ptr args){
+            return args->_args[Index];
+        }
+    };
+    
+    template <int Index>
+    struct cast_optionally<mathematica::lambda, Index>{
+        static mathematica::lambda cast(mathematica::tokens::function::ptr args){
+            return mathematica::lambda(args->_args[Index]);
+        }
+    };
+    
+    template <typename TupleT, int Index=boost::tuples::length<TupleT>::value-1>
+    struct arg_to_tuple: arg_to_tuple<TupleT, Index-1>{
+        typedef arg_to_tuple<TupleT, Index-1> base_type;
+        
+        static void convert(TupleT& tuple, mathematica::tokens::function::ptr args){
+//             boost::get<Index>(tuple) = cast<boost::tuples::element<Index, TupleT>::type>(args->_args[Index]);
+            boost::get<Index>(tuple) = cast_optionally<typename boost::tuples::element<Index, TupleT>::type, Index>::cast(args);
+            base_type::convert(tuple, args);
+        }
+    };
+    
+    template <typename TupleT>
+    struct arg_to_tuple<TupleT, 0>{
+        static void convert(TupleT& tuple, mathematica::tokens::function::ptr args){
+            boost::get<0>(tuple) = cast_optionally<typename boost::tuples::element<0, TupleT>::type, 0>::cast(args);
+        }
+    };
+    
+    template <typename TupleT>
+    void arguments_to_tuple(TupleT& tuple, mathematica::tokens::function::ptr args){
+        arg_to_tuple<TupleT>::convert(tuple, args);
+    }
 }
 
 template <typename Function>
@@ -146,7 +190,9 @@ struct module_overload{
         }
     }
     return_type call(mathematica::tokens::function::ptr args){
-        tuple_type tuple = cast<tuple_type>(args);
+//         tuple_type tuple = cast<tuple_type>(args);
+        tuple_type tuple;
+        internal::arguments_to_tuple(tuple, args);
         arguments_type arguments = internal::to_fusion(tuple);
         // https://www.boost.org/doc/libs/1_68_0/libs/fusion/doc/html/fusion/functional/invocation/functions/invoke.html
         return boost::fusion::invoke(_function, arguments);

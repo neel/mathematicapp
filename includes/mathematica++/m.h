@@ -226,7 +226,9 @@ detail::abstract_delayed_call_ptr make_argument(const T& value){
     return M_Helper::argument<T>()(value);
 }
 
+void convert(mathematica::m& root, mathematica::token::ptr val);
 mathematica::m convert(mathematica::token::ptr val);
+// mathematica::m convert(mathematica::token::ptr val);
 
 /**
  * T is scaler

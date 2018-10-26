@@ -51,11 +51,12 @@ struct lambda{
     
     mathematica::token::ptr _expr;
     
+    lambda(){}
     lambda(mathematica::token::ptr expr): _expr(expr){}
+    lambda(const lambda& other): _expr(other._expr){}
     template <typename... T>
-    lambda& operator()(T... args){
-        Apply(_expr, Sequence(args...));
-        return *this;
+    mathematica::m operator()(T... args){
+        return Apply(_expr, List(args...));
     }
     cached cache(mathematica::connector& shell) const;
 };
