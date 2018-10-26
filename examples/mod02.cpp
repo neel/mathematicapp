@@ -43,8 +43,10 @@ struct association<point_2d<T>>: mathematica::typemap<association<point_2d<T>>, 
 }
 
 std::string some_function_impl_cb(mathematica::transport& shell, mathematica::lambda ftor, std::vector<double> data){
+    mathematica::value val;
     shell << ftor(data);
-    return ftor._expr->stringify();
+    shell >> val;
+    return val->stringify();
 }
 
 double some_function_impl_geo(mathematica::transport& shell, point_2d<double> p1, point_2d<double> p2){    
@@ -78,6 +80,7 @@ EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData){
  * SomeFunctionWX[1.0, 20.0] -> 10
  * SomeFunctionWX[1 + 2I, 3 + 4I] -> 5.0
  * SomeFunctionWX[GeoPosition[{22.5726, 88.3639}], GeoPosition[{28.7041, 77.1025}]] -> 1318.14
+ * SomeFunctionWX[Print[Block[{e = #}, Total@Select[#, # > 0 &]]] &, {-2, 3, 4}]
  */
 EXTERN_C DLLEXPORT int SomeFunctionWX(WolframLibraryData libData, WMK_LINK native_link){
     mathematica::wtransport shell(libData, native_link, "SomeFunctionWX");
