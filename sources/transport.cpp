@@ -40,6 +40,14 @@ mathematica::wtransport::wtransport(WolframLibraryData data, mathematica::transp
     _input = boost::dynamic_pointer_cast<mathematica::tokens::function>(input);
 }
 
+mathematica::value mathematica::wtransport::arg(std::size_t index) const{
+    return _input->_args[index];
+}
+
+mathematica::value mathematica::wtransport::operator[](std::size_t index) const{
+    return arg(index);
+}
+
 mathematica::mtransport::mtransport(WolframLibraryData data, int argc, MArgument* argv, MArgument res, std::string lib_name): transport(data, lib_name), _result(data, res){
     for(int i = 0; i < argc; ++i){
         argument_adapter* adapter = new argument_adapter(data, argv[i]);

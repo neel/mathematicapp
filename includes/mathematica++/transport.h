@@ -484,6 +484,8 @@ struct wtransport: transport{
     boost::shared_ptr<mathematica::tokens::function> _input;
     
     wtransport(WolframLibraryData data, link_type link, std::string lib_name="");
+    mathematica::value arg(std::size_t index) const;
+    mathematica::value operator[](std::size_t index) const;
     /**
      * return a value from the library function
      */
