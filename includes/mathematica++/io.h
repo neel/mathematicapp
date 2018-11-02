@@ -39,17 +39,33 @@ struct basic_message;
 
 namespace detail{
 template <typename T>
-struct stream_helper{
-    static void write(mathematica::accessor& stream, T& expr){
+struct stream_read_helper{
+    static void read(mathematica::accessor& stream, T& expr){
         mathematica::value val = stream.pull().next();
         expr = cast<T>(val);
     }
 };
 
 template <>
-struct stream_helper<mathematica::value>{
-    static void write(mathematica::accessor& stream, mathematica::value& value){
+struct stream_read_helper<mathematica::value>{
+    static void read(mathematica::accessor& stream, mathematica::value& value){
         value = stream.pull().next();
+    }
+};
+
+template <typename T, bool A = false>
+struct stream_write_helper{
+    static void write(mathematica::wrapper& stream, const T& expr){
+        stream(expr);
+    }
+};
+
+template <typename T>
+struct stream_write_helper<T, true>{
+    static void write(mathematica::wrapper& stream, const T& expr){
+        association<T> associator;
+        typename association<T>::target_type marg = associator.serialize(expr);
+        stream << marg;
     }
 };
 }
@@ -59,7 +75,8 @@ wrapper& operator<<(wrapper& stream, const T& value){
     if(stream.transaction_lock_enabled()){
         stream.lock();
     }
-    stream(value);
+    // stream(value);
+    detail::stream_write_helper<T, mathematica::association<T>::is_associated>::write(stream, value);
     stream.end();
     return stream;
 }
@@ -74,7 +91,7 @@ mathematica::wrapper& operator<<<mathematica::value>(mathematica::wrapper& strea
 wrapper& operator,(wrapper& stream, const mathematica::m& expr);
 template <typename T>
 wrapper& operator>>(wrapper& stream, T& expr){
-    detail::stream_helper<T>::write(stream, expr);
+    detail::stream_read_helper<T>::read(stream, expr);
     if(stream.transaction_lock_enabled()){
         stream.unlock();
     }

@@ -44,6 +44,7 @@ namespace mathematica{
     
 template <typename T>
 struct association{
+    static constexpr bool is_associated = false;
     typedef T serialized_type;
 };
 

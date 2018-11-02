@@ -130,6 +130,8 @@ struct dictionary: pack<D, U, 0, Ts...> {
     typedef mathematica::m          target_type;
     typedef mathematica::m          serialized_type;
     
+    static constexpr bool is_associated = true;
+    
     /**
      * creates a mathematica Association and uses base class pack_type recursively to put rules into it
      * pack_type::build is supposed to populate the rules vector with rules for each property
@@ -154,6 +156,8 @@ struct sequence: chain<D, U, 0, Ts...> {
     typedef mathematica::m          target_type;
     typedef mathematica::m          serialized_type;
     
+    static constexpr bool is_associated = true;
+    
     mathematica::m serialize(const class_type& obj){
         mathematica::m list("List");
         pack_type::build(obj, list);
@@ -174,6 +178,8 @@ struct typemap{
     typedef C              capture_type;
     typedef mathematica::m target_type;
     typedef mathematica::m serialized_type;
+    
+    static constexpr bool is_associated = true;
     
     mathematica::m serialize(const class_type& obj){
         return static_cast<derived_type&>(*this)(obj);

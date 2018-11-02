@@ -94,6 +94,11 @@ mathematica::wrapper& mathematica::wrapper::operator()(const std::string& s){
 	return str(s);
 }
 
+mathematica::wrapper& mathematica::wrapper::operator()(const bool& v){
+	driver::io::impl::symbol(*_connection, v ? std::string("True") : std::string("False"));
+    return *this;
+}
+
 mathematica::wrapper& mathematica::wrapper::put(mathematica::token::ptr token){
     switch(token->type()){
         case mathematica::token::token_integer:

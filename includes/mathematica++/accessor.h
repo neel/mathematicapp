@@ -117,18 +117,19 @@ class wrapper: public accessor{
 	public:
 		wrapper& function(const std::string& name, unsigned int nargs);
 		wrapper& integer(int n);
-    wrapper& real(double n);
+        wrapper& real(double n);
 		wrapper& str(const std::string& s);
-    wrapper& symbol(const std::string& s);
-    /**
-     * Completes process of sending inputs in the currect context. Either mathematica output has to be pulled with <tt>pull().next()</tt> or be ignored with <tt>ignore()</tt>
-     */
+        wrapper& symbol(const std::string& s);
+        /**
+        * Completes process of sending inputs in the currect context. Either mathematica output has to be pulled with <tt>pull().next()</tt> or be ignored with <tt>ignore()</tt>
+        */
 		accessor& end();
 	public:
 		wrapper& operator()(const std::string& name, unsigned int nargs);
 		wrapper& operator()(int n);
-    wrapper& operator()(double n);
+        wrapper& operator()(double n);
 		wrapper& operator()(const std::string& s);
+        wrapper& operator()(const bool& v);
 		template <typename T>
 		wrapper& operator,(const T arg){
 			return operator()(arg);
