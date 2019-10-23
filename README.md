@@ -1,5 +1,8 @@
 # Mathematica++
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d3ab2208d35d4ce28c78f1b59f1f7ee2)](https://www.codacy.com/app/neel.basu.z/mathematicapp?utm_source=gitlab.com&amp;utm_medium=referral&amp;utm_content=neel.basu/mathematicapp&amp;utm_campaign=Badge_Grade)
+[![Documentation Status](https://readthedocs.org/projects/mathematicappdocs/badge/?version=latest)](https://mathematicappdocs.readthedocs.io/en/latest/?badge=latest)
+
 
 [GitLab Repository](https://gitlab.com/neel.basu/mathematicapp) | [GitLab Wiki](https://gitlab.com/neel.basu/mathematicapp/wikis/home) | [Website](http://neelex.com/mathematica++) | [Report Issues](https://gitlab.com/neel.basu/mathematicapp/issues) | [Chat](https://gitter.im/mathematicapp)
 
